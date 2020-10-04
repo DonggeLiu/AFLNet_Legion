@@ -1,12 +1,12 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <float.h>
+#include <math.h>
 
 /*
  * Defines a macro for casting an object into a 'TreeNode'
  */
 #define TreeNode(o) (TreeNode*)(o)
-#define INFINITY DBL_MAX
 
 enum node_colour{White, Red, Golden, Purple, Black};
 
