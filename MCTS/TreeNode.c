@@ -1,31 +1,5 @@
-#include <glib.h>
-#include <glib/gprintf.h>
-#include <float.h>
-#include <math.h>
+#include "TreeNode.h"
 
-/*
- * Defines a macro for casting an object into a 'TreeNode'
- */
-#define TreeNode(o) (TreeNode*)(o)
-
-enum node_colour{White, Red, Golden, Purple, Black};
-
-typedef struct
-{
-    // property
-    gint response_code;
-    enum node_colour colour;
-    gboolean fully_explored;
-
-    // input generation
-    gchar * input_prefix;
-
-    // statistics
-    gdouble score;
-    gint sel_try;
-    gint sel_win;
-    gint sim_try;
-    gint sim_win;
 
 }TreeNode;
 
