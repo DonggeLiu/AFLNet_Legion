@@ -102,6 +102,7 @@ void Propagation(TreeNode * selection_leaf, TreeNode * execution_leaf, gboolean 
 
 /* Precomputation */
 //static TreeNode * ROOT = new_tree_node(new_tree_node_data(0,White,""));
+extern TreeNode * ROOT;
 
 #endif //AFLNET_TREENODE_H
 
