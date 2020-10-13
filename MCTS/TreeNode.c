@@ -9,11 +9,13 @@ TreeNodeData * new_tree_node_data (gchar * response_code, enum node_colour colou
 
     // set property
     tree_node_data->response_code = response_code;
-    //TODO: This is probably not needed, left it here in case it comes in handy later.
+    //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
-    //TODO: Maybe some response codes indicate terminations (i.e. leaves) so that they can be fully explored states?
+    //TODO: Detect terminations (i.e. leaves) with some response code, and mark them fully explored.
+    // e.g. predefine a set of termination code
+    //TOASK: Given the last node of a past communication, would it have any child if we give it more inputs?
     tree_node_data->fully_explored = FALSE;
-    //TODO: Is there a way for us to know if we have found all possible inputs to fuzz a node?
+    //NOTE: No way to know if we have found all possible inputs to fuzz a node.
     tree_node_data->exhausted = FALSE;
 
     // set input prefix
@@ -119,7 +121,8 @@ gboolean is_leaf(TreeNode *tree_node) {
 
 gboolean fits_fish_bone_optimisation(TreeNode * tree_node)
 {
-    /* TODO: Can we ever know for sure that a node/subtree is fully explored?
+    /* NOTE: We might not be able to know for sure if a node/subtree is fully explored.
+     *  One optimisation is to predefine a set of termination response codes.
      * Fish bone optimisation: if a simulation child
      * has only one sibling X who is not fully explored,
      * and X is not white (so that all siblings are found)
