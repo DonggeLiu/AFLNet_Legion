@@ -272,7 +272,65 @@ void tree_node_print (TreeNode * tree_node)
 //    return FALSE;
 //}
 
+/* ============================================== TreeNode Functions ============================================== */
+/* ================================================ MCTS Functions ================================================ */
 
+TreeNode * Selection(TreeNode * parent_tree_node)
+{
+    while (get_tree_node_data(parent_tree_node)->colour != Golden) {
+        parent_tree_node = best_child(parent_tree_node);
+        assert(parent_tree_node);
+    }
+    return parent_tree_node;
+}
+
+char * Simulation(TreeNode * target)
+{
+    assert(get_tree_node_data(target)->colour == Golden);
+    return mutate(target);
+}
+
+gboolean Expansion(TreeNode * tree_node, char ** response_codes, char ** input_prefix, TreeNode ** execution_leaf)
+{
+    TreeNode * child_node;
+    gboolean is_new = FALSE;
+    /* NOTE: the size of each element in an array is the same */
+    for (int i = 0; i < sizeof(response_codes) / sizeof(response_codes[0]); i++) {
+        if (tree_node = exists_child(tree_node, response_codes[i])) continue;
+        is_new = TRUE;
+        tree_node = append_child(tree_node, response_codes[i], White, input_prefix[i]);
+    }
+    execution_leaf = &tree_node;
+    return is_new;
+}
+
+void Propagation(TreeNode * selection_leaf, TreeNode * execution_leaf, gboolean is_new)
+{
+    gboolean is_preserved = FALSE;
+    while (execution_leaf)
+    {
+        get_tree_node_data(execution_leaf)->sim_try += 1;
+        get_tree_node_data(execution_leaf)->sim_win += is_new;
+        is_preserved = is_preserved || (execution_leaf == selection_leaf->parent);
+        execution_leaf = execution_leaf->parent;
+    }
+    while (selection_leaf)
+    {
+        get_tree_node_data(selection_leaf)->sel_try += 1;
+        get_tree_node_data(selection_leaf)->sel_win += is_preserved;
+        selection_leaf = selection_leaf->parent;
+    }
+}
+
+void parent(TreeNode * child, TreeNode ** parent){
+    /*
+     * Takes a pointer to a child node, and a pointer to the pointer of a NULL
+     * Then assigned the pointer to the parent of the child to the second parameter
+     */
+    parent = &child->parent;
+}
+
+/* ================================================ MCTS Functions ================================================ */
 
 
 
