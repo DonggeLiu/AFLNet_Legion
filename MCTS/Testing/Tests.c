@@ -11,10 +11,10 @@ main (int argc, char *argv[])
 
     g_printf ("GLib version: %d.%d.%d\n\n", glib_major_version,glib_minor_version,glib_micro_version);
 
-    root = new_tree_node(new_tree_node_data("200", Red, ""));
-    child1 = new_tree_node(new_tree_node_data("201", White, "1"));
-    grandchild1 = new_tree_node(new_tree_node_data("211", White, "11"));
-    child2 = new_tree_node(new_tree_node_data("202", Red, "2"));
+    root = new_tree_node(new_tree_node_data(200, Red, ""));
+    child1 = new_tree_node(new_tree_node_data(201, White, "1"));
+    grandchild1 = new_tree_node(new_tree_node_data(211, White, "11"));
+    child2 = new_tree_node(new_tree_node_data(202, Red, "2"));
     tree_node_print (root);
     g_node_append (root, child1);
     g_node_append (root, child2);
@@ -23,7 +23,9 @@ main (int argc, char *argv[])
     tree_node_print(root);
     print_reversed_path(child2);
 //    print_path(child2);
-
+    TreeNode ** leaf;
+    tree_print(root, child1, 0,0);
+    Expansion(root, (int[]){201, 1, 2, 3}, 4, (char*[]){"201", "1", "2", "3"}, leaf);
     tree_print(root, child1, 0,0);
 
 //    TreeNode ** parent2 = malloc(8);

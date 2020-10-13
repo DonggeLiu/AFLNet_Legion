@@ -294,15 +294,16 @@ char * Simulation(TreeNode * target)
     return mutate(target);
 }
 
-gboolean Expansion(TreeNode * tree_node, int * response_codes, char ** input_prefix, TreeNode ** execution_leaf)
+gboolean Expansion(TreeNode * tree_node, int * response_codes, int len_codes, char ** input_prefix, TreeNode ** execution_leaf)
 {
-    TreeNode * child_node;
+    TreeNode * parent_node;
     gboolean is_new = FALSE;
     /* NOTE: the size of each element in an array is the same */
-    for (int i = 0; i < sizeof(response_codes) / sizeof(response_codes[0]); i++) {
-        if (tree_node = exists_child(tree_node, response_codes[i])) continue;
+    for (int i = 0; i < len_codes; i++) {
+        parent_node = tree_node;
+        if ((tree_node = exists_child(tree_node, response_codes[i]))) continue;
         is_new = TRUE;
-        tree_node = append_child(tree_node, response_codes[i], White, input_prefix[i]);
+        tree_node = append_child(parent_node, response_codes[i], White, input_prefix[i]);
     }
     execution_leaf = &tree_node;
     return is_new;

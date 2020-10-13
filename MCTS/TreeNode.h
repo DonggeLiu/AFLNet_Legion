@@ -93,7 +93,7 @@ void tree_node_print (TreeNode * tree_node);
 
 TreeNode * Selection(TreeNode * parent_tree_node);
 char * Simulation(TreeNode * target);
-gboolean Expansion(TreeNode * tree_node, int * response_codes, char ** input_prefix, TreeNode ** execution_leaf);
+gboolean Expansion(TreeNode * tree_node, int * response_codes, int len_codes, char ** input_prefix, TreeNode ** execution_leaf);
 void Propagation(TreeNode * selection_leaf, TreeNode * execution_leaf, gboolean is_new);
 
 /* ================================================ MCTS Functions ================================================ */
