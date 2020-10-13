@@ -45,7 +45,7 @@ typedef struct
 
 
 /* Hyper-parameters */
-gint RHO = sqrt(2);
+gdouble RHO = 1.414;  //sqrt(2)
 gint MIN_SAMPLES = 1;
 gint MAX_SAMPLES = 100;
 gint CONEX_TIMEOUT = 0;
