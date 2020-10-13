@@ -11,6 +11,7 @@
 #include <math.h>
 #include <unistd.h>
 #include <assert.h>
+#include "../alloc-inl.h"
 
 #define SEED 0
 #define DIGITS_IN_RESPONSE_CODE 12
@@ -83,6 +84,7 @@ TreeNode * exists_child(TreeNode *  tree_node, int target_response_code);
 TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node_colour colour, char * input_prefix);
 
 void print_reversed_path(TreeNode * tree_node);
+void print_path(TreeNode * tree_node);
 
 int colour_encoder(enum node_colour colour);
 
