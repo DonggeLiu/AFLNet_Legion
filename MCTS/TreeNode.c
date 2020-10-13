@@ -155,7 +155,7 @@ char * mutate(TreeNode * tree_node)
     return  strcat(prefix, suffix);
 }
 
-TreeNode * match_child(TreeNode * tree_node, gchar * target_response_code)
+TreeNode * exists_child(TreeNode * tree_node, gchar * target_response_code)
 {
     TreeNode * child_node = g_node_first_child(tree_node);
 

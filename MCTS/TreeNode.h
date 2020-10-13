@@ -77,7 +77,7 @@ TreeNode * best_child(TreeNode * tree_node);
 
 char * mutate(TreeNode * tree_node);
 
-TreeNode * match_child(TreeNode *  tree_node, gchar * response_code);
+TreeNode * exists_child(TreeNode *  tree_node, gchar * target_response_code);
 
 TreeNode * append_child(TreeNode * tree_node, gchar * child_response_code, enum node_colour colour, char * input_prefix);
 
