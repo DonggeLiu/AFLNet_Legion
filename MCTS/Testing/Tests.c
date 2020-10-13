@@ -28,6 +28,8 @@ main (int argc, char *argv[])
     Expansion(root, (int[]){201, 1, 2, 3}, 4, (char*[]){"201", "1", "2", "3"}, leaf);
     tree_print(root, child1, 0,0);
 
+    print_path(grandchild1);
+
 //    TreeNode ** parent2 = malloc(8);
 ////    tree_node_print(*parent2);
 //    parent(child2, parent2);
