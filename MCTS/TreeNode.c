@@ -2,7 +2,7 @@
 
 /* ============================================== TreeNode Functions ============================================== */
 
-TreeNodeData * new_tree_node_data (gchar * response_code, enum node_colour colour, const gchar * input_prefix)
+TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour, const gchar * input_prefix)
 {
     TreeNodeData * tree_node_data;
     tree_node_data = g_new (TreeNodeData, 1); //  allocates 1 element of TreeNode
@@ -159,20 +159,20 @@ char * mutate(TreeNode * tree_node)
     return  strcat(prefix, suffix);
 }
 
-TreeNode * exists_child(TreeNode * tree_node, gchar * target_response_code)
+TreeNode * exists_child(TreeNode * tree_node, int target_response_code)
 {
     TreeNode * child_node = g_node_first_child(tree_node);
 
     while (child_node)
     {
         tree_node_print(child_node);
-        if (strcmp(get_tree_node_data(child_node)->response_code,target_response_code))  return child_node;
+        if (get_tree_node_data(child_node)->response_code == target_response_code)  return child_node;
         child_node = g_node_next_sibling(child_node);
     }
     return NULL;
 }
 
-TreeNode * append_child(TreeNode * tree_node, gchar * child_response_code, enum node_colour colour, char * input_prefix)
+TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node_colour colour, char * input_prefix)
 {
     return g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour, input_prefix));
 }
@@ -180,7 +180,7 @@ TreeNode * append_child(TreeNode * tree_node, gchar * child_response_code, enum 
 void print_reversed_path(TreeNode * tree_node)
 {
     do {
-        g_printf("%s ", get_tree_node_data(tree_node)->response_code);
+        g_printf("%d ", get_tree_node_data(tree_node)->response_code);
         tree_node = tree_node->parent;
     }while (tree_node);
     g_printf("\n");
@@ -256,7 +256,7 @@ void tree_node_print (TreeNode * tree_node)
 {
     TreeNodeData * tree_node_data = get_tree_node_data(tree_node);
 //    g_printf ("%d res_code: %d, score: %lf\n",
-    g_printf ("\033[1;%dmres_code: %s, score: %lf\033[0m\n",
+    g_printf ("\033[1;%dmres_code: %d, score: %lf\033[0m\n",
               colour_encoder(tree_node_data->colour), tree_node_data->response_code, tree_node_data->score);
 }
 
@@ -294,7 +294,7 @@ char * Simulation(TreeNode * target)
     return mutate(target);
 }
 
-gboolean Expansion(TreeNode * tree_node, char ** response_codes, char ** input_prefix, TreeNode ** execution_leaf)
+gboolean Expansion(TreeNode * tree_node, int * response_codes, char ** input_prefix, TreeNode ** execution_leaf)
 {
     TreeNode * child_node;
     gboolean is_new = FALSE;

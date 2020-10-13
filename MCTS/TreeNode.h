@@ -26,7 +26,7 @@ enum score_function{Random, UCT};
 typedef struct
 {
     // property
-    gchar * response_code;
+    int response_code;
     enum node_colour colour;
     gboolean fully_explored;
     gboolean exhausted;
@@ -56,7 +56,7 @@ enum score_function SCORE_FUNCTION = UCT;
 
 /* Functions */
 /* ============================================== TreeNode Functions ============================================== */
-TreeNodeData * new_tree_node_data (gchar * response_code, enum node_colour colour, const gchar * input_prefix);
+TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour, const gchar * input_prefix);
 
 TreeNode * new_tree_node(TreeNodeData * tree_data);
 
@@ -78,9 +78,9 @@ TreeNode * best_child(TreeNode * tree_node);
 
 char * mutate(TreeNode * tree_node);
 
-TreeNode * exists_child(TreeNode *  tree_node, gchar * target_response_code);
+TreeNode * exists_child(TreeNode *  tree_node, int target_response_code);
 
-TreeNode * append_child(TreeNode * tree_node, gchar * child_response_code, enum node_colour colour, char * input_prefix);
+TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node_colour colour, char * input_prefix);
 
 void print_reversed_path(TreeNode * tree_node);
 
@@ -93,7 +93,7 @@ void tree_node_print (TreeNode * tree_node);
 
 TreeNode * Selection(TreeNode * parent_tree_node);
 char * Simulation(TreeNode * target);
-gboolean Expansion(TreeNode * tree_node, char ** response_codes, char ** input_prefix, TreeNode ** execution_leaf);
+gboolean Expansion(TreeNode * tree_node, int * response_codes, char ** input_prefix, TreeNode ** execution_leaf);
 void Propagation(TreeNode * selection_leaf, TreeNode * execution_leaf, gboolean is_new);
 
 /* ================================================ MCTS Functions ================================================ */
