@@ -22,8 +22,14 @@ main (int argc, char *argv[])
     tree_node_print(g_node_first_child(root));
     tree_node_print(root);
     print_reversed_path(child2);
+//    print_path(child2);
 
     tree_print(root, child1, 0,0);
+
+//    TreeNode ** parent2 = malloc(8);
+////    tree_node_print(*parent2);
+//    parent(child2, parent2);
+//    tree_node_print(*parent2);
 
 //    tree_node_print(match_child(ROOT, 201));
 

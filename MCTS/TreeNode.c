@@ -1,5 +1,6 @@
 #include "TreeNode.h"
 
+/* ============================================== TreeNode Functions ============================================== */
 
 TreeNodeData * new_tree_node_data (gchar * response_code, enum node_colour colour, const gchar * input_prefix)
 {
