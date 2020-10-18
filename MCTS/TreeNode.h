@@ -63,9 +63,9 @@ TreeNode * new_tree_node(TreeNodeData * tree_data);
 
 TreeNodeData * get_tree_node_data(TreeNode * tree_node);
 
-double compute_exploitation_score(TreeNode * tree_node);
+double tree_node_exploitation_score(TreeNode * tree_node);
 
-double compute_exploration_score(TreeNode * tree_node);
+double tree_node_exploration_score(TreeNode * tree_node);
 
 double tree_node_score(TreeNode * tree_node);
 
@@ -92,8 +92,10 @@ void tree_node_print (TreeNode * tree_node);
 
 /* ============================================== TreeNode Functions ============================================== */
 /* ================================================ MCTS Functions ================================================ */
-
-TreeNode * Selection(TreeNode * parent_tree_node);
+TreeNode * select_tree_node(TreeNode * parent_tree_node);
+struct queue_entry * select_seed(TreeNode * tree_node_selected);
+TreeNode * Initialisation();
+struct queue_entry * Selection(TreeNode * parent_tree_node);
 char * Simulation(TreeNode * target);
 TreeNode * Expansion(TreeNode * tree_node, int * response_codes, int len_codes, gboolean * is_new);
 void Propagation(TreeNode * selection_leaf, TreeNode * execution_leaf, gboolean is_new);

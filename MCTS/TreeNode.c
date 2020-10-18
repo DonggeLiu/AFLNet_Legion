@@ -45,17 +45,44 @@ TreeNodeData * get_tree_node_data(TreeNode * tree_node)
 }
 
 
-double compute_exploitation_score(TreeNode * tree_node)
+double tree_node_exploitation_score(TreeNode * tree_node)
 {
-    return get_tree_node_data(tree_node)->sim_win / get_tree_node_data(tree_node)->sel_try;
+    TreeNodeData * node_data = get_tree_node_data(tree_node);
+//    g_printf("%u / %u = %lf\n",
+//             get_tree_node_data(tree_node)->stats.paths_discovered,
+//             get_tree_node_data(tree_node)->stats.selected_times,
+//             (double) get_tree_node_data(tree_node)->stats.paths_discovered / get_tree_node_data(tree_node)->stats.selected_times);
+    return (double) get_tree_node_data(tree_node)->stats.paths_discovered / get_tree_node_data(tree_node)->stats.selected_times;
 }
 
+/* TOASK: which variable stores the number of times each queue_entry is selected? */
+//double seed_exploitation_score(TreeNode * tree_node, int seed_index)
+//{
+//    struct queue_entry * target_seed = get_tree_node_data(tree_node).seeds[seed_index];
+//    //TODO: replace the denominator with the number of times the seed was selected.
+////    return target_seed->unique_state_count / target_seed.?
+//    return 0;
+//}
 
-double compute_exploration_score(TreeNode * tree_node)
+double tree_node_exploration_score(TreeNode * tree_node)
 {
-    return RHO * sqrt(2*log(get_tree_node_data(tree_node->parent)->sel_try/get_tree_node_data(tree_node)->sel_try));
+    if (G_NODE_IS_ROOT(tree_node)) return INFINITY;
+    g_assert(tree_node->parent);
+//    g_printf("%lf * sqrt(2*log(%u)/%u)\n",
+//             RHO,
+//             get_tree_node_data(tree_node->parent)->stats.selected_times,
+//             get_tree_node_data(tree_node)->stats.selected_times);
+    return  RHO * sqrt(2*log((double) get_tree_node_data(tree_node->parent)->stats.selected_times) / get_tree_node_data(tree_node)->stats.selected_times);
 }
 
+/* TOASK: which variable stores the number of times each queue_entry is selected? */
+//double seed_exploration_score(TreeNode * tree_node, int seed_index)
+//{
+//    struct queue_entry * target_seed = get_tree_node_data(tree_node).seeds[seed_index];
+//    //TODO: replace the denominator with the number of times the seed was selected.
+////    return RHO * sqrt(2*log(get_tree_node_data(tree_node)->stats.selected_times / target_seed.?));
+//    return 0;
+//}
 
 double tree_node_score(TreeNode * tree_node)
 {
@@ -78,10 +105,25 @@ double tree_node_score(TreeNode * tree_node)
 
     if (!get_tree_node_data(tree_node)->stats.selected_times)  return INFINITY;
 
-    double exploit_score = compute_exploitation_score(tree_node);
-    double explore_score = compute_exploration_score(tree_node);
+    double exploit_score = tree_node_exploitation_score(tree_node);
+    double explore_score = tree_node_exploration_score(tree_node);
 
     return exploit_score + explore_score;
+}
+
+double seed_score(TreeNode * tree_node, int seed_index)
+{
+    return g_rand_int(RANDOM_NUMBER_GENERATOR);
+    if (SCORE_FUNCTION == Random) return g_rand_int(RANDOM_NUMBER_GENERATOR);
+
+/* TOASK: which variable stores the number of times each queue_entry is selected? */
+//    //TODO: replace the ? with the number of times the seed was selected.
+//    if (!target_seed.?)  return INFINITY;
+//
+//    double exploit_score = seed_exploitation_score(tree_node, seed_index);
+//    double explore_score = seed_exploration_score(tree_node, seed_index);
+//
+//    return exploit_score + explore_score;
 }
 
 gboolean is_fully_explored(TreeNode *  tree_node)
@@ -149,13 +191,28 @@ TreeNode * best_child(TreeNode * tree_node)
     return g_node_nth_child(tree_node, g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties));
 }
 
+struct queue_entry * best_seed(TreeNode * tree_node)
+{
+    gdouble max_score = -INFINITY;
+    gint number_of_seeds = get_tree_node_data(tree_node)->seeds_count;
+    gint number_of_ties = 0;
+    gint ties[number_of_seeds];
+
+    for (gint seed_index = 0; seed_index < number_of_seeds; seed_index++) {
+        int score = seed_score(tree_node, seed_index);
+
+        if (score < max_score) continue;
+        if (score > max_score) number_of_ties = 0;
+        ties[number_of_ties++] = seed_index;
+    }
+    int winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
+    return get_tree_node_data(tree_node)->seeds[winner_index];
+}
+
 char * mutate(TreeNode * tree_node)
 {
-    char * prefix = get_tree_node_data(tree_node)->input_prefix;
     //TODO: fill in later
-    char * suffix = "";
-
-    return  strcat(prefix, suffix);
+    return "";
 }
 
 TreeNode * exists_child(TreeNode * tree_node, int target_response_code)
@@ -306,13 +363,36 @@ void tree_node_print (TreeNode * tree_node)
 /* ============================================== TreeNode Functions ============================================== */
 /* ================================================ MCTS Functions ================================================ */
 
-TreeNode * Selection(TreeNode * parent_tree_node)
+TreeNode * select_tree_node(TreeNode * parent_tree_node)
 {
     while (get_tree_node_data(parent_tree_node)->colour != Golden) {
+        tree_node_print(parent_tree_node);
         parent_tree_node = best_child(parent_tree_node);
+        /* NOTE: Stats propagation along the selection path is done here */
+        get_tree_node_data(parent_tree_node)->stats.selected_times++;
         assert(parent_tree_node);
     }
     return parent_tree_node;
+}
+
+
+struct queue_entry * select_seed(TreeNode * tree_node_selected)
+{
+    return best_seed(tree_node_selected);
+}
+
+
+TreeNode * Initialisation()
+{
+    return new_tree_node(new_tree_node_data(0,White));
+}
+
+//TODO: According to afl-fuzz.c `choose_target_state`, this should return "target_state_id"
+struct queue_entry * Selection(TreeNode * parent_tree_node)
+{
+    TreeNode * node_selected = select_tree_node(parent_tree_node);
+    struct queue_entry * seed_selected = select_seed(node_selected);
+    return seed_selected;
 }
 
 char * Simulation(TreeNode * target)
