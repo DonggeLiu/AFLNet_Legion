@@ -7,10 +7,12 @@
 
 /* libraries */
 #include "glib_helper.h"
+
 #include <float.h>
 #include <math.h>
 #include <unistd.h>
 #include <assert.h>
+
 #include "../alloc-inl.h"
 #include "../aflnet.h"
 //#include "../afl-fuzz.c"

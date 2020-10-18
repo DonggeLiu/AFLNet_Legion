@@ -170,7 +170,7 @@ gboolean fits_fish_bone_optimisation(TreeNode * tree_node)
      * then do not simulate from that simulation child but only from X
      * as all new paths can only come from X
      */
-    gboolean is_simul = (get_tree_node_data(tree_node)->colour == Golden);
+//    gboolean is_simul = (get_tree_node_data(tree_node)->colour == Golden);
 
     return FALSE;
 }
@@ -312,7 +312,7 @@ void print_path(TreeNode * tree_node)
     }
     g_print("\n");
     // TOASK: free causes error
-//    free(reversed_path);
+//    ck_free(reversed_path);
     for (int i = 0; i < path_len; i++) {
         g_printf("%d ", path[i]);
     }
