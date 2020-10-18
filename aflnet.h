@@ -41,7 +41,8 @@ enum {
   /* 00 */ INVALID_SELECTION,
   /* 01 */ RANDOM_SELECTION,
   /* 02 */ ROUND_ROBIN,
-  /* 03 */ FAVOR
+  /* 03 */ FAVOR,
+  /* 04 */ MCTS
 };
 
 // Initialize klist linked list data structure
