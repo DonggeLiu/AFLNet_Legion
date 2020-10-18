@@ -321,26 +321,25 @@ char * Simulation(TreeNode * target)
     return mutate(target);
 }
 
-gboolean Expansion(TreeNode * tree_node, int * response_codes, int len_codes, char ** input_prefix, TreeNode ** execution_leaf)
+TreeNode * Expansion(TreeNode * tree_node, int * response_codes, int len_codes, gboolean * is_new)
 {
     TreeNode * parent_node;
-    gboolean is_new = FALSE;
-    /* NOTE: the size of each element in an array is the same */
+    *is_new = FALSE;
+
     for (int i = 0; i < len_codes; i++) {
         parent_node = tree_node;
         if ((tree_node = exists_child(tree_node, response_codes[i]))) continue;
-        is_new = TRUE;
-        tree_node = append_child(parent_node, response_codes[i], White, input_prefix[i]);
+        *is_new = TRUE;
+        tree_node = append_child(parent_node, response_codes[i], White);
     }
-    execution_leaf = &tree_node;
-    return is_new;
-}
 
     /*NOTE: Stats propagation along the execution path is done here*/
     while (tree_node) {
         get_tree_node_data(tree_node)->stats.paths_discovered += *is_new;
         tree_node = tree_node->parent;
     }
+
+    return tree_node;
 }
 
 void parent(TreeNode * child, TreeNode ** parent){
