@@ -44,6 +44,19 @@ typedef struct
     gboolean exhausted;
 }TreeNodeData;
 
+/* TOASK: TO use MCTS on seed selection, we need:
+ *  1. The number of new paths/states found by this seed (from unique_state_count?)
+ *  2. The number of times this seed is selected         (from ?)
+ *  3. The number of times its parent state is selected  (get state and its statistics from the invoking function)
+ *  We can either define another layer as bellow, or use/add these variables in afl-fuzz.c
+ */
+//typedef struct
+//{
+//    struct queue_entry * seed;
+//    int new_path_count;
+//    int selected_count;
+//}seed_info_t;
+
 
 /* Hyper-parameters */
 gdouble RHO = 1.414;  //sqrt(2)
