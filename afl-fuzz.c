@@ -677,6 +677,12 @@ unsigned int choose_target_state(u8 mode) {
 
       result = update_scores_and_select_next_state(FAVOR);
       break;
+      /* NOTE: Moved node selection to its caller function,
+       *    as it is easier to combine with seed selection.
+       * */
+//    case MCTS:
+//        /* Use the Monte Carlo search algorithm to select states */
+//        result = Selection(ROOT);
     default:
       break;
   }
@@ -764,6 +770,7 @@ struct queue_entry *choose_seed(u32 target_state_id, u8 mode)
 }
 
 /* Update state-aware variables */
+/* TODO: Expansion + Propagation */
 void update_state_aware_variables(struct queue_entry *q, u8 dry_run)
 {
   khint_t k;
@@ -774,6 +781,17 @@ void update_state_aware_variables(struct queue_entry *q, u8 dry_run)
   if (!response_buf_size) return;
 
   unsigned int *state_sequence = (*extract_response_codes)(response_buf, response_buf_size, &state_count);
+
+  /* NOTE: MCTS Expansion and Propagation */
+//  TreeNode * selection_leaf = malloc(sizeof(TreeNode));
+//  TreeNode * execution_leaf = malloc(sizeof(TreeNode));
+
+  gboolean is_new = FALSE;
+//  execution_leaf = Expansion(ROOT, state_sequence, state_count, &is_new);
+//  print_path(leaf);
+
+//  Propagation(selection_leaf, execution_leaf, is_new);
+  /* MCTS Expansion and Propagation */
 
   q->unique_state_count = get_unique_state_count(state_sequence, state_count);
 
@@ -9134,11 +9152,16 @@ int main(int argc, char** argv) {
     if (stop_soon) goto stop_fuzzing;
   }
 
+  /* NOTE: Initialise the search tree with a root */
+//  TreeNode * ROOT = Initialisation();
+
   if (state_aware_mode) {
     while (1) {
       u8 skipped_fuzz;
 
       struct queue_entry *selected_seed = NULL;
+      /* NOTE: Moved the selection of tree node and seed here */
+//      selected_seed = Selection(ROOT);
       while(!selected_seed || selected_seed->region_count == 0) {
         target_state_id = choose_target_state(state_selection_algo);
 
