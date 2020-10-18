@@ -2,13 +2,13 @@
 
 /* ============================================== TreeNode Functions ============================================== */
 
-TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour, const gchar * input_prefix)
+TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour)
 {
     TreeNodeData * tree_node_data;
     tree_node_data = g_new (TreeNodeData, 1); //  allocates 1 element of TreeNode
 
     // set property
-    tree_node_data->response_code = response_code;
+    tree_node_data->stats.id = response_code;
     //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
     //TODO: Detect terminations (i.e. leaves) with some response code, and mark them fully explored.
@@ -18,15 +18,14 @@ TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour, c
     //NOTE: No way to know if we have found all possible inputs to fuzz a node.
     tree_node_data->exhausted = FALSE;
 
-    // set input prefix
-    tree_node_data->input_prefix = g_strdup(input_prefix);
-
     // set statistics
-    tree_node_data->score = INFINITY;
-    tree_node_data->sel_try = 0;
-    tree_node_data->sel_win = 0;
-    tree_node_data->sim_try = 0;
-    tree_node_data->sim_win = 0;
+    tree_node_data->stats.score = INFINITY;
+    tree_node_data->stats.selected_times = 0;
+    tree_node_data->stats.paths_discovered = 0;
+    tree_node_data->stats.paths = 0;
+    tree_node_data->stats.fuzzs = 0;
+    tree_node_data->stats.selected_seed_index = 0;
+    tree_node_data->seeds_count = 0;
 
     return tree_node_data;
 }
@@ -77,7 +76,7 @@ double tree_node_score(TreeNode * tree_node)
 
     if (fits_fish_bone_optimisation(tree_node)) return -INFINITY;
 
-    if (!get_tree_node_data(tree_node)->sel_try)  return INFINITY;
+    if (!get_tree_node_data(tree_node)->stats.selected_times)  return INFINITY;
 
     double exploit_score = compute_exploitation_score(tree_node);
     double explore_score = compute_exploration_score(tree_node);
@@ -166,21 +165,24 @@ TreeNode * exists_child(TreeNode * tree_node, int target_response_code)
     while (child_node)
     {
         tree_node_print(child_node);
-        if (get_tree_node_data(child_node)->response_code == target_response_code)  return child_node;
+        if (get_tree_node_data(child_node)->stats.id == target_response_code)  return child_node;
         child_node = g_node_next_sibling(child_node);
     }
     return NULL;
 }
 
-TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node_colour colour, char * input_prefix)
+TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node_colour colour)
 {
-    return g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour, input_prefix));
+    TreeNode * child = g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour));
+    if (colour != Golden) get_tree_node_data(child)->simulation_child = append_child(child, -1, Golden);
+
+    return child;
 }
 
 void print_reversed_path(TreeNode * tree_node)
 {
     do {
-        g_printf("%d ", get_tree_node_data(tree_node)->response_code);
+        g_printf("%d ", get_tree_node_data(tree_node)->stats.id);
         tree_node = tree_node->parent;
     }while (tree_node);
     g_printf("\n");
@@ -213,7 +215,7 @@ void print_path(TreeNode * tree_node)
         }
 
         // collect addresses from leaf to root
-        reversed_path[path_len] = get_tree_node_data(tree_node)->response_code;
+        reversed_path[path_len] = get_tree_node_data(tree_node)->stats.id;
         path_len += 1;
         tree_node = tree_node->parent;
     }
@@ -277,8 +279,12 @@ void tree_node_print (TreeNode * tree_node)
 {
     TreeNodeData * tree_node_data = get_tree_node_data(tree_node);
 //    g_printf ("%d res_code: %d, score: %lf\n",
-    g_printf ("\033[1;%dmres_code: %d, score: %lf\033[0m\n",
-              colour_encoder(tree_node_data->colour), tree_node_data->response_code, tree_node_data->score);
+    g_printf ("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m\n",
+              colour_encoder(tree_node_data->colour),
+              tree_node_data->stats.id,
+              tree_node_score(tree_node),
+              tree_node_exploitation_score(tree_node),
+              tree_node_exploration_score(tree_node));
 }
 
 //
@@ -330,21 +336,10 @@ gboolean Expansion(TreeNode * tree_node, int * response_codes, int len_codes, ch
     return is_new;
 }
 
-void Propagation(TreeNode * selection_leaf, TreeNode * execution_leaf, gboolean is_new)
-{
-    gboolean is_preserved = FALSE;
-    while (execution_leaf)
-    {
-        get_tree_node_data(execution_leaf)->sim_try += 1;
-        get_tree_node_data(execution_leaf)->sim_win += is_new;
-        is_preserved = is_preserved || (execution_leaf == selection_leaf->parent);
-        execution_leaf = execution_leaf->parent;
-    }
-    while (selection_leaf)
-    {
-        get_tree_node_data(selection_leaf)->sel_try += 1;
-        get_tree_node_data(selection_leaf)->sel_win += is_preserved;
-        selection_leaf = selection_leaf->parent;
+    /*NOTE: Stats propagation along the execution path is done here*/
+    while (tree_node) {
+        get_tree_node_data(tree_node)->stats.paths_discovered += *is_new;
+        tree_node = tree_node->parent;
     }
 }
 

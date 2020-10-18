@@ -12,6 +12,9 @@
 #include <unistd.h>
 #include <assert.h>
 #include "../alloc-inl.h"
+#include "../aflnet.h"
+//#include "../afl-fuzz.c"
+
 
 #define SEED 0
 #define DIGITS_IN_RESPONSE_CODE 12
@@ -26,22 +29,19 @@ enum score_function{Random, UCT};
 
 typedef struct
 {
+    // statistics
+    state_info_t stats;
+
+    // input generation
+    //TOASK: Which function to use to save seeds here?
+    void ** seeds;
+    int seeds_count;
+    TreeNode * simulation_child;
+
     // property
-    int response_code;
     enum node_colour colour;
     gboolean fully_explored;
     gboolean exhausted;
-
-    // input generation
-    gchar * input_prefix;
-
-    // statistics
-    gdouble score;
-    gdouble sel_try;
-    gdouble sel_win;
-    gdouble sim_try;
-    gdouble sim_win;
-
 }TreeNodeData;
 
 
@@ -57,7 +57,7 @@ enum score_function SCORE_FUNCTION = UCT;
 
 /* Functions */
 /* ============================================== TreeNode Functions ============================================== */
-TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour, const gchar * input_prefix);
+TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour);
 
 TreeNode * new_tree_node(TreeNodeData * tree_data);
 
@@ -81,7 +81,7 @@ char * mutate(TreeNode * tree_node);
 
 TreeNode * exists_child(TreeNode *  tree_node, int target_response_code);
 
-TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node_colour colour, char * input_prefix);
+TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node_colour colour);
 
 void print_reversed_path(TreeNode * tree_node);
 void print_path(TreeNode * tree_node);
