@@ -36,7 +36,7 @@ typedef struct
 
     // input generation
     //TOASK: Which function to use to save seeds here?
-    void ** seeds;
+    void ** seeds;                  /* keeps all seeds reaching this node -- can be casted to struct seed_info_t* */
     int seeds_count;
     TreeNode * simulation_child;
 

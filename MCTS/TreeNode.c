@@ -55,14 +55,11 @@ double tree_node_exploitation_score(TreeNode * tree_node)
     return (double) get_tree_node_data(tree_node)->stats.paths_discovered / get_tree_node_data(tree_node)->stats.selected_times;
 }
 
-/* TOASK: which variable stores the number of times each queue_entry is selected? */
-//double seed_exploitation_score(TreeNode * tree_node, int seed_index)
-//{
-//    struct queue_entry * target_seed = get_tree_node_data(tree_node).seeds[seed_index];
-//    //TODO: replace the denominator with the number of times the seed was selected.
-////    return target_seed->unique_state_count / target_seed.?
-//    return 0;
-//}
+double seed_exploitation_score(TreeNode * tree_node, int seed_index)
+{
+    seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
+    return (double) target_seed->new_path_count / target_seed->selected_count;
+}
 
 double tree_node_exploration_score(TreeNode * tree_node)
 {
@@ -75,14 +72,11 @@ double tree_node_exploration_score(TreeNode * tree_node)
     return  RHO * sqrt(2*log((double) get_tree_node_data(tree_node->parent)->stats.selected_times) / get_tree_node_data(tree_node)->stats.selected_times);
 }
 
-/* TOASK: which variable stores the number of times each queue_entry is selected? */
-//double seed_exploration_score(TreeNode * tree_node, int seed_index)
-//{
-//    struct queue_entry * target_seed = get_tree_node_data(tree_node).seeds[seed_index];
-//    //TODO: replace the denominator with the number of times the seed was selected.
-////    return RHO * sqrt(2*log(get_tree_node_data(tree_node)->stats.selected_times / target_seed.?));
-//    return 0;
-//}
+double seed_exploration_score(TreeNode * tree_node, int seed_index)
+{
+    seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
+    return RHO * sqrt(2*log((double)get_tree_node_data(tree_node)->stats.selected_times)/target_seed->selected_count);
+}
 
 double tree_node_score(TreeNode * tree_node)
 {
@@ -116,14 +110,14 @@ double seed_score(TreeNode * tree_node, int seed_index)
     return g_rand_int(RANDOM_NUMBER_GENERATOR);
     if (SCORE_FUNCTION == Random) return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
-/* TOASK: which variable stores the number of times each queue_entry is selected? */
-//    //TODO: replace the ? with the number of times the seed was selected.
-//    if (!target_seed.?)  return INFINITY;
-//
-//    double exploit_score = seed_exploitation_score(tree_node, seed_index);
-//    double explore_score = seed_exploration_score(tree_node, seed_index);
-//
-//    return exploit_score + explore_score;
+    seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
+
+    if (!target_seed->selected_count)  return INFINITY;
+
+    double exploit_score = seed_exploitation_score(tree_node, seed_index);
+    double explore_score = seed_exploration_score(tree_node, seed_index);
+
+    return exploit_score + explore_score;
 }
 
 gboolean is_fully_explored(TreeNode *  tree_node)
@@ -215,7 +209,7 @@ TreeNode * best_child(TreeNode * tree_node)
     return g_node_nth_child(tree_node, ties[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties)]);
 }
 
-struct queue_entry * best_seed(TreeNode * tree_node)
+seed_info_t * best_seed(TreeNode * tree_node)
 {
     gdouble max_score = -INFINITY;
     gint number_of_seeds = get_tree_node_data(tree_node)->seeds_count;
@@ -417,8 +411,9 @@ TreeNode * select_tree_node(TreeNode * parent_tree_node)
 
 struct queue_entry * select_seed(TreeNode * tree_node_selected)
 {
-    //TODO: update the statistics of seeds
-    return best_seed(tree_node_selected);
+    seed_info_t * seed = best_seed(tree_node_selected);
+    seed->selected_count ++;
+    return seed->seed;
 }
 
 
