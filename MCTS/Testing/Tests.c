@@ -111,7 +111,7 @@ main (int argc, char *argv[])
     print_path(grandchild20);
 
     g_printf("\nSelection\n");
-//    Selection(ROOT);
+    Selection(ROOT);
     g_printf("\nSimulation\n");
     g_printf("\tAssuming the trace from simulation is 200, 220, 222, 2222\n");
     g_printf("\nExpansion\n");
@@ -121,6 +121,7 @@ main (int argc, char *argv[])
 
     g_printf("\tThe leaf of expansion is: ");
     tree_node_print(leaf);
+    g_printf("\n");
     g_printf("\tThe tree after expansion:\n");
     tree_print(ROOT, leaf, 0,is_new);
 
