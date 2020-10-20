@@ -413,6 +413,7 @@ TreeNode * select_tree_node(TreeNode * parent_tree_node)
 struct queue_entry * select_seed(TreeNode * tree_node_selected)
 {
     seed_info_t * seed = best_seed(tree_node_selected);
+    /* NOTE: Stats propagation of the seed is done here */
     seed->selected_count ++;
     return seed->seed;
 }
