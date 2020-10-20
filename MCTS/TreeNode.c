@@ -363,7 +363,8 @@ void tree_print(TreeNode * tree_node, TreeNode * mark_node, int indent, int foun
     for (int i = 0; i < indent-1; ++i) g_print("|  ");
     if (indent) g_print("|-- ");
     tree_node_print(tree_node);
-//    if (tree_node == mark_node) g_printf("\\033[1;32m <=< found %d\\033[0;m",found);
+    if (tree_node == mark_node) g_printf("\033[1;32m <=< found %d\033[0;m",found);
+    g_printf("\n");
     if (g_node_n_children(tree_node)) indent++;
     for (int i = 0; i < g_node_n_children(tree_node); ++i) {
         tree_print(g_node_nth_child(tree_node, i), mark_node, indent, found);
