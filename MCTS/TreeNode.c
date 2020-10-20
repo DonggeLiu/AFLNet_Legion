@@ -259,7 +259,7 @@ TreeNode * exists_child(TreeNode * tree_node, int target_response_code)
 
     while (child_node)
     {
-        tree_node_print(child_node);
+//        tree_node_print(child_node);
         if (get_tree_node_data(child_node)->stats.id == target_response_code)  return child_node;
         child_node = g_node_next_sibling(child_node);
     }
@@ -314,17 +314,17 @@ void print_path(TreeNode * tree_node)
         path_len += 1;
         tree_node = tree_node->parent;
     }
-    g_printf("%d of %d\n", path_len, path_size);
-
-    for (int i = 0; i < path_len; i++) {
-        g_printf("%d ", reversed_path[i]);
-    }
+//    g_printf("%d of %d\n", path_len, path_size);
+//
+//    for (int i = 0; i < path_len; i++) {
+//        g_printf("%d ", reversed_path[i]);
+//    }
 
     path = ck_alloc(path_len*sizeof(int));
     for (int i = 0; i < path_len; i++) {
         path[i] = reversed_path[path_len-i-1];
     }
-    g_print("\n");
+//    g_print("\n");
     // TOASK: free causes error
 //    ck_free(reversed_path);
     for (int i = 0; i < path_len; i++) {
