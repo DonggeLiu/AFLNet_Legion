@@ -375,7 +375,7 @@ void tree_node_print (TreeNode * tree_node)
 {
     TreeNodeData * tree_node_data = get_tree_node_data(tree_node);
 //    g_printf ("%d res_code: %d, score: %lf\n",
-    g_printf ("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m\n",
+    g_printf ("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
               colour_encoder(tree_node_data->colour),
               tree_node_data->stats.id,
               tree_node_score(tree_node),
