@@ -105,11 +105,24 @@ main (int argc, char *argv[])
     get_tree_node_data(grandchild20)->stats.paths_discovered = 2;
     get_tree_node_data(grandchild20)->stats.selected_times = 2;
 
+    g_printf("Initial tree:\n");
     tree_print(ROOT, NULL, 0,0);
 
-    print_path(grandchild01);
+    print_path(grandchild20);
 
-    Selection(ROOT);
+    g_printf("\nSelection\n");
+//    Selection(ROOT);
+    g_printf("\nSimulation\n");
+    g_printf("\tAssuming the trace from simulation is 200, 220, 222, 2222\n");
+    g_printf("\nExpansion\n");
+
+    gboolean is_new = FALSE;
+    TreeNode * leaf = Expansion(ROOT, (int[]) {200, 220, 222, 2222}, 4, &is_new);
+
+    g_printf("\tThe leaf of expansion is: ");
+    tree_node_print(leaf);
+    g_printf("\tThe tree after expansion:\n");
+    tree_print(ROOT, leaf, 0,is_new);
 
 //    grandchild1 = new_tree_node(new_tree_node_data(211, White));
 //    child2 = new_tree_node(new_tree_node_data(202, Red));
