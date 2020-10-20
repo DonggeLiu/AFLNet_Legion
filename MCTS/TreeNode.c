@@ -222,14 +222,28 @@ struct queue_entry * best_seed(TreeNode * tree_node)
     gint number_of_ties = 0;
     gint ties[number_of_seeds];
 
+    if (number_of_seeds == 1) {
+        g_printf("Only one seed: ");
+        return get_tree_node_data(tree_node)->seeds[0];
+    }
+
     for (gint seed_index = 0; seed_index < number_of_seeds; seed_index++) {
         int score = seed_score(tree_node, seed_index);
 
         if (score < max_score) continue;
         if (score > max_score) number_of_ties = 0;
-        ties[number_of_ties++] = seed_index;
+        max_score = score;
+        ties[number_of_ties] = seed_index;
+        number_of_ties ++;
     }
-    int winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
+
+    if (number_of_ties == 1)
+    {
+        g_printf("Only one candidate: ");
+        return get_tree_node_data(tree_node)->seeds[ties[0]];
+    }
+
+    int winner_index = ties[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties)];
     return get_tree_node_data(tree_node)->seeds[winner_index];
 }
 
