@@ -451,11 +451,11 @@ TreeNode * Expansion(TreeNode * tree_node, int * response_codes, int len_codes, 
         *is_new = TRUE;
         tree_node = append_child(parent_node, response_codes[i], White);
     }
-
+    parent_node = tree_node;
     /*NOTE: Stats propagation along the execution path is done here*/
-    while (tree_node) {
+    while (parent_node) {
         get_tree_node_data(tree_node)->stats.paths_discovered += *is_new;
-        tree_node = tree_node->parent;
+        parent_node = parent_node->parent;
     }
 
     return tree_node;
