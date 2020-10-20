@@ -17,8 +17,6 @@ main (int argc, char *argv[])
     TreeNode * child0, * child1, * child2, * child3,
     * grandchild01, * grandchild02, * grandchild03,
     * grandchild11, * grandchild12, * grandchild20;
-    u32 a = 3, b = 9;
-    g_printf("%u / %u = %lf", a, b, (double) a / b);
 
     g_printf ("GLib version: %d.%d.%d\n\n", glib_major_version,glib_minor_version,glib_micro_version);
 
@@ -35,12 +33,12 @@ main (int argc, char *argv[])
     child0 = append_child(ROOT,400, White);
     get_tree_node_data(child0)->stats.paths_discovered = 1;
     get_tree_node_data(child0)->stats.selected_times = 2;
-    g_print("Child0\n");
-    tree_node_print(child0);
-    g_printf("Path Discovered: %u\n", get_tree_node_data(child0)->stats.paths_discovered);
-    g_printf("Selected Times: %u\n", get_tree_node_data(child0)->stats.selected_times);
-    g_printf("Exploitation score: %lf\n", tree_node_exploitation_score(child0));
-    g_printf("Exploration score: %lf\n\n", tree_node_exploration_score(child0));
+//    g_print("Child0\n");
+//    tree_node_print(child0);
+//    g_printf("Path Discovered: %u\n", get_tree_node_data(child0)->stats.paths_discovered);
+//    g_printf("Selected Times: %u\n", get_tree_node_data(child0)->stats.selected_times);
+//    g_printf("Exploitation score: %lf\n", tree_node_exploitation_score(child0));
+//    g_printf("Exploration score: %lf\n\n", tree_node_exploration_score(child0));
 
     child1 = append_child(ROOT,100, White);
     get_tree_node_data(child1)->stats.paths_discovered = 1;
@@ -80,12 +78,12 @@ main (int argc, char *argv[])
     grandchild01 = append_child(child0, 410, White);
     get_tree_node_data(grandchild01)->stats.paths_discovered = 2;
     get_tree_node_data(grandchild01)->stats.selected_times = 3;
-    g_print("grandchild01\n");
-    tree_node_print(grandchild01);
-    g_printf("Path Discovered: %u\n", get_tree_node_data(child3)->stats.paths_discovered);
-    g_printf("Selected Times: %u\n", get_tree_node_data(child3)->stats.selected_times);
-    g_printf("Exploitation score: %lf\n", tree_node_exploitation_score(child3));
-    g_printf("Exploration score: %lf\n\n", tree_node_exploration_score(child3));
+//    g_print("grandchild01\n");
+//    tree_node_print(grandchild01);
+//    g_printf("Path Discovered: %u\n", get_tree_node_data(child3)->stats.paths_discovered);
+//    g_printf("Selected Times: %u\n", get_tree_node_data(child3)->stats.selected_times);
+//    g_printf("Exploitation score: %lf\n", tree_node_exploitation_score(child3));
+//    g_printf("Exploration score: %lf\n\n", tree_node_exploration_score(child3));
 
     grandchild02 = append_child(child0, 020, White);
     get_tree_node_data(grandchild02)->stats.paths_discovered = 2;

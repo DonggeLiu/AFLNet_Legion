@@ -52,12 +52,12 @@ typedef struct
  *  3. The number of times its parent state is selected  (get state and its statistics from the invoking function)
  *  We can either define another layer as bellow, or use/add these variables in afl-fuzz.c
  */
-//typedef struct
-//{
-//    struct queue_entry * seed;
-//    int new_path_count;
-//    int selected_count;
-//}seed_info_t;
+typedef struct
+{
+    struct queue_entry * seed;
+    int new_path_count;
+    int selected_count;
+}seed_info_t;
 
 
 /* Hyper-parameters */
