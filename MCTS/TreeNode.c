@@ -400,6 +400,7 @@ TreeNode * select_tree_node(TreeNode * parent_tree_node)
 {
     while (get_tree_node_data(parent_tree_node)->colour != Golden) {
         tree_node_print(parent_tree_node);
+        g_print("\n");
         parent_tree_node = best_child(parent_tree_node);
         /* NOTE: Stats propagation along the selection path is done here */
         get_tree_node_data(parent_tree_node)->stats.selected_times++;
@@ -450,7 +451,7 @@ TreeNode * Expansion(TreeNode * tree_node, int * response_codes, int len_codes, 
     parent_node = tree_node;
     /*NOTE: Stats propagation along the execution path is done here*/
     while (parent_node) {
-        get_tree_node_data(tree_node)->stats.paths_discovered += *is_new;
+        get_tree_node_data(parent_node)->stats.paths_discovered += *is_new;
         parent_node = parent_node->parent;
     }
     //TODO: update the statistics of seeds
