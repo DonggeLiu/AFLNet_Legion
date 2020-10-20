@@ -417,6 +417,7 @@ TreeNode * select_tree_node(TreeNode * parent_tree_node)
 
 struct queue_entry * select_seed(TreeNode * tree_node_selected)
 {
+    //TODO: update the statistics of seeds
     return best_seed(tree_node_selected);
 }
 
@@ -457,7 +458,7 @@ TreeNode * Expansion(TreeNode * tree_node, int * response_codes, int len_codes, 
         get_tree_node_data(tree_node)->stats.paths_discovered += *is_new;
         parent_node = parent_node->parent;
     }
-
+    //TODO: update the statistics of seeds
     return tree_node;
 }
 
