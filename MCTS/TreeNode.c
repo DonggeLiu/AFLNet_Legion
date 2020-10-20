@@ -427,7 +427,11 @@ TreeNode * Initialisation()
 struct queue_entry * Selection(TreeNode * parent_tree_node)
 {
     TreeNode * node_selected = select_tree_node(parent_tree_node);
-    struct queue_entry * seed_selected = select_seed(node_selected);
+    g_printf("\tTree node selected: ");
+    tree_node_print(node_selected);
+    //TOASK: Which function can integrate seeds to nodes?
+    struct queue_entry * seed_selected = NULL;
+//    struct queue_entry * seed_selected = select_seed(node_selected);
     return seed_selected;
 }
 
