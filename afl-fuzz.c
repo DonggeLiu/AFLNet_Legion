@@ -275,13 +275,6 @@ struct queue_entry {
   u8 is_initial_seed;                 /* Is this an initial seed */
   u32 unique_state_count;             /* Unique number of states traversed by this queue entry */
 
-  /* TOASK: TO use MCTS on seed selection, we need:
-   *    1. The number of new paths/states found by this seed (from unique_state_count?)
-   *    2. The number of times this seed is selected         (from ?)
-   *    3. The number of times its parent state is selected  (get state and its statistics from the invoking function)
-   *    We can either use/add these variables here, or define another layer in TreeNode.h (seed_info_t)
-  */
-
 };
 
 static struct queue_entry *queue,     /* Fuzzing queue (linked list)      */
