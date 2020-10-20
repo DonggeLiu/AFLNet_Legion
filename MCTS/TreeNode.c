@@ -441,7 +441,7 @@ char * Simulation(TreeNode * target)
     return mutate(target);
 }
 
-TreeNode * Expansion(TreeNode * tree_node, int * response_codes, int len_codes, gboolean * is_new)
+TreeNode * Expansion(TreeNode * tree_node, seed_info_t * seed, int * response_codes, int len_codes, gboolean * is_new)
 {
     TreeNode * parent_node;
     *is_new = FALSE;
@@ -458,7 +458,8 @@ TreeNode * Expansion(TreeNode * tree_node, int * response_codes, int len_codes, 
         get_tree_node_data(parent_node)->stats.paths_discovered += *is_new;
         parent_node = parent_node->parent;
     }
-    //TODO: update the statistics of seeds
+    /* TODO: Stats propagation of the seed is done here */
+//    seed->selected_count ++;
     return tree_node;
 }
 

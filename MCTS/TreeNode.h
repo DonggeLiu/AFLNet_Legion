@@ -107,7 +107,7 @@ struct queue_entry * select_seed(TreeNode * tree_node_selected);
 TreeNode * Initialisation();
 struct queue_entry * Selection(TreeNode * parent_tree_node);
 char * Simulation(TreeNode * target);
-TreeNode * Expansion(TreeNode * tree_node, int * response_codes, int len_codes, gboolean * is_new);
+TreeNode * Expansion(TreeNode * tree_node, seed_info_t * seed, int * response_codes, int len_codes, gboolean * is_new);
 void Propagation(TreeNode * selection_leaf, TreeNode * execution_leaf, gboolean is_new);
 
 /* ================================================ MCTS Functions ================================================ */
