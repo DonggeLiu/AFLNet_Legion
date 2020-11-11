@@ -762,6 +762,13 @@ struct queue_entry *choose_seed(u32 target_state_id, u8 mode)
   return result;
 }
 
+void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
+{
+  //MCTS_Expansion + Back Propagation
+  //add q to the corresponding tree node -- one function would be needed for this
+  //call update_region_annotations so that we know which state we can reach after sending a sequence of messages
+}
+
 /* Update state-aware variables */
 /* TODO: Expansion + Propagation */
 void update_state_aware_variables(struct queue_entry *q, u8 dry_run)
@@ -3582,7 +3589,13 @@ static void perform_dry_run(char** argv) {
     ck_free(use_mem);
 
     /* Update state-aware variables (e.g., state machine, regions and their annotations */
-    if (state_aware_mode) update_state_aware_variables(q, 1);
+    if (state_aware_mode) {
+      if (state_selection_algo == MCTS) {
+        update_MCTS_tree();
+      } else {
+        update_state_aware_variables(q, 1);
+      }
+    }
 
     /* AFLNet delete the kl_messages */
     delete_kl_messages(kl_messages);
@@ -4011,7 +4024,13 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
     /* We use the actual length of all messages (full_len), not the len of the mutated message subsequence (len)*/
     add_to_queue(fn, full_len, 0);
 
-    if (state_aware_mode) update_state_aware_variables(queue_top, 0);
+    if (state_aware_mode) {
+      if (state_selection_aglo == MCTS) {
+        update_MCTS_tree();
+      } else {
+        update_state_aware_variables(queue_top, 0);
+      }
+    }
 
     if (hnb == 2) {
       queue_top->has_new_cov = 1;
@@ -5884,47 +5903,53 @@ AFLNET_REGIONS_SELECTION:;
   state aware dependent. However, once the information is clear, the code for fuzzing preparation is the same */
 
   if (state_aware_mode) {
-    /* In state aware mode, select M2 based on the targeted state ID */
-    u32 total_region = queue_cur->region_count;
-    if (total_region == 0) PFATAL("0 region found for %s", queue_cur->fname);
-
-    if (target_state_id == 0) {
-      //No prefix subsequence (M1 is empty)
-      M2_start_region_ID = 0;
-      M2_region_count = 0;
-
-      //To compute M2_region_count, we identify the first region which has a different annotation
-      //Now we quickly compare the state count, we could make it more fine grained by comparing the exact response codes
-      for(i = 0; i < queue_cur->region_count ; i++) {
-        if (queue_cur->regions[i].state_count != queue_cur->regions[0].state_count) break;
-        M2_region_count++;
-      }
+    if (state_selection_mode == MCTS) {
+      //identify M1, M2, (and M3) in such a way that
+      //after receiveing all messages in M1, the SUT reaches the corresponding selected tree node
+      //and it will process the mutated versions of M2, (and M3)
     } else {
-      //M1 is unlikely to be empty
-      M2_start_region_ID = 0;
+      /* In state aware mode, select M2 based on the targeted state ID */
+      u32 total_region = queue_cur->region_count;
+      if (total_region == 0) PFATAL("0 region found for %s", queue_cur->fname);
 
-      //Identify M2_start_region_ID first based on the target_state_id
-      for(i = 0; i < queue_cur->region_count; i++) {
-        u32 regionalStateCount = queue_cur->regions[i].state_count;
-        if (regionalStateCount > 0) {
-          //reachableStateID is the last ID in the state_sequence
-          u32 reachableStateID = queue_cur->regions[i].state_sequence[regionalStateCount - 1];
-          M2_start_region_ID++;
-          if (reachableStateID == target_state_id) break;
-        } else {
-          //No annotation for this region
-          return 1;
+      if (target_state_id == 0) {
+        //No prefix subsequence (M1 is empty)
+        M2_start_region_ID = 0;
+        M2_region_count = 0;
+
+        //To compute M2_region_count, we identify the first region which has a different annotation
+        //Now we quickly compare the state count, we could make it more fine grained by comparing the exact response codes
+        for(i = 0; i < queue_cur->region_count ; i++) {
+          if (queue_cur->regions[i].state_count != queue_cur->regions[0].state_count) break;
+          M2_region_count++;
         }
-      }
+      } else {
+        //M1 is unlikely to be empty
+        M2_start_region_ID = 0;
 
-      //Then identify M2_region_count
-      for(i = M2_start_region_ID; i < queue_cur->region_count ; i++) {
-        if (queue_cur->regions[i].state_count != queue_cur->regions[M2_start_region_ID].state_count) break;
-        M2_region_count++;
-      }
+        //Identify M2_start_region_ID first based on the target_state_id
+        for(i = 0; i < queue_cur->region_count; i++) {
+          u32 regionalStateCount = queue_cur->regions[i].state_count;
+          if (regionalStateCount > 0) {
+            //reachableStateID is the last ID in the state_sequence
+            u32 reachableStateID = queue_cur->regions[i].state_sequence[regionalStateCount - 1];
+            M2_start_region_ID++;
+            if (reachableStateID == target_state_id) break;
+          } else {
+            //No annotation for this region
+            return 1;
+          }
+        }
 
-      //Handle corner case(s) and skip the current queue entry
-      if (M2_start_region_ID >= queue_cur->region_count) return 1;
+        //Then identify M2_region_count
+        for(i = M2_start_region_ID; i < queue_cur->region_count ; i++) {
+          if (queue_cur->regions[i].state_count != queue_cur->regions[M2_start_region_ID].state_count) break;
+          M2_region_count++;
+        }
+
+        //Handle corner case(s) and skip the current queue entry
+        if (M2_start_region_ID >= queue_cur->region_count) return 1;
+      }
     }
   } else {
     /* Select M2 randomly */
@@ -9101,6 +9126,12 @@ int main(int argc, char** argv) {
 
   setup_ipsm();
 
+  /* NOTE: Initialise the search tree with a root */
+  /* Thuan's comments:
+     - we should do intialisation here so that the tree is ready to perform dry run with given seed inputs/message sequences
+  */  
+  //  TreeNode * ROOT = Initialisation();
+
   setup_dirs_fds();
   read_testcases();
   load_auto();
@@ -9145,29 +9176,34 @@ int main(int argc, char** argv) {
     if (stop_soon) goto stop_fuzzing;
   }
 
-  /* NOTE: Initialise the search tree with a root */
-//  TreeNode * ROOT = Initialisation();
+
 
   if (state_aware_mode) {
     while (1) {
       u8 skipped_fuzz;
 
       struct queue_entry *selected_seed = NULL;
-      /* NOTE: Moved the selection of tree node and seed here */
-//      selected_seed = Selection(ROOT);
-      while(!selected_seed || selected_seed->region_count == 0) {
-        target_state_id = choose_target_state(state_selection_algo);
+   
+      if (state_selection_algo == MCTS) { //MCTS_SELECTION
+        //when we select a tree node, we would need to get the sequence of response code (responses)
+        //from the root node to the selected node so that we can indentify M1, M2 (and M3) sub sequences
+        //(tree_node node, responses) = select_node()
+        //selected_seed = select_seed(node, responses)
+      } else {
+        while(!selected_seed || selected_seed->region_count == 0) {
+          target_state_id = choose_target_state(state_selection_algo);
 
-        /* Update favorites based on the selected state */
-        cull_queue();
+          /* Update favorites based on the selected state */
+          cull_queue();
 
-        /* Update number of times a state has been selected for targeted fuzzing */
-        khint_t k = kh_get(hms, khms_states, target_state_id);
-        if (k != kh_end(khms_states)) {
-          kh_val(khms_states, k)->selected_times++;
+          /* Update number of times a state has been selected for targeted fuzzing */
+          khint_t k = kh_get(hms, khms_states, target_state_id);
+          if (k != kh_end(khms_states)) {
+            kh_val(khms_states, k)->selected_times++;
+          }
+
+          selected_seed = choose_seed(target_state_id, seed_selection_algo);
         }
-
-        selected_seed = choose_seed(target_state_id, seed_selection_algo);
       }
 
       /* Seek to the selected seed */
