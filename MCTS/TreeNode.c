@@ -421,7 +421,7 @@ struct queue_entry * select_seed(TreeNode * tree_node_selected)
 
 TreeNode * Initialisation()
 {
-    return new_tree_node(new_tree_node_data(0,White));
+    return append_child(NULL, 0, White);
 }
 
 //TODO: According to afl-fuzz.c `choose_target_state`, this should return "target_state_id"
