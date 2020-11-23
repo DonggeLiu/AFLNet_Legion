@@ -407,6 +407,11 @@ khash_t(hms) *khms_states;
 //If M3 is empty, M2_next point to the end of the kl_messages linked list
 kliter_t(lms) *M2_prev, *M2_next;
 
+//MCTS global variables
+TreeNode * ROOT;
+TreeNode * cur_tree_node;
+seed_info_t * cur_seed;
+
 //Function pointers pointing to Protocol-specific functions
 unsigned int* (*extract_response_codes)(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref) = NULL;
 region_t* (*extract_requests)(unsigned char* buf, unsigned int buf_size, unsigned int* region_count_ref) = NULL;
