@@ -57,6 +57,10 @@ TreeNode * get_simulation_child(TreeNode * tree_node)
 double tree_node_exploitation_score(TreeNode * tree_node)
 {
     TreeNodeData * node_data = get_tree_node_data(tree_node);
+
+    if (!node_data->selected) return INFINITY;
+
+    g_assert(node_data->selected);
 //    g_printf("%u / %u = %lf\n",
 //             get_tree_node_data(tree_node)->stats.paths_discovered,
 //             get_tree_node_data(tree_node)->stats.selected_times,
