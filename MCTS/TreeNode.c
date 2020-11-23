@@ -43,6 +43,16 @@ TreeNodeData * get_tree_node_data(TreeNode * tree_node)
     return (TreeNodeData *) tree_node->data;
 }
 
+TreeNode * get_simulation_child(TreeNode * tree_node)
+{
+  TreeNodeData * node_data = get_tree_node_data(tree_node);
+  TreeNode * sim_child = node_data->simulation_child;
+
+  assert(node_data->colour != Golden);
+  assert(get_tree_node_data(sim_child)->colour == Golden);
+
+  return sim_child;
+}
 
 double tree_node_exploitation_score(TreeNode * tree_node)
 {

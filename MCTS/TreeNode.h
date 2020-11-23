@@ -78,6 +78,8 @@ TreeNode * new_tree_node(TreeNodeData * tree_data);
 
 TreeNodeData * get_tree_node_data(TreeNode * tree_node);
 
+TreeNode * get_simulation_child(TreeNode * tree_node);
+
 double tree_node_exploitation_score(TreeNode * tree_node);
 
 double tree_node_exploration_score(TreeNode * tree_node);
