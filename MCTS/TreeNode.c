@@ -524,18 +524,62 @@ char * Simulation(TreeNode * target)
     return mutate(target);
 }
 
-TreeNode * Expansion(TreeNode * tree_node, seed_info_t * seed, int * response_codes, int len_codes, gboolean * is_new)
+TreeNode * Expansion(TreeNode * tree_node, struct queue_entry * q, u32 * response_codes, u32 len_codes, gboolean * is_new)
 {
     TreeNode * parent_node;
     *is_new = FALSE;
 
-    for (int i = 0; i < len_codes; i++) {
+    // Construct seed with queue_entry q
+    seed_info_t * seed = construct_seed_with_queue_entry(q);
+
+    // Check if the response code sequence is new
+    // And add the new queue entry to each node along the paths
+    for (u32 i = 0; i < len_codes; i++) {
         parent_node = tree_node;
-        if ((tree_node = exists_child(tree_node, response_codes[i]))) continue;
-        *is_new = TRUE;
-        tree_node = append_child(parent_node, response_codes[i], White);
+        if (!(tree_node = exists_child(tree_node, response_codes[i]))){
+          *is_new = TRUE;
+          tree_node = append_child(parent_node, response_codes[i], White);
+        }
+        add_seed_to_node(seed, get_simulation_child(tree_node));
+
+
+        //TODO: cache the path & path_len of each tree_node here
+        TreeNodeData * node_data = get_tree_node_data(tree_node);
+        node_data->path = response_codes;
+        node_data->path_len = i + 1;
+
+        //TODO: assert the path & path_len of each tree_node here
+        u32 path_len;
+        u32 * path = collect_node_path(tree_node, &path_len);
+        if (node_data->path_len != path_len){
+          printf("\nUnmatch path len:\n");
+          printf("\n");
+          print_path(tree_node);
+          printf("\n");
+          printf("\nnode path len: %d; path len: %d\n", node_data->path_len, path_len);
+        }
+        if (!memcmp(node_data->path, path, node_data->path_len)){
+          //TOASK: How are these two arrays different?
+          for (int j = 0; j < path_len; ++j) {
+            assert(node_data->path[j] == path[j]);
+          }
+//          printf("\nUnmatch path:\n");
+//          printf("Path from responses:\n");
+//          for (int j = 0; j < node_data->path_len; ++j) {
+//            printf("%d ", node_data->path[j]);
+//          }
+//          printf("\n");
+//          printf("Path from my function:\n");
+//          for (int j = 0; j < path_len; ++j) {
+//            printf("%d ", path[j]);
+//          }
+//          printf("\n");
+        }
+        assert(node_data->path_len == path_len);
+//        assert(memcmp(node_data->path, path, path_len));
     }
     parent_node = tree_node;
+
     /*NOTE: Stats propagation along the execution path is done here*/
     while (parent_node) {
         get_tree_node_data(parent_node)->discovered += *is_new;
@@ -545,6 +589,15 @@ TreeNode * Expansion(TreeNode * tree_node, seed_info_t * seed, int * response_co
     /* NOTE: Stats propagation of the seed is done here */
     seed->discovered += *is_new;
     return tree_node;
+}
+
+void Propagation(TreeNode * leaf_selected, seed_info_t * seed_selected, gboolean is_new)
+{
+    while (leaf_selected) {
+      get_tree_node_data(leaf_selected)->discovered += is_new;
+      leaf_selected = leaf_selected->parent;
+    }
+    seed_selected->discovered += is_new;
 }
 
 void parent(TreeNode * child, TreeNode ** parent){
