@@ -115,9 +115,9 @@ void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_reg
 /* ============================================== TreeNode Functions ============================================== */
 /* ================================================ MCTS Functions ================================================ */
 TreeNode * select_tree_node(TreeNode * parent_tree_node);
-struct queue_entry * select_seed(TreeNode * tree_node_selected);
+seed_info_t * select_seed(TreeNode * tree_node_selected);
 TreeNode * Initialisation();
-struct queue_entry * Selection(TreeNode * parent_tree_node);
+seed_info_t * Selection(TreeNode * parent_tree_node);
 char * Simulation(TreeNode * target);
 TreeNode * Expansion(TreeNode * tree_node, seed_info_t * seed, int * response_codes, int len_codes, gboolean * is_new);
 void Propagation(TreeNode * selection_leaf, TreeNode * execution_leaf, gboolean is_new);

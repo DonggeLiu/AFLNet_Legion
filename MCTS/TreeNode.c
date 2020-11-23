@@ -490,7 +490,7 @@ TreeNode * select_tree_node(TreeNode * parent_tree_node)
 }
 
 
-struct queue_entry * select_seed(TreeNode * tree_node_selected)
+seed_info_t * select_seed(TreeNode * tree_node_selected)
 {
     seed_info_t * seed = best_seed(tree_node_selected);
     /* NOTE: Selected stats propagation of the seed is done here */
@@ -505,14 +505,16 @@ TreeNode * Initialisation()
 }
 
 //TODO: According to afl-fuzz.c `choose_target_state`, this should return "target_state_id"
-struct queue_entry * Selection(TreeNode * parent_tree_node)
+seed_info_t * Selection(TreeNode * tree_node)
 {
-    TreeNode * node_selected = select_tree_node(parent_tree_node);
+    assert(G_NODE_IS_ROOT(tree_node));
+
+    tree_node = select_tree_node(tree_node);
     g_printf("\tTree node selected: ");
-    tree_node_print(node_selected);
-    //TOASK: Which function can integrate seeds to nodes?
-    struct queue_entry * seed_selected = NULL;
-//    struct queue_entry * seed_selected = select_seed(node_selected);
+    tree_node_print(tree_node);
+//    struct queue_entry * seed_selected = NULL;
+    seed_info_t * seed_selected = select_seed(tree_node);
+
     return seed_selected;
 }
 
