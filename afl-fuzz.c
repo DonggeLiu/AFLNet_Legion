@@ -9159,7 +9159,8 @@ int main(int argc, char** argv) {
   /* Thuan's comments:
      - we should do intialisation here so that the tree is ready to perform dry run with given seed inputs/message sequences
   */  
-  //  TreeNode * ROOT = Initialisation();
+  ROOT = Initialisation();
+//  perform_dry_run()
 
   setup_dirs_fds();
   read_testcases();
