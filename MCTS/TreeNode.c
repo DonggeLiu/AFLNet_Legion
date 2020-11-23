@@ -504,7 +504,9 @@ seed_info_t * select_seed(TreeNode * tree_node_selected)
 
 TreeNode * Initialisation()
 {
-    return append_child(NULL, 0, White);
+    TreeNode * root = new_tree_node(new_tree_node_data(0, White));
+    get_tree_node_data(root)->simulation_child = append_child(root, -1, Golden);
+    return root;
 }
 
 //TODO: According to afl-fuzz.c `choose_target_state`, this should return "target_state_id"
