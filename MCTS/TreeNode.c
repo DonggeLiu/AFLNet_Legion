@@ -457,8 +457,7 @@ void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_reg
 //    *M2_region_count++;
 //  }
 
-//TODO: Add the following back
-/*  NOTE: M2 = the regions with the same code sequence as the node and all regions afterwards */
+///*  NOTE: M2 = the regions with the same code sequence as the node and all regions afterwards */
   for (*M2_start_region_ID = 0; *M2_start_region_ID < seed->q->region_count; (*M2_start_region_ID)++) {
     region_path = collect_region_path(seed->q->regions[*M2_start_region_ID], region_path_len);
     if (region_path_len < node_path_len) continue;
