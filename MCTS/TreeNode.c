@@ -8,24 +8,23 @@ TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour)
     tree_node_data = g_new (TreeNodeData, 1); //  allocates 1 element of TreeNode
 
     // set property
-    tree_node_data->stats.id = response_code;
+    tree_node_data->id = response_code;
     //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
+
+    // set statistics
+    tree_node_data->selected = 0;
+    tree_node_data->discovered = 0;
+//    tree_node_data->stats.selected_seed_index = 0;
+    tree_node_data->seeds = NULL;
+    tree_node_data->seeds_count = 0;
+
     //TODO: Detect terminations (i.e. leaves) with some response code, and mark them fully explored.
     // e.g. predefine a set of termination code
     //TOASK: Given the last node of a past communication, would it have any child if we give it more inputs?
     tree_node_data->fully_explored = FALSE;
     //NOTE: No way to know if we have found all possible inputs to fuzz a node.
     tree_node_data->exhausted = FALSE;
-
-    // set statistics
-    tree_node_data->stats.score = INFINITY;
-    tree_node_data->stats.selected_times = 0;
-    tree_node_data->stats.paths_discovered = 0;
-    tree_node_data->stats.paths = 0;
-    tree_node_data->stats.fuzzs = 0;
-    tree_node_data->stats.selected_seed_index = 0;
-    tree_node_data->seeds_count = 0;
 
     return tree_node_data;
 }
@@ -52,30 +51,33 @@ double tree_node_exploitation_score(TreeNode * tree_node)
 //             get_tree_node_data(tree_node)->stats.paths_discovered,
 //             get_tree_node_data(tree_node)->stats.selected_times,
 //             (double) get_tree_node_data(tree_node)->stats.paths_discovered / get_tree_node_data(tree_node)->stats.selected_times);
-    return (double) get_tree_node_data(tree_node)->stats.paths_discovered / get_tree_node_data(tree_node)->stats.selected_times;
+    return (double) node_data->discovered / node_data->selected;
 }
 
 double seed_exploitation_score(TreeNode * tree_node, int seed_index)
 {
     seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
-    return (double) target_seed->new_path_count / target_seed->selected_count;
+    return (double) target_seed->discovered / target_seed->selected;
 }
 
 double tree_node_exploration_score(TreeNode * tree_node)
 {
     if (G_NODE_IS_ROOT(tree_node)) return INFINITY;
     g_assert(tree_node->parent);
+    TreeNodeData * node_data = get_tree_node_data(tree_node);
+    TreeNodeData * parent_data = get_tree_node_data(tree_node->parent);
 //    g_printf("%lf * sqrt(2*log(%u)/%u)\n",
 //             RHO,
 //             get_tree_node_data(tree_node->parent)->stats.selected_times,
 //             get_tree_node_data(tree_node)->stats.selected_times);
-    return  RHO * sqrt(2*log((double) get_tree_node_data(tree_node->parent)->stats.selected_times) / get_tree_node_data(tree_node)->stats.selected_times);
+    return  RHO * sqrt(2*log((double) parent_data->selected) / node_data->selected);
 }
 
 double seed_exploration_score(TreeNode * tree_node, int seed_index)
 {
     seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
-    return RHO * sqrt(2*log((double)get_tree_node_data(tree_node)->stats.selected_times)/target_seed->selected_count);
+    TreeNodeData * node_data = get_tree_node_data(tree_node);
+    return RHO * sqrt(2*log((double)node_data->selected)/target_seed->selected);
 }
 
 double tree_node_score(TreeNode * tree_node)
@@ -97,7 +99,7 @@ double tree_node_score(TreeNode * tree_node)
 
     if (fits_fish_bone_optimisation(tree_node)) return -INFINITY;
 
-    if (!get_tree_node_data(tree_node)->stats.selected_times)  return INFINITY;
+    if (!get_tree_node_data(tree_node)->selected)  return INFINITY;
 
     double exploit_score = tree_node_exploitation_score(tree_node);
     double explore_score = tree_node_exploration_score(tree_node);
@@ -112,7 +114,7 @@ double seed_score(TreeNode * tree_node, int seed_index)
 
     seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
 
-    if (!target_seed->selected_count)  return INFINITY;
+    if (!target_seed->selected)  return INFINITY;
 
     double exploit_score = seed_exploitation_score(tree_node, seed_index);
     double explore_score = seed_exploration_score(tree_node, seed_index);
@@ -254,7 +256,7 @@ TreeNode * exists_child(TreeNode * tree_node, int target_response_code)
     while (child_node)
     {
 //        tree_node_print(child_node);
-        if (get_tree_node_data(child_node)->stats.id == target_response_code)  return child_node;
+        if (get_tree_node_data(child_node)->id == target_response_code)  return child_node;
         child_node = g_node_next_sibling(child_node);
     }
     return NULL;
@@ -271,7 +273,7 @@ TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node
 void print_reversed_path(TreeNode * tree_node)
 {
     do {
-        g_printf("%d ", get_tree_node_data(tree_node)->stats.id);
+        g_printf("%d ", get_tree_node_data(tree_node)->id);
         tree_node = tree_node->parent;
     }while (tree_node);
     g_printf("\n");
@@ -371,7 +373,7 @@ void tree_node_print (TreeNode * tree_node)
 //    g_printf ("%d res_code: %d, score: %lf\n",
     g_printf ("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
               colour_encoder(tree_node_data->colour),
-              tree_node_data->stats.id,
+              tree_node_data->id,
               tree_node_score(tree_node),
               tree_node_exploitation_score(tree_node),
               tree_node_exploration_score(tree_node));
@@ -402,8 +404,8 @@ TreeNode * select_tree_node(TreeNode * parent_tree_node)
         tree_node_print(parent_tree_node);
         g_print("\n");
         parent_tree_node = best_child(parent_tree_node);
-        /* NOTE: Stats propagation along the selection path is done here */
-        get_tree_node_data(parent_tree_node)->stats.selected_times++;
+        /* NOTE: Selected stats propagation of nodes along the selection path is done here */
+        get_tree_node_data(parent_tree_node)->selected++;
         assert(parent_tree_node);
     }
     return parent_tree_node;
@@ -413,9 +415,9 @@ TreeNode * select_tree_node(TreeNode * parent_tree_node)
 struct queue_entry * select_seed(TreeNode * tree_node_selected)
 {
     seed_info_t * seed = best_seed(tree_node_selected);
-    /* NOTE: Stats propagation of the seed is done here */
-    seed->selected_count ++;
-    return seed->seed;
+    /* NOTE: Selected stats propagation of the seed is done here */
+    seed->selected++;
+    return seed;
 }
 
 
@@ -456,11 +458,12 @@ TreeNode * Expansion(TreeNode * tree_node, seed_info_t * seed, int * response_co
     parent_node = tree_node;
     /*NOTE: Stats propagation along the execution path is done here*/
     while (parent_node) {
-        get_tree_node_data(parent_node)->stats.paths_discovered += *is_new;
+        get_tree_node_data(parent_node)->discovered += *is_new;
         parent_node = parent_node->parent;
     }
-    /* TODO: Stats propagation of the seed is done here */
-//    seed->selected_count ++;
+
+    /* NOTE: Stats propagation of the seed is done here */
+    seed->discovered += *is_new;
     return tree_node;
 }
 
