@@ -21,89 +21,89 @@ main (int argc, char *argv[])
     g_printf ("GLib version: %d.%d.%d\n\n", glib_major_version,glib_minor_version,glib_micro_version);
 
     TreeNode * ROOT = Initialisation();
-    get_tree_node_data(ROOT)->stats.paths_discovered = 3;
-    get_tree_node_data(ROOT)->stats.selected_times = 9;
+    get_tree_node_data(ROOT)->discovered = 3;
+    get_tree_node_data(ROOT)->selected = 9;
+    get_tree_node_data(get_tree_node_data(ROOT)->simulation_child)->discovered = 3;
+    get_tree_node_data(get_tree_node_data(ROOT)->simulation_child)->selected = 9;
 //    g_print("ROOT\n");
-//    g_printf("%u\n", get_tree_node_data(ROOT)->stats.paths_discovered);
-//    g_printf("%u\n", get_tree_node_data(ROOT)->stats.selected_times);
+//    g_printf("%u\n", get_tree_node_data(ROOT)->discovered);
+//    g_printf("%u\n", get_tree_node_data(ROOT)->selected);
 //    g_printf("%lf\n", tree_node_exploitation_score(ROOT));
 //    g_printf("%lf\n", tree_node_exploration_score(ROOT));
 
 
     child0 = append_child(ROOT,400, White);
-    get_tree_node_data(child0)->stats.paths_discovered = 1;
-    get_tree_node_data(child0)->stats.selected_times = 2;
+    get_tree_node_data(child0)->discovered = 1;
+    get_tree_node_data(child0)->selected = 2;
 //    g_print("Child0\n");
 //    tree_node_print(child0);
-//    g_printf("Path Discovered: %u\n", get_tree_node_data(child0)->stats.paths_discovered);
-//    g_printf("Selected Times: %u\n", get_tree_node_data(child0)->stats.selected_times);
+//    g_printf("Path Discovered: %u\n", get_tree_node_data(child0)->discovered);
+//    g_printf("Selected Times: %u\n", get_tree_node_data(child0)->selected);
 //    g_printf("Exploitation score: %lf\n", tree_node_exploitation_score(child0));
 //    g_printf("Exploration score: %lf\n\n", tree_node_exploration_score(child0));
 
     child1 = append_child(ROOT,100, White);
-    get_tree_node_data(child1)->stats.paths_discovered = 1;
-    get_tree_node_data(child1)->stats.selected_times = 2;
+    get_tree_node_data(child1)->discovered = 1;
+    get_tree_node_data(child1)->selected = 2;
 
 //    g_print("child1\n");
-//    g_printf("%u\n", get_tree_node_data(child1)->stats.paths_discovered);
-//    g_printf("%u\n", get_tree_node_data(child1)->stats.selected_times);
+//    g_printf("%u\n", get_tree_node_data(child1)->discovered);
+//    g_printf("%u\n", get_tree_node_data(child1)->selected);
 //    g_printf("%lf\n", tree_node_exploitation_score(child1));
 //    g_printf("%lf\n", tree_node_exploration_score(child1));
 
     child2 = append_child(ROOT,200, White);
-    get_tree_node_data(child2)->stats.paths_discovered = 1;
-    get_tree_node_data(child2)->stats.selected_times = 2;
-    get_tree_node_data(get_tree_node_data(child2)->simulation_child)->stats.paths_discovered = 1;
-    get_tree_node_data(get_tree_node_data(child2)->simulation_child)->stats.selected_times = 2;
+    get_tree_node_data(child2)->discovered = 1;
+    get_tree_node_data(child2)->selected = 2;
+    get_tree_node_data(get_tree_node_data(child2)->simulation_child)->discovered = 1;
+    get_tree_node_data(get_tree_node_data(child2)->simulation_child)->selected = 2;
 //    g_print("child2\n");
-//    g_printf("%u\n", get_tree_node_data(child2)->stats.paths_discovered);
-//    g_printf("%u\n", get_tree_node_data(child2)->stats.selected_times);
+//    g_printf("%u\n", get_tree_node_data(child2)->discovered);
+//    g_printf("%u\n", get_tree_node_data(child2)->selected);
 //    g_printf("%lf\n", tree_node_exploitation_score(child2));
 //    g_printf("%lf\n", tree_node_exploration_score(child2));
 
     child3 = append_child(ROOT, 300, White);
-    get_tree_node_data(child3)->stats.paths_discovered = 1;
-    get_tree_node_data(child3)->stats.selected_times = 3;
+    get_tree_node_data(child3)->discovered = 1;
+    get_tree_node_data(child3)->selected = 3;
 //    g_print("child3\n");
-//    g_printf("%u\n", get_tree_node_data(child3)->stats.paths_discovered);
-//    g_printf("%u\n", get_tree_node_data(child3)->stats.selected_times);
+//    g_printf("%u\n", get_tree_node_data(child3)->discovered);
+//    g_printf("%u\n", get_tree_node_data(child3)->selected);
 //    g_printf("%lf\n", tree_node_exploitation_score(child3));
 //    g_printf("%lf\n", tree_node_exploration_score(child3));
 
-    /* TOASK:
-     *  1s. using id 410 works, but changing it to 010 will not print out 8 instead
-     *      Similarly, 020 becomes 16
-     *      How does it become octal?
-     */
     grandchild01 = append_child(child0, 410, White);
-    get_tree_node_data(grandchild01)->stats.paths_discovered = 2;
-    get_tree_node_data(grandchild01)->stats.selected_times = 3;
+    get_tree_node_data(grandchild01)->discovered = 2;
+    get_tree_node_data(grandchild01)->selected = 3;
 //    g_print("grandchild01\n");
 //    tree_node_print(grandchild01);
-//    g_printf("Path Discovered: %u\n", get_tree_node_data(child3)->stats.paths_discovered);
-//    g_printf("Selected Times: %u\n", get_tree_node_data(child3)->stats.selected_times);
+//    g_printf("Path Discovered: %u\n", get_tree_node_data(child3)->discovered);
+//    g_printf("Selected Times: %u\n", get_tree_node_data(child3)->selected);
 //    g_printf("Exploitation score: %lf\n", tree_node_exploitation_score(child3));
 //    g_printf("Exploration score: %lf\n\n", tree_node_exploration_score(child3));
 
     grandchild02 = append_child(child0, 020, White);
-    get_tree_node_data(grandchild02)->stats.paths_discovered = 2;
-    get_tree_node_data(grandchild02)->stats.selected_times = 4;
+    get_tree_node_data(grandchild02)->discovered = 2;
+    get_tree_node_data(grandchild02)->selected = 4;
 
     grandchild03 = append_child(child0, 030, White);
-    get_tree_node_data(grandchild03)->stats.paths_discovered = 3;
-    get_tree_node_data(grandchild03)->stats.selected_times = 4;
+    get_tree_node_data(grandchild03)->discovered = 3;
+    get_tree_node_data(grandchild03)->selected = 4;
 
     grandchild11 = append_child(child1, 110, White);
-    get_tree_node_data(grandchild11)->stats.paths_discovered = 2;
-    get_tree_node_data(grandchild11)->stats.selected_times = 3;
+    get_tree_node_data(grandchild11)->discovered = 2;
+    get_tree_node_data(grandchild11)->selected = 3;
 
     grandchild12 = append_child(child1, 120, White);
-    get_tree_node_data(grandchild12)->stats.paths_discovered = 2;
-    get_tree_node_data(grandchild12)->stats.selected_times = 4;
+    get_tree_node_data(grandchild12)->discovered = 2;
+    get_tree_node_data(grandchild12)->selected = 4;
 
     grandchild20 = append_child(child2, 220, White);
-    get_tree_node_data(grandchild20)->stats.paths_discovered = 2;
-    get_tree_node_data(grandchild20)->stats.selected_times = 2;
+    get_tree_node_data(grandchild20)->discovered = 2;
+    get_tree_node_data(grandchild20)->selected = 2;
+    add_seed_to_node(construct_seed_with_queue_entry(NULL),get_simulation_child(grandchild20));
+    add_seed_to_node(construct_seed_with_queue_entry(NULL),get_simulation_child(grandchild20));
+
 
     g_printf("Initial tree:\n");
     tree_print(ROOT, NULL, 0,0);
@@ -117,7 +117,8 @@ main (int argc, char *argv[])
     g_printf("\nExpansion\n");
 
     gboolean is_new = FALSE;
-    TreeNode * leaf = Expansion(ROOT, seed, (int[]) {200, 220, 222, 2222}, 4, &is_new);
+  TreeNode * leaf = Expansion(ROOT,NULL, (u32[]) {200, 220, 222, 2222}, 4, &is_new);
+//    TreeNode * leaf = Expansion(ROOT, seed, (int[]) {200, 220, 222, 2222}, 4, &is_new);
 
     g_printf("\tThe leaf of expansion is: ");
     tree_node_print(leaf);
