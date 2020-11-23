@@ -107,7 +107,7 @@ double tree_node_score(TreeNode * tree_node)
 
     if (G_NODE_IS_ROOT(tree_node))  return INFINITY;
 
-    if (fits_fish_bone_optimisation(tree_node)) return -INFINITY;
+//    if (fits_fish_bone_optimisation(tree_node)) return -INFINITY;
 
     if (!get_tree_node_data(tree_node)->selected)  return INFINITY;
 
@@ -119,7 +119,8 @@ double tree_node_score(TreeNode * tree_node)
 
 double seed_score(TreeNode * tree_node, int seed_index)
 {
-    return g_rand_int(RANDOM_NUMBER_GENERATOR);
+//    return g_rand_int(RANDOM_NUMBER_GENERATOR);
+
     if (SCORE_FUNCTION == Random) return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
     seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
@@ -132,26 +133,24 @@ double seed_score(TreeNode * tree_node, int seed_index)
     return exploit_score + explore_score;
 }
 
-gboolean is_fully_explored(TreeNode *  tree_node)
-{
-    /*
-     * Check if a node is fully explored:
-     *  1. If not in PERSISTENT mode, return the exact stats of the tree node
-     *  2. If in PERSISTENT mode, but the root is not fully explored, return the exact stats
-     *  3. If in PERSISTENT mode and the root is fully explored, but the node is root, return the exact stats
-     *  4. Else a node is fully explored if it is a non-Golden leaf, or it is exhausted
-     */
-    TreeNodeData * tree_node_data = get_tree_node_data(tree_node);
-    if (!PERSISTENT)    return tree_node_data->fully_explored;
-
-    if (!get_tree_node_data(g_node_get_root(tree_node))->fully_explored)  return tree_node_data->fully_explored;
-
-    if (G_NODE_IS_ROOT(tree_node))  return tree_node_data->fully_explored;
-
-    return (is_leaf(tree_node) && tree_node_data->colour != Golden) || tree_node_data->exhausted;
-
-
-}
+//gboolean is_fully_explored(TreeNode *  tree_node)
+//{
+//    /*
+//     * Check if a node is fully explored:
+//     *  1. If not in PERSISTENT mode, return the exact stats of the tree node
+//     *  2. If in PERSISTENT mode, but the root is not fully explored, return the exact stats
+//     *  3. If in PERSISTENT mode and the root is fully explored, but the node is root, return the exact stats
+//     *  4. Else a node is fully explored if it is a non-Golden leaf, or it is exhausted
+//     */
+//    TreeNodeData * tree_node_data = get_tree_node_data(tree_node);
+//    if (!PERSISTENT)    return tree_node_data->fully_explored;
+//
+//    if (!get_tree_node_data(g_node_get_root(tree_node))->fully_explored)  return tree_node_data->fully_explored;
+//
+//    if (G_NODE_IS_ROOT(tree_node))  return tree_node_data->fully_explored;
+//
+//    return (is_leaf(tree_node) && tree_node_data->colour != Golden) || tree_node_data->exhausted;
+//}
 
 gboolean is_leaf(TreeNode *tree_node) {
     /*
@@ -166,20 +165,20 @@ gboolean is_leaf(TreeNode *tree_node) {
                    get_tree_node_data(g_node_first_child(tree_node))->colour == Golden));
 }
 
-gboolean fits_fish_bone_optimisation(TreeNode * tree_node)
-{
-    /* NOTE: We might not be able to know for sure if a node/subtree is fully explored.
-     *  One optimisation is to predefine a set of termination response codes.
-     * Fish bone optimisation: if a simulation child
-     * has only one sibling X who is not fully explored,
-     * and X is not white (so that all siblings are found)
-     * then do not simulate from that simulation child but only from X
-     * as all new paths can only come from X
-     */
-//    gboolean is_simul = (get_tree_node_data(tree_node)->colour == Golden);
-
-    return FALSE;
-}
+//gboolean fits_fish_bone_optimisation(TreeNode * tree_node)
+//{
+//    /* NOTE: We might not be able to know for sure if a node/subtree is fully explored.
+//     *  One optimisation is to predefine a set of termination response codes.
+//     * Fish bone optimisation: if a simulation child
+//     * has only one sibling X who is not fully explored,
+//     * and X is not white (so that all siblings are found)
+//     * then do not simulate from that simulation child but only from X
+//     * as all new paths can only come from X
+//     */
+////    gboolean is_simul = (get_tree_node_data(tree_node)->colour == Golden);
+//
+//    return FALSE;
+//}
 
 TreeNode * best_child(TreeNode * tree_node)
 {
