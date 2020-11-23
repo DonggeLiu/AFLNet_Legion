@@ -9214,11 +9214,15 @@ int main(int argc, char** argv) {
 
       struct queue_entry *selected_seed = NULL;
    
-      if (state_selection_algo == MCTS) { //MCTS_SELECTION
+      if (state_selection_algo == MCTS) {
+        /* NOTE: MCTS_SELECTION */
         //when we select a tree node, we would need to get the sequence of response code (responses)
         //from the root node to the selected node so that we can indentify M1, M2 (and M3) sub sequences
         //(tree_node node, responses) = select_node()
         //selected_seed = select_seed(node, responses)
+        cur_tree_node = ROOT;
+        cur_seed = Selection(cur_tree_node);
+        selected_seed = cur_seed->q;
       } else {
         while(!selected_seed || selected_seed->region_count == 0) {
           target_state_id = choose_target_state(state_selection_algo);
