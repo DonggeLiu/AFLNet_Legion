@@ -54,9 +54,9 @@ typedef struct
 
 typedef struct
 {
-    struct queue_entry * seed;
-    int new_path_count;
-    int selected_count;
+    struct queue_entry * q;
+    int selected;
+    int discovered;
 }seed_info_t;
 
 
