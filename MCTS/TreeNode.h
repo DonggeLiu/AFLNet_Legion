@@ -31,11 +31,16 @@ enum score_function{Random, UCT};
 
 typedef struct
 {
+    // info
+    gint id;
+    u32 * path;
+    u32 path_len;
+
     // statistics
-    state_info_t stats;
+    gint selected;
+    gint discovered;
 
     // input generation
-    //TOASK: Which function to use to save seeds here?
     void ** seeds;                  /* keeps all seeds reaching this node -- can be casted to struct seed_info_t* */
     int seeds_count;
     TreeNode * simulation_child;
