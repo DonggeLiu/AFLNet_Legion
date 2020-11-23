@@ -767,11 +767,35 @@ struct queue_entry *choose_seed(u32 target_state_id, u8 mode)
   return result;
 }
 
+/* Update tree_node-aware variables */
 void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
 {
   //MCTS_Expansion + Back Propagation
   //add q to the corresponding tree node -- one function would be needed for this
   //call update_region_annotations so that we know which state we can reach after sending a sequence of messages
+
+  // Update the annotation of each region of the q
+  update_region_annotations(q);
+
+  // During dry run: Save the given queue entry to the sim child of ROOT only
+  if (dry_run) {
+    add_seed_to_node(construct_seed_with_queue_entry(q), get_simulation_child(ROOT));
+    return;
+  }
+
+  // During normal run: Collect the sequence of response code and expand the tree with it
+  unsigned int node_count;
+  // TOASK: Is this necessary? We can get this from the last region of the q
+  unsigned int * node_sequence = (*extract_response_codes)(response_buf, response_buf_size, &node_count);
+
+  /* NOTE: MCTS Expansion and check if the new input finds a new sequence */
+  gboolean is_new = FALSE;
+  Expansion(ROOT, q, node_sequence, node_count, &is_new);
+//  TreeNode * execution_leaf = Expansion(ROOT, q, node_sequence, node_count, &is_new);
+//  print_path(execution_leaf);
+
+  /* NOTE: MCTS Propagation: Record the result to the node and seed selected */
+  Propagation(cur_tree_node, cur_seed, is_new);
 }
 
 /* Update state-aware variables */
@@ -3596,7 +3620,7 @@ static void perform_dry_run(char** argv) {
     /* Update state-aware variables (e.g., state machine, regions and their annotations */
     if (state_aware_mode) {
       if (state_selection_algo == MCTS) {
-        update_MCTS_tree();
+        update_MCTS_tree(q, 1);
       } else {
         update_state_aware_variables(q, 1);
       }
@@ -4030,8 +4054,8 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
     add_to_queue(fn, full_len, 0);
 
     if (state_aware_mode) {
-      if (state_selection_aglo == MCTS) {
-        update_MCTS_tree();
+      if (state_selection_algo == MCTS) {
+        update_MCTS_tree(queue_top, 0);
       } else {
         update_state_aware_variables(queue_top, 0);
       }
