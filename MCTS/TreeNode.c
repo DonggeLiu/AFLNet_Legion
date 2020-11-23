@@ -289,55 +289,64 @@ void print_reversed_path(TreeNode * tree_node)
     g_printf("\n");
 }
 
-void print_path(TreeNode * tree_node)
+u32 * collect_node_path(TreeNode * tree_node, u32 * path_len)
 {
-    int * path, * reversed_path;
-    int path_len = 0;
-    int path_size = 0;
+  u32 * path, * reversed_path;
+  *path_len = 0;
+  u32 path_size = 0;
 
-    while (tree_node) {
-        //NOTE: dynamically expanding the size of array
-        if (path_len >= path_size - 1) {
-            path_size += 100;
-            int * new_reversed_path = ck_alloc(path_size*sizeof(int));
-            if (new_reversed_path) {
-                for (int i = 0; i < path_len; ++i) {
-                    new_reversed_path[i] = reversed_path[i];
-                }
-                // TOASK: free causes error
+  while (tree_node->parent) {
+    //NOTE: dynamically expanding the size of array
+//    g_printf("%d of %d: %d\n", *path_len, path_size, (*path_len) >= (path_size));
+    if ((*path_len) >= (path_size)) {
+      path_size += 100;
+//      g_printf("%d\n", path_size);
+      u32 * new_reversed_path = ck_alloc(path_size*sizeof(u32));
+      if (new_reversed_path) {
+        for (u32 i = 0; i < *path_len; ++i) {
+          new_reversed_path[i] = reversed_path[i];
+        }
+        // TOASK: free causes error
 //                ck_free(reversed_path);
 //                int * reversed_path = new_reversed_path;
-                reversed_path = new_reversed_path;
-            }
-            else {
-                g_print("Insufficient Memory when printing path");
-                exit(0);
-            }
-        }
-
-        // collect addresses from leaf to root
-        reversed_path[path_len] = get_tree_node_data(tree_node)->stats.id;
-        path_len += 1;
-        tree_node = tree_node->parent;
+        reversed_path = new_reversed_path;
+      }
+      else {
+        g_print("Insufficient Memory when collecting path");
+        exit(0);
+      }
     }
-//    g_printf("%d of %d\n", path_len, path_size);
-//
-//    for (int i = 0; i < path_len; i++) {
+
+    // collect addresses from leaf to root
+    reversed_path[*path_len] = get_tree_node_data(tree_node)->id;
+    *path_len += 1;
+    tree_node = tree_node->parent;
+  }
+//    g_printf("%d of %d\n", *path_len, path_size);
+
+//    for (u32 i = 0; i < *path_len; i++) {
 //        g_printf("%d ", reversed_path[i]);
 //    }
 
-    path = ck_alloc(path_len*sizeof(int));
-    for (int i = 0; i < path_len; i++) {
-        path[i] = reversed_path[path_len-i-1];
-    }
-//    g_print("\n");
-    // TOASK: free causes error
-//    ck_free(reversed_path);
-    for (int i = 0; i < path_len; i++) {
+//    return reversed_path;
+  // TOASK: free causes error
+  // ck_free(reversed_path);
+
+  path = ck_alloc((*path_len) * sizeof(u32));
+  for (u32 i = 0; i < *path_len; i++) {
+    path[i] = reversed_path[(*path_len) - i - 1];
+  }
+  return path;
+}
+
+void print_path(TreeNode * tree_node)
+{
+    u32 path_len;
+    u32 * path = collect_node_path(tree_node, &path_len);
+    for (u32 i = 0; i < path_len; i++) {
         g_printf("%d ", path[i]);
     }
     g_print("\n");
-//    free(path);
 }
 
 int colour_encoder(enum node_colour colour) {
