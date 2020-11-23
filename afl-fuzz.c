@@ -5932,10 +5932,10 @@ AFLNET_REGIONS_SELECTION:;
   state aware dependent. However, once the information is clear, the code for fuzzing preparation is the same */
 
   if (state_aware_mode) {
-    if (state_selection_mode == MCTS) {
-      //identify M1, M2, (and M3) in such a way that
-      //after receiveing all messages in M1, the SUT reaches the corresponding selected tree node
-      //and it will process the mutated versions of M2, (and M3)
+    if (state_selection_algo == MCTS) {
+      //TOASK: Find the start region ID of M2 as usual
+      //  and consider all regions after that as the rest of M2?
+      find_M2_region(cur_seed, cur_tree_node, &M2_start_region_ID, &M2_region_count);
     } else {
       /* In state aware mode, select M2 based on the targeted state ID */
       u32 total_region = queue_cur->region_count;
