@@ -103,11 +103,15 @@ TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node
 void print_reversed_path(TreeNode * tree_node);
 u32 * collect_node_path(TreeNode * tree_node, u32 * path_len);
 void print_path(TreeNode * tree_node);
+u32 * collect_region_path(region_t region, u32 * path_len);
 
 int colour_encoder(enum node_colour colour);
 
 void tree_node_print (TreeNode * tree_node);
 
+seed_info_t * construct_seed_with_queue_entry(struct queue_entry * q);
+void add_seed_to_node(seed_info_t * seed, TreeNode * node);
+void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_region_ID, u32 * M2_region_count);
 /* ============================================== TreeNode Functions ============================================== */
 /* ================================================ MCTS Functions ================================================ */
 TreeNode * select_tree_node(TreeNode * parent_tree_node);

@@ -414,6 +414,65 @@ void tree_node_print (TreeNode * tree_node)
 //    return FALSE;
 //}
 
+
+seed_info_t * construct_seed_with_queue_entry(struct queue_entry * q)
+{
+  seed_info_t * seed = (seed_info_t *) ck_alloc (sizeof(seed_info_t));
+  seed->q = q;
+  seed->selected = 0;
+  seed->discovered = 0;
+  return seed;
+}
+
+void add_seed_to_node(seed_info_t * seed, TreeNode * node)
+{
+  assert(get_tree_node_data(node)->colour == Golden);
+
+  // TOASK: Should we allocate more spaces to avoid repeated reallocation?
+  TreeNodeData * node_data = get_tree_node_data(node);
+  node_data->seeds = (void **) ck_realloc (node_data->seeds, (node_data->seeds_count + 1) * sizeof(void *));
+  node_data->seeds[node_data->seeds_count] = (void *) seed;
+  node_data->seeds_count++;
+}
+
+void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_region_ID, u32 * M2_region_count)
+{
+  u32 region_path_len, node_path_len;
+  u32 * region_path;
+  u32 * node_path = collect_node_path(tree_node, &node_path_len);
+
+  gboolean found_M2 = FALSE;
+  *M2_start_region_ID = *M2_region_count = 0;
+
+///*  NOTE: M2 = the regions with the same code sequence as the node */
+//  for (u32 region_id = 0; region_id < seed->q->region_count; region_id++) {
+//    region_path = collect_region_path(seed->q->regions[region_id], region_path_len);
+//    if (region_path_len < node_path_len) continue;
+//    if (region_path_len > node_path_len) break;
+//    if (!found_M2) *M2_start_region_ID = region_id;
+//    found_M2 = TRUE;
+//    *M2_region_count++;
+//  }
+
+//TODO: Add the following back
+/*  NOTE: M2 = the regions with the same code sequence as the node and all regions afterwards */
+  for (*M2_start_region_ID = 0; *M2_start_region_ID < seed->q->region_count; (*M2_start_region_ID)++) {
+    region_path = collect_region_path(seed->q->regions[*M2_start_region_ID], region_path_len);
+    if (region_path_len < node_path_len) continue;
+    break;
+  }
+  *M2_region_count = region_path_len - *M2_start_region_ID + 1;
+
+  assert(region_path_len == node_path_len);
+  assert(memcmp(region_path, node_path, region_path_len));
+}
+
+u32 * collect_region_path(region_t region, u32 * path_len)
+{
+    *path_len = region.state_count;
+    return region.state_sequence;
+}
+
 /* ============================================== TreeNode Functions ============================================== */
 /* ================================================ MCTS Functions ================================================ */
 
