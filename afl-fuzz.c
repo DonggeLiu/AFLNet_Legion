@@ -675,12 +675,6 @@ unsigned int choose_target_state(u8 mode) {
 
       result = update_scores_and_select_next_state(FAVOR);
       break;
-      /* NOTE: Moved node selection to its caller function,
-       *    as it is easier to combine with seed selection.
-       * */
-//    case MCTS:
-//        /* Use the Monte Carlo search algorithm to select states */
-//        result = Selection(ROOT);
     default:
       break;
   }
@@ -799,7 +793,6 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
 }
 
 /* Update state-aware variables */
-/* TODO: Expansion + Propagation */
 void update_state_aware_variables(struct queue_entry *q, u8 dry_run)
 {
   khint_t k;
@@ -810,17 +803,6 @@ void update_state_aware_variables(struct queue_entry *q, u8 dry_run)
   if (!response_buf_size) return;
 
   unsigned int *state_sequence = (*extract_response_codes)(response_buf, response_buf_size, &state_count);
-
-  /* NOTE: MCTS Expansion and Propagation */
-//  TreeNode * selection_leaf = malloc(sizeof(TreeNode));
-//  TreeNode * execution_leaf = malloc(sizeof(TreeNode));
-
-  gboolean is_new = FALSE;
-//  execution_leaf = Expansion(ROOT, state_sequence, state_count, &is_new);
-//  print_path(leaf);
-
-//  Propagation(selection_leaf, execution_leaf, is_new);
-  /* MCTS Expansion and Propagation */
 
   q->unique_state_count = get_unique_state_count(state_sequence, state_count);
 
