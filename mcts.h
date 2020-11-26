@@ -2,8 +2,8 @@
 // Created by Dongge Liu on 4/10/20.
 //
 
-#ifndef AFLNET_TREENODE_H
-#define AFLNET_TREENODE_H
+#ifndef MCTS_H
+#define MCTS_H
 
 /* libraries */
 #include "glib_helper.h"
@@ -13,10 +13,8 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include "../alloc-inl.h"
-#include "../aflnet.h"
-//#include "../afl-fuzz.c"
-
+#include "alloc-inl.h"
+#include "aflnet.h"
 
 #define SEED 0
 #define DIGITS_IN_RESPONSE_CODE 12
@@ -109,7 +107,7 @@ int colour_encoder(enum node_colour colour);
 
 void tree_node_print (TreeNode * tree_node);
 
-seed_info_t * construct_seed_with_queue_entry(void* q);
+seed_info_t * construct_seed_with_queue_entry(void * q);
 void add_seed_to_node(seed_info_t * seed, TreeNode * node);
 void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_region_ID, u32 * M2_region_count);
 /* ============================================== TreeNode Functions ============================================== */
@@ -128,5 +126,5 @@ void Propagation(TreeNode * leaf_selected, seed_info_t * seed_selected, gboolean
 //static TreeNode * ROOT = new_tree_node(new_tree_node_data(0,White,""));
 extern TreeNode * ROOT;
 
-#endif //AFLNET_TREENODE_H
+#endif //MCTS_H
 

@@ -11,6 +11,7 @@ afl-showmap
 afl-tmin
 aflnet-replay
 aflnet.o
+mcts.o
 as
 
 # Binaries produced by "make -C llvm_mode"

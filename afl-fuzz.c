@@ -71,7 +71,7 @@
 #include <graphviz/gvc.h>
 #include <math.h>
 
-#include "MCTS/TreeNode.h"
+#include "mcts.h"
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined (__OpenBSD__)
 #  include <sys/sysctl.h>
@@ -415,6 +415,38 @@ seed_info_t * cur_seed;
 //Function pointers pointing to Protocol-specific functions
 unsigned int* (*extract_response_codes)(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref) = NULL;
 region_t* (*extract_requests)(unsigned char* buf, unsigned int buf_size, unsigned int* region_count_ref) = NULL;
+
+//MCTS-specific functions
+void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_region_ID, u32 * M2_region_count)
+{
+  u32 region_path_len, node_path_len;
+  u32 * region_path;
+  u32 * node_path = collect_node_path(tree_node, &node_path_len);
+
+  gboolean found_M2 = FALSE;
+  *M2_start_region_ID = *M2_region_count = 0;
+
+///*  NOTE: M2 = the regions with the same code sequence as the node */
+//  for (u32 region_id = 0; region_id < seed->q->region_count; region_id++) {
+//    region_path = collect_region_path(seed->q->regions[region_id], region_path_len);
+//    if (region_path_len < node_path_len) continue;
+//    if (region_path_len > node_path_len) break;
+//    if (!found_M2) *M2_start_region_ID = region_id;
+//    found_M2 = TRUE;
+//    *M2_region_count++;
+//  }
+
+///*  NOTE: M2 = the regions with the same code sequence as the node and all regions afterwards */
+  for (*M2_start_region_ID = 0; *M2_start_region_ID < queue_cur->region_count; (*M2_start_region_ID)++) {
+    region_path = collect_region_path(queue_cur->regions[*M2_start_region_ID], region_path_len);
+    if (region_path_len < node_path_len) continue;
+    break;
+  }
+  *M2_region_count = region_path_len - *M2_start_region_ID + 1;
+
+  assert(region_path_len == node_path_len);
+  assert(memcmp(region_path, node_path, region_path_len));
+}
 
 /* Initialize the implemented state machine as a graphviz graph */
 void setup_ipsm()
@@ -9204,7 +9236,7 @@ int main(int argc, char** argv) {
         //selected_seed = select_seed(node, responses)
         cur_tree_node = ROOT;
         cur_seed = Selection(cur_tree_node);
-        selected_seed = cur_seed->q;
+        selected_seed = (struct queue_entry*) cur_seed->q;
       } else {
         while(!selected_seed || selected_seed->region_count == 0) {
           target_state_id = choose_target_state(state_selection_algo);
