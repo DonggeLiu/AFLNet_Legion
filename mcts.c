@@ -294,7 +294,7 @@ void print_reversed_path(TreeNode * tree_node)
 
 u32 * collect_node_path(TreeNode * tree_node, u32 * path_len)
 {
-  u32 * path, * reversed_path;
+  u32 * path, * reversed_path = NULL;
   *path_len = 0;
   u32 path_size = 0;
 

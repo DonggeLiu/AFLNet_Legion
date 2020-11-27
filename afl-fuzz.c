@@ -419,14 +419,14 @@ region_t* (*extract_requests)(unsigned char* buf, unsigned int buf_size, unsigne
 //MCTS-specific functions
 void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_region_ID, u32 * M2_region_count)
 {
-  u32 region_path_len, node_path_len;
-  u32 * region_path;
+  u32 region_path_len = 0, node_path_len;
+  u32 * region_path = NULL;
   u32 * node_path = collect_node_path(tree_node, &node_path_len);
 
-  gboolean found_M2 = FALSE;
   *M2_start_region_ID = *M2_region_count = 0;
 
 ///*  NOTE: M2 = the regions with the same code sequence as the node */
+//  gboolean found_M2 = FALSE;
 //  for (u32 region_id = 0; region_id < seed->q->region_count; region_id++) {
 //    region_path = collect_region_path(seed->q->regions[region_id], region_path_len);
 //    if (region_path_len < node_path_len) continue;
@@ -438,7 +438,7 @@ void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_reg
 
 ///*  NOTE: M2 = the regions with the same code sequence as the node and all regions afterwards */
   for (*M2_start_region_ID = 0; *M2_start_region_ID < queue_cur->region_count; (*M2_start_region_ID)++) {
-    region_path = collect_region_path(queue_cur->regions[*M2_start_region_ID], region_path_len);
+    region_path = collect_region_path(queue_cur->regions[*M2_start_region_ID], &region_path_len);
     if (region_path_len < node_path_len) continue;
     break;
   }
