@@ -445,6 +445,7 @@ void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_reg
   *M2_region_count = region_path_len - *M2_start_region_ID + 1;
 
   assert(region_path_len == node_path_len);
+  //TOASK: This might fail, for unknown reasons
   assert(memcmp(region_path, node_path, region_path_len));
 }
 
