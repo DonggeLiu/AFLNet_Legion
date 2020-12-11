@@ -11,10 +11,10 @@ enum score_function SCORE_FUNCTION = UCT;
 
 /* ============================================== TreeNode Functions ============================================== */
 
-TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour)
+TreeNodeData* new_tree_node_data (int response_code, enum node_colour colour)
 {
-    TreeNodeData * tree_node_data;
-    tree_node_data = g_new (TreeNodeData, 1); //  allocates 1 element of TreeNode
+    TreeNodeData* tree_node_data;
+    tree_node_data = g_new(TreeNodeData, 1); //  allocates 1 element of TreeNode
 
     // set property
     tree_node_data->id = response_code;
@@ -24,7 +24,7 @@ TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour)
     // set statistics
     tree_node_data->selected = 0;
     tree_node_data->discovered = 0;
-//    tree_node_data->stats.selected_seed_index = 0;
+    // tree_node_data->stats.selected_seed_index = 0;
     tree_node_data->seeds = NULL;
     tree_node_data->seeds_count = 0;
 
@@ -39,23 +39,23 @@ TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour)
 }
 
 
-TreeNode * new_tree_node(TreeNodeData * tree_data)
+TreeNode* new_tree_node(TreeNodeData* tree_data)
 {
-    GNode * tree_node;
+    GNode* tree_node;
     tree_node = g_node_new (tree_data);
     return tree_node;
 }
 
 
-TreeNodeData * get_tree_node_data(TreeNode * tree_node)
+TreeNodeData* get_tree_node_data(TreeNode* tree_node)
 {
-    return (TreeNodeData *) tree_node->data;
+    return (TreeNodeData*) tree_node->data;
 }
 
-TreeNode * get_simulation_child(TreeNode * tree_node)
+TreeNode* get_simulation_child(TreeNode* tree_node)
 {
-  TreeNodeData * node_data = get_tree_node_data(tree_node);
-  TreeNode * sim_child = node_data->simulation_child;
+  TreeNodeData* node_data = get_tree_node_data(tree_node);
+  TreeNode* sim_child = node_data->simulation_child;
 
   assert(node_data->colour != Golden);
   assert(get_tree_node_data(sim_child)->colour == Golden);
@@ -63,9 +63,9 @@ TreeNode * get_simulation_child(TreeNode * tree_node)
   return sim_child;
 }
 
-double tree_node_exploitation_score(TreeNode * tree_node)
+double tree_node_exploitation_score(TreeNode* tree_node)
 {
-    TreeNodeData * node_data = get_tree_node_data(tree_node);
+    TreeNodeData* node_data = get_tree_node_data(tree_node);
 
     if (!node_data->selected) return INFINITY;
 
@@ -77,33 +77,33 @@ double tree_node_exploitation_score(TreeNode * tree_node)
     return (double) node_data->discovered / node_data->selected;
 }
 
-double seed_exploitation_score(TreeNode * tree_node, int seed_index)
+double seed_exploitation_score(TreeNode* tree_node, int seed_index)
 {
-    seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
+    seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
     return (double) target_seed->discovered / target_seed->selected;
 }
 
-double tree_node_exploration_score(TreeNode * tree_node)
+double tree_node_exploration_score(TreeNode* tree_node)
 {
     if (G_NODE_IS_ROOT(tree_node)) return INFINITY;
     g_assert(tree_node->parent);
-    TreeNodeData * node_data = get_tree_node_data(tree_node);
-    TreeNodeData * parent_data = get_tree_node_data(tree_node->parent);
+    TreeNodeData* node_data = get_tree_node_data(tree_node);
+    TreeNodeData* parent_data = get_tree_node_data(tree_node->parent);
 //    g_printf("%lf * sqrt(2*log(%u)/%u)\n",
 //             RHO,
 //             get_tree_node_data(tree_node->parent)->stats.selected_times,
 //             get_tree_node_data(tree_node)->stats.selected_times);
-    return  RHO * sqrt(2*log((double) parent_data->selected) / node_data->selected);
+    return  RHO * sqrt(2 * log((double) parent_data->selected) / node_data->selected);
 }
 
-double seed_exploration_score(TreeNode * tree_node, int seed_index)
+double seed_exploration_score(TreeNode* tree_node, int seed_index)
 {
-    seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
-    TreeNodeData * node_data = get_tree_node_data(tree_node);
-    return RHO * sqrt(2*log((double)node_data->selected)/target_seed->selected);
+    seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
+    TreeNodeData* node_data = get_tree_node_data(tree_node);
+    return RHO * sqrt(2 * log((double)node_data->selected)/target_seed->selected);
 }
 
-double tree_node_score(TreeNode * tree_node)
+double tree_node_score(TreeNode* tree_node)
 {
     /*
      * If using the random score function, return a random number
@@ -120,7 +120,7 @@ double tree_node_score(TreeNode * tree_node)
 
     if (G_NODE_IS_ROOT(tree_node))  return INFINITY;
 
-//    if (fits_fish_bone_optimisation(tree_node)) return -INFINITY;
+    // if (fits_fish_bone_optimisation(tree_node)) return -INFINITY;
 
     if (!get_tree_node_data(tree_node)->selected)  return INFINITY;
 
@@ -130,13 +130,13 @@ double tree_node_score(TreeNode * tree_node)
     return exploit_score + explore_score;
 }
 
-double seed_score(TreeNode * tree_node, int seed_index)
+double seed_score(TreeNode* tree_node, int seed_index)
 {
-//    return g_rand_int(RANDOM_NUMBER_GENERATOR);
+    // return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
     if (SCORE_FUNCTION == Random) return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
-    seed_info_t * target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
+    seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
 
     if (!target_seed->selected)  return INFINITY;
 
@@ -165,7 +165,7 @@ double seed_score(TreeNode * tree_node, int seed_index)
 //    return (is_leaf(tree_node) && tree_node_data->colour != Golden) || tree_node_data->exhausted;
 //}
 
-gboolean is_leaf(TreeNode *tree_node) {
+gboolean is_leaf(TreeNode* tree_node) {
     /*
      * If the node is a phantom, then it is not a leaf
      * If the node has no child, it is a leaf
@@ -193,7 +193,7 @@ gboolean is_leaf(TreeNode *tree_node) {
 //    return FALSE;
 //}
 
-TreeNode * best_child(TreeNode * tree_node)
+TreeNode* best_child(TreeNode* tree_node)
 {
     gdouble max_score = -INFINITY;
     gint number_of_children = g_node_n_children(tree_node);
@@ -229,11 +229,12 @@ TreeNode * best_child(TreeNode * tree_node)
     for (int i = 0; i < number_of_ties; ++i) {
         tree_node_print(g_node_nth_child(tree_node, ties[i]));
     }
+
     g_printf("\n");
     return g_node_nth_child(tree_node, ties[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties)]);
 }
 
-seed_info_t * best_seed(TreeNode * tree_node)
+seed_info_t* best_seed(TreeNode* tree_node)
 {
     gdouble max_score = -INFINITY;
     gint number_of_seeds = get_tree_node_data(tree_node)->seeds_count;
@@ -265,55 +266,51 @@ seed_info_t * best_seed(TreeNode * tree_node)
     return get_tree_node_data(tree_node)->seeds[winner_index];
 }
 
-char * mutate(TreeNode * tree_node)
+TreeNode* exists_child(TreeNode* tree_node, int target_response_code)
 {
-    //TODO: fill in later
-    return "";
-}
-
-TreeNode * exists_child(TreeNode * tree_node, int target_response_code)
-{
-    TreeNode * child_node = g_node_first_child(tree_node);
+    TreeNode* child_node = g_node_first_child(tree_node);
 
     while (child_node)
     {
-//        tree_node_print(child_node);
+        // tree_node_print(child_node);
         if (get_tree_node_data(child_node)->id == target_response_code)  return child_node;
         child_node = g_node_next_sibling(child_node);
     }
     return NULL;
 }
 
-TreeNode * append_child(TreeNode * tree_node, int child_response_code, enum node_colour colour)
+TreeNode* append_child(TreeNode* tree_node, int child_response_code, enum node_colour colour)
 {
-    TreeNode * child = g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour));
+    TreeNode* child = g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour));
     if (colour != Golden) get_tree_node_data(child)->simulation_child = append_child(child, -1, Golden);
 
     return child;
 }
 
-void print_reversed_path(TreeNode * tree_node)
+void print_reversed_path(TreeNode* tree_node)
 {
     do {
         g_printf("%d ", get_tree_node_data(tree_node)->id);
         tree_node = tree_node->parent;
-    }while (tree_node);
+    } while (tree_node);
     g_printf("\n");
 }
 
-u32 * collect_node_path(TreeNode * tree_node, u32 * path_len)
+u32* collect_node_path(TreeNode* tree_node, u32* path_len)
 {
-  u32 * path, * reversed_path = NULL;
+  u32* path;
+  u32* reversed_path = NULL;
+  
   *path_len = 0;
   u32 path_size = 0;
 
   while (tree_node->parent) {
     //NOTE: dynamically expanding the size of array
-//    g_printf("%d of %d: %d\n", *path_len, path_size, (*path_len) >= (path_size));
+    // g_printf("%d of %d: %d\n", *path_len, path_size, (*path_len) >= (path_size));
     if ((*path_len) >= (path_size)) {
       path_size += 100;
 //      g_printf("%d\n", path_size);
-      u32 * new_reversed_path = ck_alloc(path_size*sizeof(u32));
+      u32* new_reversed_path = ck_alloc(path_size * sizeof(u32));
       if (new_reversed_path) {
         for (u32 i = 0; i < *path_len; ++i) {
           new_reversed_path[i] = reversed_path[i];
@@ -351,10 +348,10 @@ u32 * collect_node_path(TreeNode * tree_node, u32 * path_len)
   return path;
 }
 
-void print_path(TreeNode * tree_node)
+void print_path(TreeNode* tree_node)
 {
     u32 path_len;
-    u32 * path = collect_node_path(tree_node, &path_len);
+    u32* path = collect_node_path(tree_node, &path_len);
     for (u32 i = 0; i < path_len; i++) {
         g_printf("%d ", path[i]);
     }
@@ -384,7 +381,7 @@ int colour_encoder(enum node_colour colour) {
     return colour_code;
 }
 
-void tree_print(TreeNode * tree_node, TreeNode * mark_node, int indent, int found)
+void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 {
     for (int i = 0; i < indent-1; ++i) g_print("|  ");
     if (indent) g_print("|-- ");
@@ -397,9 +394,9 @@ void tree_print(TreeNode * tree_node, TreeNode * mark_node, int indent, int foun
     }
 }
 
-void tree_node_print (TreeNode * tree_node)
+void tree_node_print (TreeNode* tree_node)
 {
-    TreeNodeData * tree_node_data = get_tree_node_data(tree_node);
+    TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
 //    g_printf ("%d res_code: %d, score: %lf\n",
     g_printf ("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
               colour_encoder(tree_node_data->colour),
@@ -426,27 +423,27 @@ void tree_node_print (TreeNode * tree_node)
 //}
 
 
-seed_info_t * construct_seed_with_queue_entry(void *q)
+seed_info_t* construct_seed_with_queue_entry(void *q)
 {
-  seed_info_t * seed = (seed_info_t *) ck_alloc (sizeof(seed_info_t));
+  seed_info_t* seed = (seed_info_t*) ck_alloc (sizeof(seed_info_t));
   seed->q = q;
   seed->selected = 0;
   seed->discovered = 0;
   return seed;
 }
 
-void add_seed_to_node(seed_info_t * seed, TreeNode * node)
+void add_seed_to_node(seed_info_t* seed, TreeNode * node)
 {
   assert(get_tree_node_data(node)->colour == Golden);
 
   // TOASK: Should we allocate more spaces to avoid repeated reallocation?
-  TreeNodeData * node_data = get_tree_node_data(node);
+  TreeNodeData* node_data = get_tree_node_data(node);
   node_data->seeds = (void **) ck_realloc (node_data->seeds, (node_data->seeds_count + 1) * sizeof(void *));
   node_data->seeds[node_data->seeds_count] = (void *) seed;
   node_data->seeds_count++;
 }
 
-u32 * collect_region_path(region_t region, u32 * path_len)
+u32* collect_region_path(region_t region, u32* path_len)
 {
     *path_len = region.state_count;
     return region.state_sequence;
@@ -455,7 +452,7 @@ u32 * collect_region_path(region_t region, u32 * path_len)
 /* ============================================== TreeNode Functions ============================================== */
 /* ================================================ MCTS Functions ================================================ */
 
-TreeNode * select_tree_node(TreeNode * parent_tree_node)
+TreeNode* select_tree_node(TreeNode* parent_tree_node)
 {
     while (get_tree_node_data(parent_tree_node)->colour != Golden) {
         tree_node_print(parent_tree_node);
@@ -469,24 +466,24 @@ TreeNode * select_tree_node(TreeNode * parent_tree_node)
 }
 
 
-seed_info_t * select_seed(TreeNode * tree_node_selected)
+seed_info_t* select_seed(TreeNode* tree_node_selected)
 {
-    seed_info_t * seed = best_seed(tree_node_selected);
+    seed_info_t* seed = best_seed(tree_node_selected);
     /* NOTE: Selected stats propagation of the seed is done here */
     seed->selected++;
     return seed;
 }
 
 
-TreeNode * Initialisation()
+TreeNode* Initialisation()
 {
-    TreeNode * root = new_tree_node(new_tree_node_data(0, White));
+    TreeNode* root = new_tree_node(new_tree_node_data(0, White));
     get_tree_node_data(root)->simulation_child = append_child(root, -1, Golden);
     return root;
 }
 
 //TODO: According to afl-fuzz.c `choose_target_state`, this should return "target_state_id"
-seed_info_t * Selection(TreeNode * tree_node)
+seed_info_t* Selection(TreeNode* tree_node)
 {
     assert(G_NODE_IS_ROOT(tree_node));
 
@@ -494,24 +491,24 @@ seed_info_t * Selection(TreeNode * tree_node)
     g_printf("\tTree node selected: ");
     tree_node_print(tree_node);
 //    struct queue_entry * seed_selected = NULL;
-    seed_info_t * seed_selected = select_seed(tree_node);
+    seed_info_t* seed_selected = select_seed(tree_node);
 
     return seed_selected;
 }
 
-char * Simulation(TreeNode * target)
+char* Simulation(TreeNode* target)
 {
     assert(get_tree_node_data(target)->colour == Golden);
-    return mutate(target);
+    return NULL;
 }
 
-TreeNode * Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_codes, gboolean* is_new)
+TreeNode* Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
-    TreeNode * parent_node;
+    TreeNode* parent_node;
     *is_new = FALSE;
 
     // Construct seed with queue_entry q
-    seed_info_t * seed = construct_seed_with_queue_entry(q);
+    seed_info_t* seed = construct_seed_with_queue_entry(q);
 
     // Check if the response code sequence is new
     // And add the new queue entry to each node along the paths
@@ -525,13 +522,13 @@ TreeNode * Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_
 
 
         //TODO: cache the path & path_len of each tree_node here
-        TreeNodeData * node_data = get_tree_node_data(tree_node);
+        TreeNodeData* node_data = get_tree_node_data(tree_node);
         node_data->path = response_codes;
         node_data->path_len = i + 1;
 
         //TODO: assert the path & path_len of each tree_node here
         u32 path_len;
-        u32 * path = collect_node_path(tree_node, &path_len);
+        u32* path = collect_node_path(tree_node, &path_len);
         if (node_data->path_len != path_len){
           printf("\nUnmatch path len:\n");
           printf("\n");
@@ -572,7 +569,7 @@ TreeNode * Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_
     return tree_node;
 }
 
-void Propagation(TreeNode * leaf_selected, seed_info_t * seed_selected, gboolean is_new)
+void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new)
 {
     while (leaf_selected) {
       get_tree_node_data(leaf_selected)->discovered += is_new;
@@ -581,7 +578,7 @@ void Propagation(TreeNode * leaf_selected, seed_info_t * seed_selected, gboolean
     seed_selected->discovered += is_new;
 }
 
-void parent(TreeNode * child, TreeNode ** parent){
+void parent(TreeNode* child, TreeNode** parent){
     /*
      * Takes a pointer to a child node, and a pointer to the pointer of a NULL
      * Then assigned the pointer to the parent of the child to the second parameter
