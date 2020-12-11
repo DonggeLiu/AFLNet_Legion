@@ -119,8 +119,6 @@ seed_info_t* construct_seed_with_queue_entry(void* q);
 
 void add_seed_to_node(seed_info_t* seed, TreeNode* node);
 
-void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region_ID, u32* M2_region_count);
-
 
 #endif //MCTS_H
 

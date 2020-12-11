@@ -408,20 +408,20 @@ khash_t(hms) *khms_states;
 kliter_t(lms) *M2_prev, *M2_next;
 
 //MCTS global variables
-TreeNode * ROOT;
-TreeNode * cur_tree_node;
-seed_info_t * cur_seed;
+TreeNode* ROOT;
+TreeNode* cur_tree_node;
+seed_info_t* cur_seed;
 
 //Function pointers pointing to Protocol-specific functions
 unsigned int* (*extract_response_codes)(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref) = NULL;
 region_t* (*extract_requests)(unsigned char* buf, unsigned int buf_size, unsigned int* region_count_ref) = NULL;
 
 //MCTS-specific functions
-void find_M2_region(seed_info_t * seed, TreeNode * tree_node, u32 * M2_start_region_ID, u32 * M2_region_count)
+void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region_ID, u32* M2_region_count)
 {
   u32 region_path_len = 0, node_path_len;
-  u32 * region_path = NULL;
-  u32 * node_path = collect_node_path(tree_node, &node_path_len);
+  u32* region_path = NULL;
+  u32* node_path = collect_node_path(tree_node, &node_path_len);
 
   *M2_start_region_ID = *M2_region_count = 0;
 
@@ -818,8 +818,8 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   /* NOTE: MCTS Expansion and check if the new input finds a new sequence */
   gboolean is_new = FALSE;
   Expansion(ROOT, q, node_sequence, node_count, &is_new);
-//  TreeNode * execution_leaf = Expansion(ROOT, q, node_sequence, node_count, &is_new);
-//  print_path(execution_leaf);
+  //  TreeNode * execution_leaf = Expansion(ROOT, q, node_sequence, node_count, &is_new);
+  //  print_path(execution_leaf);
 
   /* NOTE: MCTS Propagation: Record the result to the node and seed selected */
   Propagation(cur_tree_node, cur_seed, is_new);
@@ -9175,7 +9175,6 @@ int main(int argc, char** argv) {
      - we should do intialisation here so that the tree is ready to perform dry run with given seed inputs/message sequences
   */  
   ROOT = Initialisation();
-//  perform_dry_run()
 
   setup_dirs_fds();
   read_testcases();
@@ -9230,15 +9229,13 @@ int main(int argc, char** argv) {
       struct queue_entry *selected_seed = NULL;
    
       if (state_selection_algo == MCTS) {
-        /* NOTE: MCTS_SELECTION */
-        //when we select a tree node, we would need to get the sequence of response code (responses)
-        //from the root node to the selected node so that we can indentify M1, M2 (and M3) sub sequences
-        //(tree_node node, responses) = select_node()
-        //selected_seed = select_seed(node, responses)
+
         cur_tree_node = ROOT;
         cur_seed = Selection(cur_tree_node);
         selected_seed = (struct queue_entry*) cur_seed->q;
+
       } else {
+
         while(!selected_seed || selected_seed->region_count == 0) {
           target_state_id = choose_target_state(state_selection_algo);
 
@@ -9253,6 +9250,7 @@ int main(int argc, char** argv) {
 
           selected_seed = choose_seed(target_state_id, seed_selection_algo);
         }
+
       }
 
       /* Seek to the selected seed */
