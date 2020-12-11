@@ -58,16 +58,6 @@ typedef struct
 }seed_info_t;
 
 
-/* Hyper-parameters */
-static gdouble RHO = 1.414;  //sqrt(2)
-static gint MIN_SAMPLES = 1;
-static gint MAX_SAMPLES = 100;
-static gint CONEX_TIMEOUT = 0;
-static gboolean PERSISTENT = FALSE;
-static gboolean COVERAGE_ONLY = TRUE;
-static enum score_function SCORE_FUNCTION = UCT;
-
-
 /* Functions */
 /* ============================================== TreeNode Functions ============================================== */
 TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour);

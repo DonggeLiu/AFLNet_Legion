@@ -1,5 +1,14 @@
 #include "mcts.h"
 
+/* Hyper-parameters */
+gdouble RHO = 1.414;  //sqrt(2)
+gint MIN_SAMPLES = 1;
+gint MAX_SAMPLES = 100;
+gint CONEX_TIMEOUT = 0;
+gboolean PERSISTENT = FALSE;
+gboolean COVERAGE_ONLY = TRUE;
+enum score_function SCORE_FUNCTION = UCT;
+
 /* ============================================== TreeNode Functions ============================================== */
 
 TreeNodeData * new_tree_node_data (int response_code, enum node_colour colour)
