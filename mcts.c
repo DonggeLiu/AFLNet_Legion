@@ -18,6 +18,8 @@ TreeNodeData* new_tree_node_data (int response_code, enum node_colour colour)
 
     // set property
     tree_node_data->id = response_code;
+    tree_node_data->path = NULL;
+    tree_node_data->path_len = 0;
     //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
 
@@ -298,7 +300,7 @@ void print_reversed_path(TreeNode* tree_node)
 
 u32* collect_node_path(TreeNode* tree_node, u32* path_len)
 {
-  u32* path;
+  u32* path = NULL;
   u32* reversed_path = NULL;
   
   *path_len = 0;
