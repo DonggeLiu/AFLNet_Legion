@@ -304,6 +304,13 @@ u32* collect_node_path(TreeNode* tree_node, u32* path_len)
   *path_len = 0;
   u32 path_size = 0;
 
+  //NOTE: If the tree_node is Golden, then its path is the same as its parent
+  if (get_tree_node_data(tree_node)->colour == Golden) {
+    assert(tree_node->parent);
+    assert(get_tree_node_data(tree_node)->colour != Golden);
+    tree_node = tree_node->parent;
+  }
+
   while (tree_node->parent) {
     //NOTE: dynamically expanding the size of array
     // g_printf("%d of %d: %d\n", *path_len, path_size, (*path_len) >= (path_size));
