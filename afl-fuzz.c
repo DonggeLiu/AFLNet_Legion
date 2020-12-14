@@ -811,7 +811,7 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   }
 
   // During normal run: Collect the sequence of response code and expand the tree with it
-  unsigned int node_count;
+  unsigned int node_count = 0;
   // TOASK: Is this necessary? We can get this from the last region of the q
   unsigned int * node_sequence = (*extract_response_codes)(response_buf, response_buf_size, &node_count);
 
