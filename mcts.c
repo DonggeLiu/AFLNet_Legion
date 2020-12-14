@@ -311,6 +311,9 @@ u32* collect_node_path(TreeNode* tree_node, u32* path_len)
     tree_node = tree_node->parent;
   }
 
+  // NOTE: The condition is tree_node->parent instead of tree_node,
+  //  because we don't want to include the id of ROOT in the path,
+  //  given the id of ROOT is always 0 and does not represent any valid response code.
   while (tree_node->parent) {
     //NOTE: dynamically expanding the size of array
     // g_printf("%d of %d: %d\n", *path_len, path_size, (*path_len) >= (path_size));
