@@ -495,15 +495,15 @@ TreeNode* Initialisation()
 }
 
 //TODO: According to afl-fuzz.c `choose_target_state`, this should return "target_state_id"
-seed_info_t* Selection(TreeNode* tree_node)
+seed_info_t* Selection(TreeNode** tree_node)
 {
-    assert(G_NODE_IS_ROOT(tree_node));
+    assert(G_NODE_IS_ROOT(*tree_node));
 
-    tree_node = select_tree_node(tree_node);
+    *tree_node = select_tree_node(*tree_node);
 //    g_printf("\tTree node selected: ");
 //    tree_node_print(tree_node);
 //    struct queue_entry * seed_selected = NULL;
-    seed_info_t* seed_selected = select_seed(tree_node);
+    seed_info_t* seed_selected = select_seed(*tree_node);
 
     return seed_selected;
 }

@@ -96,7 +96,7 @@ TreeNode* append_child(TreeNode* tree_node, int child_response_code, enum node_c
 TreeNode* select_tree_node(TreeNode* parent_tree_node);
 seed_info_t* select_seed(TreeNode* tree_node_selected);
 TreeNode* Initialisation();
-seed_info_t* Selection(TreeNode* parent_tree_node);
+seed_info_t* Selection(TreeNode** parent_tree_node);
 char* Simulation(TreeNode* target);
 TreeNode* Expansion(TreeNode* tree_node, void*, u32* response_codes, u32 len_codes, gboolean* is_new);
 void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new);

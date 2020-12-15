@@ -9231,7 +9231,7 @@ int main(int argc, char** argv) {
       if (state_selection_algo == MCTS) {
 
         cur_tree_node = ROOT;
-        cur_seed = Selection(cur_tree_node);
+        cur_seed = Selection(&cur_tree_node);
         selected_seed = (struct queue_entry*) cur_seed->q;
 
       } else {
