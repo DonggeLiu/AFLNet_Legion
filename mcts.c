@@ -308,8 +308,8 @@ u32* collect_node_path(TreeNode* tree_node, u32* path_len)
   //NOTE: If the tree_node is Golden, then its path is the same as its parent
   if (get_tree_node_data(tree_node)->colour == Golden) {
     assert(tree_node->parent);
-    assert(get_tree_node_data(tree_node)->colour != Golden);
     tree_node = tree_node->parent;
+    assert(get_tree_node_data(tree_node)->colour != Golden);
   }
 
   // NOTE: The condition is tree_node->parent instead of tree_node,
