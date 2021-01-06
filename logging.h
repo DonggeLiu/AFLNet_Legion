@@ -38,6 +38,7 @@
 //#include <limits.h>
 
 #include "types.h"
+#include "alloc-inl.h"
 
 #define LOG_VERSION "0.1.0"
 
