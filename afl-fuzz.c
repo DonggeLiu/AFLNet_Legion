@@ -72,6 +72,7 @@
 #include <math.h>
 
 #include "mcts.h"
+#include "logging.h"
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined (__OpenBSD__)
 #  include <sys/sysctl.h>
@@ -823,10 +824,11 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   unsigned int node_count = 0;
   // TOASK: Is this necessary? We can get this from the last region of the q
   unsigned int * node_sequence = (*extract_response_codes)(response_buf, response_buf_size, &node_count);
-
+  log_info("New node sequence: %s", u32_array_to_str(node_sequence, node_count));
   /* NOTE: MCTS Expansion and check if the new input finds a new sequence */
   gboolean is_new = FALSE;
   Expansion(ROOT, q, node_sequence, node_count, &is_new);
+  tree_log(ROOT, cur_tree_node, 0, is_new);
   //  TreeNode * execution_leaf = Expansion(ROOT, q, node_sequence, node_count, &is_new);
   //  print_path(execution_leaf);
 
@@ -9240,7 +9242,12 @@ int main(int argc, char** argv) {
       if (state_selection_algo == MCTS) {
 
         cur_tree_node = ROOT;
+        log_info("Selection starts:");
+        tree_node_print(ROOT);
         cur_seed = Selection(&cur_tree_node);
+        log_info("Selection ends:");
+        tree_node_print(cur_tree_node);
+
         selected_seed = (struct queue_entry*) cur_seed->q;
 
       } else {
