@@ -191,7 +191,7 @@ int message_format(log_Message* message, const char *fmt, ...) {
 
   if (message->size) {strcpy(new_space, message->content);}
   if (message->content) {
-    ck_free(message->content);
+    free(message->content);
     message->content = NULL;
   }
 
@@ -236,7 +236,7 @@ int message_cat(log_Message* message, char* source) {
     }
     strcpy(new_space, message->content);
     if (message->content) {
-      ck_free(message->content);
+      free(message->content);
       message->content = NULL;
     }
 
