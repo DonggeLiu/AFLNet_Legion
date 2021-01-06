@@ -301,7 +301,7 @@ u32* collect_node_path(TreeNode* tree_node, u32* path_len)
 {
   u32* path = NULL;
   u32* reversed_path = NULL;
-  
+
   *path_len = 0;
   u32 path_size = 0;
 
@@ -369,6 +369,39 @@ void print_path(TreeNode* tree_node)
     g_print("\n");
 }
 
+void prepare_path_str(TreeNode* tree_node)
+{
+  u32 path_len = 0;
+  u32* path = collect_node_path(tree_node, &path_len);
+
+  u32 path_str_len = 0;
+  for (u32 i = 0; i < path_len; i++) {
+    path_str_len += (int)((ceil(log10(path[i]))+1)*sizeof(char));
+  }
+
+  log_info("Node path len: %d", path_len);
+  for (int i = 0; i < path_len; ++i) {
+
+    log_info("Node path (%d/%d): %d", i, path_len, path[i]);
+    g_printf("%d, ", path[i]);
+    printf("%d, ", path[i]);
+  }
+
+  u32 n = 0, m = 0;
+
+  char path_str[100] = {0};
+  for (u32 i = 0; i < path_len; i++) {
+    m = snprintf(&path_str[n], 100-n, "%d", path[i]);
+    if (m<0) {
+      exit(1);
+    }
+    n += m;
+  }
+
+//  g_printf("%s", path_str);
+  log_info("Node path: %s", path_str);
+}
+
 int colour_encoder(enum node_colour colour) {
     int colour_code = 0;
     switch (colour) {
@@ -394,21 +427,71 @@ int colour_encoder(enum node_colour colour) {
 
 void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 {
-    for (int i = 0; i < indent-1; ++i) g_print("|  ");
-    if (indent) g_print("|-- ");
-    tree_node_print(tree_node);
-    if (tree_node == mark_node) g_printf("\033[1;32m <=< found %d\033[0;m",found);
-    g_printf("\n");
+    char* layer = malloc(200);
+    for (int i = 0; i < indent-1; ++i) strcat(layer, "|  ");
+    if (indent) strcat(layer, "|-- ");
+    strcat(layer, tree_node_repr(tree_node));
+    if (tree_node == mark_node) strcat(layer, "\033[1;32m <=< found\033[0;m");
+    strcat(layer, "\n");
+    log_info(layer);
     if (g_node_n_children(tree_node)) indent++;
     for (int i = 0; i < g_node_n_children(tree_node); ++i) {
         tree_print(g_node_nth_child(tree_node, i), mark_node, indent, found);
     }
 }
 
-void tree_node_print (TreeNode* tree_node)
+void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
+{
+    log_Message* message = (log_Message*) message_init();
+
+    for (int i = 0; i < indent-1; ++i) message_format(message, "|  ");
+    if (indent) message_format(message, "|-- ");
+    message_format(message, tree_node_repr(tree_node));
+    if (tree_node == mark_node) message_format(message, "\033[1;32m <=< found\033[0;m");
+//    message_format(message, "\n");
+    log_info(message->content);
+    if (g_node_n_children(tree_node)) indent++;
+    for (int i = 0; i < g_node_n_children(tree_node); ++i) {
+      tree_log(g_node_nth_child(tree_node, i), mark_node, indent, found);
+    }
+}
+
+char* tree_node_repr(TreeNode* tree_node)
+{
+  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+  log_Message* message = message_init();
+//  message_format(message, "id: %u", tree_node_data->id);
+  message_format(message, "res_code: %u, score: %lf (%lf + %lf)",
+           colour_encoder(tree_node_data->colour),
+           tree_node_data->id,
+           tree_node_score(tree_node),
+           tree_node_exploitation_score(tree_node),
+           tree_node_exploration_score(tree_node));
+
+//  char* repr = malloc(100);
+//  sprintf(repr, "\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
+//           colour_encoder(tree_node_data->colour),
+//           tree_node_data->id,
+//           tree_node_score(tree_node),
+//           tree_node_exploitation_score(tree_node),
+//           tree_node_exploration_score(tree_node));
+  return message->content;
+}
+
+void tree_node_log(TreeNode* tree_node)
+{
+  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+  log_info("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
+           colour_encoder(tree_node_data->colour),
+           tree_node_data->id,
+           tree_node_score(tree_node),
+           tree_node_exploitation_score(tree_node),
+           tree_node_exploration_score(tree_node));
+}
+
+void tree_node_print(TreeNode* tree_node)
 {
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-//    g_printf ("%d res_code: %d, score: %lf\n",
     g_printf ("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
               colour_encoder(tree_node_data->colour),
               tree_node_data->id,
@@ -490,15 +573,16 @@ TreeNode* Initialisation()
 {
     TreeNode* root = new_tree_node(new_tree_node_data(0, White));
     get_tree_node_data(root)->simulation_child = append_child(root, -1, Golden);
+    log_add_fp(fopen("/home/ubuntu/AFLNet_MCTS/log.log", "a+"),2);
     return root;
 }
 
-//TODO: According to afl-fuzz.c `choose_target_state`, this should return "target_state_id"
 seed_info_t* Selection(TreeNode** tree_node)
 {
     assert(G_NODE_IS_ROOT(*tree_node));
 
     *tree_node = select_tree_node(*tree_node);
+    prepare_path_str(*tree_node);
 //    g_printf("\tTree node selected: ");
 //    tree_node_print(tree_node);
 //    struct queue_entry * seed_selected = NULL;

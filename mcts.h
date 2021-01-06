@@ -7,11 +7,14 @@
 
 /* libraries */
 #include "glib_helper.h"
+#include "logging.h"
+//#include "utls.h"
 
 #include <float.h>
 #include <math.h>
 #include <unistd.h>
 #include <assert.h>
+#include <string.h>
 
 #include "alloc-inl.h"
 #include "aflnet.h"
@@ -91,6 +94,10 @@ char* mutate(TreeNode* tree_node);
 TreeNode* exists_child(TreeNode* tree_node, int target_response_code);
 
 TreeNode* append_child(TreeNode* tree_node, int child_response_code, enum node_colour colour);
+
+void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found);
+void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found);
+char* tree_node_repr(TreeNode* tree_node);
 
 /* ================================================ MCTS Functions ================================================ */
 TreeNode* select_tree_node(TreeNode* parent_tree_node);
