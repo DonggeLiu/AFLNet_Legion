@@ -442,14 +442,15 @@ void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 
 void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 {
-    log_Message* message = (log_Message*) message_init();
+//    log_Message* message = (log_Message*) message_init();
+    char* message = NULL;
 
-    for (int i = 0; i < indent-1; ++i) message_format(message, "|  ");
-    if (indent) message_format(message, "|-- ");
-    message_format(message, tree_node_repr(tree_node));
-    if (tree_node == mark_node) message_format(message, "\033[1;32m <=< found\033[0;m");
+    for (int i = 0; i < indent-1; ++i) message_format(&message, "|  ");
+    if (indent) message_format(&message, "|-- ");
+    message_format(&message, tree_node_repr(tree_node));
+    if (tree_node == mark_node) message_format(&message, "\033[1;32m <=< found\033[0;m");
 //    message_format(message, "\n");
-    log_info(message->content);
+    log_info(message);
     if (g_node_n_children(tree_node)) indent++;
     for (int i = 0; i < g_node_n_children(tree_node); ++i) {
       tree_log(g_node_nth_child(tree_node, i), mark_node, indent, found);
@@ -459,9 +460,10 @@ void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 char* tree_node_repr(TreeNode* tree_node)
 {
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-  log_Message* message = message_init();
+//  log_Message* message = message_init();
+  char* message = NULL;
 //  message_format(message, "id: %u", tree_node_data->id);
-  message_format(message, "res_code: %u, score: %lf (%lf + %lf)",
+  message_format(&message, "res_code: %u, score: %lf (%lf + %lf)",
            colour_encoder(tree_node_data->colour),
            tree_node_data->id,
            tree_node_score(tree_node),
@@ -475,7 +477,7 @@ char* tree_node_repr(TreeNode* tree_node)
 //           tree_node_score(tree_node),
 //           tree_node_exploitation_score(tree_node),
 //           tree_node_exploration_score(tree_node));
-  return message->content;
+  return message;
 }
 
 void tree_node_log(TreeNode* tree_node)
@@ -607,6 +609,9 @@ TreeNode* Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_c
 
     // Check if the response code sequence is new
     // And add the new queue entry to each node along the paths
+    char* message = NULL;
+    message_format(&message, "response_codes:%s", u32_array_to_str(response_codes, len_codes));
+    log_info(message);
     for (u32 i = 0; i < len_codes; i++) {
         parent_node = tree_node;
         if (!(tree_node = exists_child(tree_node, response_codes[i]))){

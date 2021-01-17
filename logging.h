@@ -54,18 +54,6 @@ typedef struct {
     int level;
 } log_Event;
 
-//struct log_Message_t {
-//    char* content;
-//    u32 size;
-//} log_Message_default = {NULL, 0};
-//
-//typedef struct log_Message_t log_Message;
-
-typedef struct {
-    char* content;
-    u32 size;
-} log_Message;
-
 typedef void (*log_LogFn)(log_Event *ev);
 typedef void (*log_LockFn)(bool lock, void *udata);
 
@@ -88,8 +76,7 @@ int log_add_fp(FILE *fp, int level);
 void log_log(int level, const char *file, int line, const char *fmt, ...);
 
 char* u32_array_to_str(u32* a, u32 a_len);
-log_Message* message_init();
-int message_format(log_Message* message, const char *fmt, ...);
+int message_format(char** message, const char *fmt, ...);
 
 #endif //AFLNET_UTILS_H
 

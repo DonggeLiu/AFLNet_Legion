@@ -24,6 +24,7 @@
 //
 #include "logging.h"
 
+#define _GNU_SOURCE
 #define MAX_CALLBACKS 32
 
 typedef struct {
@@ -169,83 +170,25 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
   unlock();
 }
 
-log_Message* message_init() {
-  log_Message* message = malloc(sizeof(log_Message));
-  message->content=NULL;
-  message->size=0;
-  return message;
-}
-
-int message_format(log_Message* message, const char *fmt, ...) {
+int message_format(char** message, const char *fmt, ...) {
   va_list argptr;
+  char *fmt_str = NULL;
   va_start(argptr,fmt);
-  int source_len = snprintf(NULL, 0, fmt, argptr);
+  int fmt_str_len = vasprintf(&fmt_str, fmt, argptr); /* vasprintf returns the str length including the `\0` */
   va_end(argptr);
-  log_debug("Source_len: %d", source_len);
-//  u32 multiplier = (u32) ceil((double) source_len/EXTEND_MESSAGE_SIZE);
-  char* new_space = malloc(message->size + source_len);
+  log_debug("Source_len: %d", fmt_str_len);
+  log_debug("Source: %s", fmt_str);
 
-  if(!new_space) {
-    return 1;
+  if (fmt_str_len == -1) {exit(1);}
+
+  if (*message) {
+    char* new_message = NULL;
+    fmt_str_len = message_format(&new_message, "%s%s", *message, fmt_str);
+    *message = new_message;
+  } else {
+    *message = fmt_str;
   }
-
-  if (message->size) {strcpy(new_space, message->content);}
-  if (message->content) {
-    free(message->content);
-    message->content = NULL;
-  }
-
-  message->content = new_space;
-  message->size += source_len;
-
-//  va_list argptr;
-  va_start(argptr,fmt);
-  char* source = malloc(source_len);
-  snprintf(source, source_len, fmt, argptr);
-  va_end(argptr);
-  strncat(message->content, source, message->size - strlen(message->content));
-  return 0;
-}
-
-//  while (message->size < strlen(message->content) ) {
-//    u32 multiplier = (u32) ceil((double) strlen(source)/EXTEND_MESSAGE_SIZE);
-//    char* new_space = malloc(message->size + EXTEND_MESSAGE_SIZE);
-//    if(!new_space) {
-//      return 1;
-//    }
-//    strcpy(new_space, message->content);
-//    free(message->content);
-//    message->content = new_space;
-//    message->size += EXTEND_MESSAGE_SIZE;
-//  }
-//  va_list argptr;
-//  va_start(argptr,fmt);
-//  snprintf()
-//  va_end(argptr);
-//  strncat(message->content, source, message->size - strlen(message->content));
-//  return 0;
-//}
-
-int message_cat(log_Message* message, char* source) {
-
-  while (message->size < strlen(message->content) + strlen(source)) {
-    u32 multiplier = (u32) ceil((double) strlen(source)/EXTEND_MESSAGE_SIZE);
-    char* new_space = malloc(message->size + EXTEND_MESSAGE_SIZE * multiplier);
-    if(!new_space) {
-      return 1;
-    }
-    strcpy(new_space, message->content);
-    if (message->content) {
-      free(message->content);
-      message->content = NULL;
-    }
-
-    message->content = new_space;
-    message->size += EXTEND_MESSAGE_SIZE * multiplier;
-  }
-
-  strncat(message->content, source, message->size - strlen(message->content));
-  return 0;
+  return fmt_str_len;
 }
 
 char* u32_array_to_str(u32* a, u32 a_len)
