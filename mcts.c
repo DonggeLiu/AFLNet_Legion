@@ -576,6 +576,7 @@ TreeNode* Initialisation()
     TreeNode* root = new_tree_node(new_tree_node_data(0, White));
     get_tree_node_data(root)->simulation_child = append_child(root, -1, Golden);
     log_add_fp(fopen("/home/ubuntu/AFLNet_MCTS/log.log", "a+"),2);
+    log_set_quiet(TRUE);
     return root;
 }
 
