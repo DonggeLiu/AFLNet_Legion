@@ -36,7 +36,7 @@ enum score_function{Random, UCT};
 typedef struct
 {
     // info
-    gint id;
+    u32 id;
     u32 *path;
     u32 path_len;
 
@@ -70,7 +70,7 @@ extern TreeNode * ROOT;
 
 /* Core functions */
 /* ============================================== TreeNode Functions ============================================== */
-TreeNodeData* new_tree_node_data(int response_code, enum node_colour colour);
+TreeNodeData* new_tree_node_data(u32 response_code, enum node_colour colour, u32* path, u32 path_len);
 
 TreeNode* new_tree_node(TreeNodeData* tree_data);
 
@@ -94,9 +94,9 @@ TreeNode* best_child(TreeNode* tree_node);
 
 char* mutate(TreeNode* tree_node);
 
-TreeNode* exists_child(TreeNode* tree_node, int target_response_code);
+TreeNode* exists_child(TreeNode* tree_node, u32 target_response_code);
 
-TreeNode* append_child(TreeNode* tree_node, int child_response_code, enum node_colour colour);
+TreeNode* append_child(TreeNode* tree_node, u32 child_response_code, enum node_colour colour, u32* path, u32 path_len);
 
 void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found);
 void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found);
@@ -123,12 +123,13 @@ u32* collect_region_path(region_t region, u32* path_len);
 
 int colour_encoder(enum node_colour colour);
 
-void tree_node_print (TreeNode* tree_node);
+//void tree_node_print (TreeNode* tree_node);
 
 seed_info_t* construct_seed_with_queue_entry(void* q);
 
 void add_seed_to_node(seed_info_t* seed, TreeNode* node);
 
+char* node_path_str(TreeNode* tree_node);
 
 #endif //MCTS_H
 

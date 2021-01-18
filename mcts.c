@@ -11,7 +11,7 @@ enum score_function SCORE_FUNCTION = UCT;
 
 /* ============================================== TreeNode Functions ============================================== */
 
-TreeNodeData* new_tree_node_data (int response_code, enum node_colour colour)
+TreeNodeData* new_tree_node_data (u32 response_code, enum node_colour colour, u32* path, u32 path_len)
 {
     TreeNodeData* tree_node_data;
     tree_node_data = g_new(TreeNodeData, 1); //  allocates 1 element of TreeNode
@@ -24,6 +24,9 @@ TreeNodeData* new_tree_node_data (int response_code, enum node_colour colour)
     tree_node_data->path_len = path_len;
     //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
+
+    if (colour == Golden) {assert(tree_node_data->id == 999);}
+    else  {assert(tree_node_data->id == tree_node_data->path[tree_node_data->path_len - 1]);}
 
     // set statistics
     tree_node_data->selected = 0;
@@ -244,7 +247,7 @@ seed_info_t* best_seed(TreeNode* tree_node)
     return get_tree_node_data(tree_node)->seeds[winner_index];
 }
 
-TreeNode* exists_child(TreeNode* tree_node, int target_response_code)
+TreeNode* exists_child(TreeNode* tree_node, u32 target_response_code)
 {
     TreeNode* child_node = g_node_first_child(tree_node);
 
@@ -257,10 +260,10 @@ TreeNode* exists_child(TreeNode* tree_node, int target_response_code)
     return NULL;
 }
 
-TreeNode* append_child(TreeNode* tree_node, int child_response_code, enum node_colour colour)
+TreeNode* append_child(TreeNode* tree_node, u32 child_response_code, enum node_colour colour, u32* path, u32 path_len)
 {
-    TreeNode* child = g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour));
-    if (colour != Golden) get_tree_node_data(child)->simulation_child = append_child(child, -1, Golden);
+    TreeNode* child = g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour, path, path_len));
+    if (colour != Golden) get_tree_node_data(child)->simulation_child = append_child(child, 999, Golden, path, path_len);
 
     return child;
 }
@@ -268,7 +271,7 @@ TreeNode* append_child(TreeNode* tree_node, int child_response_code, enum node_c
 void print_reversed_path(TreeNode* tree_node)
 {
     do {
-        g_printf("%d ", get_tree_node_data(tree_node)->id);
+        g_printf("%u ", get_tree_node_data(tree_node)->id);
         tree_node = tree_node->parent;
     } while (tree_node);
     g_printf("\n");
@@ -276,45 +279,25 @@ void print_reversed_path(TreeNode* tree_node)
 
 void print_path(TreeNode* tree_node)
 {
-    u32 path_len;
-    u32* path = collect_node_path(tree_node, &path_len);
-    for (u32 i = 0; i < path_len; i++) {
-        g_printf("%d ", path[i]);
-    }
-    g_print("\n");
+  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+  for (u32 i = 0; i < tree_node_data->path_len; i++) {
+      g_printf("%u ", tree_node_data->path[i]);
+  }
+  g_print("\n");
 }
 
-void prepare_path_str(TreeNode* tree_node)
+char* node_path_str(TreeNode* tree_node)
 {
-  u32 path_len = 0;
-  u32* path = collect_node_path(tree_node, &path_len);
+  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
 
-  u32 path_str_len = 0;
-  for (u32 i = 0; i < path_len; i++) {
-    path_str_len += (int)((ceil(log10(path[i]))+1)*sizeof(char));
-  }
+    char* a_str = NULL;
+    int a_str_len = asprintf(&a_str, "%u", tree_node_data->path[0]);
 
-  log_info("Node path len: %d", path_len);
-  for (int i = 0; i < path_len; ++i) {
-
-    log_info("Node path (%d/%d): %d", i, path_len, path[i]);
-    g_printf("%d, ", path[i]);
-    printf("%d, ", path[i]);
-  }
-
-  u32 n = 0, m = 0;
-
-  char path_str[100] = {0};
-  for (u32 i = 0; i < path_len; i++) {
-    m = snprintf(&path_str[n], 100-n, "%d", path[i]);
-    if (m<0) {
-      exit(1);
+    for (int i = 1; i < tree_node_data->path_len; ++i) {
+      assert(a_str_len != -1);
+      a_str_len = asprintf(&a_str, "%s, %u", a_str, tree_node_data->path[i]);
     }
-    n += m;
-  }
-
-//  g_printf("%s", path_str);
-  log_info("Node path: %s", path_str);
+  return a_str;
 }
 
 int colour_encoder(enum node_colour colour) {
@@ -442,9 +425,10 @@ seed_info_t* select_seed(TreeNode* tree_node_selected)
 
 TreeNode* Initialisation()
 {
-    TreeNode* root = new_tree_node(new_tree_node_data(0, White));
-    get_tree_node_data(root)->simulation_child = append_child(root, -1, Golden);
-    log_add_fp(fopen("/home/ubuntu/AFLNet_MCTS/log.log", "a+"),2);
+    u32 path[] = {0};
+    TreeNode* root = new_tree_node(new_tree_node_data(0, White, path, 1));
+    get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
+    log_add_fp(fopen("/home/ubuntu/AFLNet_MCTS/log.ansi", "w+"),2);
     log_set_quiet(TRUE);
     return root;
 }
@@ -454,7 +438,8 @@ seed_info_t* Selection(TreeNode** tree_node)
     assert(G_NODE_IS_ROOT(*tree_node));
 
     *tree_node = select_tree_node(*tree_node);
-    prepare_path_str(*tree_node);
+    log_info("Selection path: %s", node_path_str(*tree_node));
+//    prepare_path_str(*tree_node);
 //    g_printf("\tTree node selected: ");
 //    tree_node_print(tree_node);
 //    struct queue_entry * seed_selected = NULL;
@@ -471,46 +456,46 @@ char* Simulation(TreeNode* target)
 
 TreeNode* Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
-    TreeNode* parent_node;
-    *is_new = FALSE;
+  TreeNode* parent_node;
+  *is_new = FALSE;
 
-    // Construct seed with queue_entry q
-    seed_info_t* seed = construct_seed_with_queue_entry(q);
+  // Construct seed with queue_entry q
+  seed_info_t* seed = construct_seed_with_queue_entry(q);
 
-    // Check if the response code sequence is new
-    // And add the new queue entry to each node along the paths
-    char* message = NULL;
-    message_format(&message, "response_codes:%s", u32_array_to_str(response_codes, len_codes));
-    log_info(message);
-    for (u32 i = 0; i < len_codes; i++) {
-        parent_node = tree_node;
-        if (!(tree_node = exists_child(tree_node, response_codes[i]))){
-          *is_new = TRUE;
-          tree_node = append_child(parent_node, response_codes[i], White);
-        }
-        add_seed_to_node(seed, get_simulation_child(tree_node));
+  // Check if the response code sequence is new
+  // And add the new queue entry to each node along the paths
+  assert(response_codes[0] == 0);
+  for (u32 i = 1; i < len_codes; i++) {
+      parent_node = tree_node;
+      if (!(tree_node = exists_child(tree_node, response_codes[i]))){
+        *is_new = TRUE;
+        tree_node = append_child(parent_node, response_codes[i], White, response_codes, i+1);
+      }
+      add_seed_to_node(seed, get_simulation_child(tree_node));
 
+//        //Cache the path & path_len of each tree_node
+//        TreeNodeData* node_data = get_tree_node_data(tree_node);
+//        node_data->path = response_codes;
+//        node_data->path_len = i + 1;
 
-        //TODO: cache the path & path_len of each tree_node here
-        TreeNodeData* node_data = get_tree_node_data(tree_node);
-        node_data->path = response_codes;
-        node_data->path_len = i + 1;
-
-        //TODO: assert the path & path_len of each tree_node here
-        u32 path_len;
-        u32* path = collect_node_path(tree_node, &path_len);
-        if (node_data->path_len != path_len){
-          printf("\nUnmatch path len:\n");
-          printf("\n");
-          print_path(tree_node);
-          printf("\n");
-          printf("\nnode path len: %d; path len: %d\n", node_data->path_len, path_len);
-        }
-        if (!memcmp(node_data->path, path, node_data->path_len)){
-          //TOASK: How are these two arrays different?
-          for (int j = 0; j < path_len; ++j) {
-            assert(node_data->path[j] == path[j]);
-          }
+      //TODO: assert the path & path_len of each tree_node here
+//      u32 path_len;
+//      u32* path = collect_node_path(tree_node, &path_len);
+      TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+      assert(tree_node_data->path_len == i+1);
+//      if (tree_node_data->path_len != i+1){
+//        log_error(message_log("Unmatch path len of path: %s", node_path_str(tree_node)));
+//        log_error(message_log("\nnode path len: %u; path len: %u\n", node_data->path_len, path_len));
+//      }
+//      for (int j = 0; j < tree_node_data->path_len; ++j) {
+//        assert(tree_node_data->path[j] == response_codes[j]);
+//      }
+      assert(!memcmp(tree_node_data->path, response_codes, sizeof(u32)*tree_node_data->path_len));
+//      if (!memcmp(node_data->path, path, node_data->path_len)){
+//        //TOASK: How are these two arrays different?
+//        for (int j = 0; j < path_len; ++j) {
+//          assert(node_data->path[j] == path[j]);
+//        }
 //          printf("\nUnmatch path:\n");
 //          printf("Path from responses:\n");
 //          for (int j = 0; j < node_data->path_len; ++j) {
@@ -522,21 +507,21 @@ TreeNode* Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_c
 //            printf("%d ", path[j]);
 //          }
 //          printf("\n");
-        }
-        assert(node_data->path_len == path_len);
+//      }
+//      assert(node_data->path_len == path_len);
 //        assert(memcmp(node_data->path, path, path_len));
-    }
-    parent_node = tree_node;
+  }
+  parent_node = tree_node;
 
-    /*NOTE: Stats propagation along the execution path is done here*/
-    while (parent_node) {
-        get_tree_node_data(parent_node)->discovered += *is_new;
-        parent_node = parent_node->parent;
-    }
+  /*NOTE: Stats propagation along the execution path is done here*/
+  while (parent_node) {
+      get_tree_node_data(parent_node)->discovered += *is_new;
+      parent_node = parent_node->parent;
+  }
 
-    /* NOTE: Stats propagation of the seed is done here */
-    seed->discovered += *is_new;
-    return tree_node;
+  /* NOTE: Stats propagation of the seed is done here */
+  seed->discovered += *is_new;
+  return tree_node;
 }
 
 void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new)
