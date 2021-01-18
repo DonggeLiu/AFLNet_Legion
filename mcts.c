@@ -18,8 +18,10 @@ TreeNodeData* new_tree_node_data (int response_code, enum node_colour colour)
 
     // set property
     tree_node_data->id = response_code;
-    tree_node_data->path = NULL;
-    tree_node_data->path_len = 0;
+    /* NOTE: The path of each node is the prefix of the path in which the node is found */
+    tree_node_data->path = malloc(sizeof(u32)*path_len);
+    memcpy(tree_node_data->path, path, sizeof(u32)*path_len);
+    tree_node_data->path_len = path_len;
     //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
 
