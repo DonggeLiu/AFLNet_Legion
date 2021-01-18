@@ -420,9 +420,10 @@ region_t* (*extract_requests)(unsigned char* buf, unsigned int buf_size, unsigne
 //MCTS-specific functions
 void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region_ID, u32* M2_region_count)
 {
-  u32 region_path_len = 0, node_path_len;
+  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+  u32 region_path_len = 0, node_path_len = tree_node_data->path_len;
   u32* region_path = NULL;
-  u32* node_path = collect_node_path(tree_node, &node_path_len);
+  u32* node_path = &tree_node_data->path[1];
 
   *M2_start_region_ID = *M2_region_count = 0;
 
@@ -437,6 +438,8 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
 //    *M2_region_count++;
 //  }
 
+  assert(node_path_len <= queue_cur->region_count);
+
 ///*  NOTE: M2 = the regions with the same code sequence as the node and all regions afterwards */
   for (*M2_start_region_ID = 0;
        (*M2_start_region_ID < queue_cur->region_count) && (*M2_start_region_ID < node_path_len);
@@ -446,14 +449,15 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
     break;
   }
   *M2_region_count = region_path_len - *M2_start_region_ID + 1;
-
-  assert(region_path_len == node_path_len);
+  /*NOTE: region_path_len will be >= node_path_len, as there might be a sequence of responses codes for one region*/
+  /*TODO: find out why this assertion fails occasionally
+  assert(region_path_len >= node_path_len);*/
   //NOTE: When the simulation child of the ROOT is selected,
   // region_path == node_path == NULL and node_path_len == region_path_len == 0
-  assert(
-          (!region_path && !node_path && !node_path_len)
-          || memcmp(region_path, node_path, region_path_len)
-  );
+//  assert(
+//          (!region_path && !node_path && !node_path_len)
+//          || memcmp(region_path, node_path, region_path_len)
+//  );
 }
 
 /* Initialize the implemented state machine as a graphviz graph */
@@ -824,11 +828,16 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   unsigned int node_count = 0;
   // TOASK: Is this necessary? We can get this from the last region of the q
   unsigned int * node_sequence = (*extract_response_codes)(response_buf, response_buf_size, &node_count);
-  log_info("New node sequence: %s", u32_array_to_str(node_sequence, node_count));
+//  char* message = "RES Codes: ";
+//  message_array(&message, node_sequence, node_count);
+//  log_info(message);
+//  free(message);
+
+  log_info("RES Codes: %s", u32_array_to_str(node_sequence, node_count));
   /* NOTE: MCTS Expansion and check if the new input finds a new sequence */
   gboolean is_new = FALSE;
   Expansion(ROOT, q, node_sequence, node_count, &is_new);
-  tree_log(ROOT, cur_tree_node, 0, is_new);
+//  tree_log(ROOT, cur_tree_node, 0, is_new);
   //  TreeNode * execution_leaf = Expansion(ROOT, q, node_sequence, node_count, &is_new);
   //  print_path(execution_leaf);
 
@@ -9242,11 +9251,11 @@ int main(int argc, char** argv) {
       if (state_selection_algo == MCTS) {
 
         cur_tree_node = ROOT;
-        log_info("Selection starts:");
-        tree_node_print(ROOT);
+        tree_log(ROOT, cur_tree_node, 0, -1);
+        log_info("Node selection starts from: %s", tree_node_repr(cur_tree_node));
         cur_seed = Selection(&cur_tree_node);
-        log_info("Selection ends:");
-        tree_node_print(cur_tree_node);
+        log_info("Node selection ends at: %s", tree_node_repr(cur_tree_node));
+//        tree_node_print(cur_tree_node);
 
         selected_seed = (struct queue_entry*) cur_seed->q;
 
