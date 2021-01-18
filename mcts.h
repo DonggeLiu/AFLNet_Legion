@@ -15,9 +15,12 @@
 #include <unistd.h>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "alloc-inl.h"
 #include "aflnet.h"
+
+#define _GNU_SOURCE
 
 #define SEED 0
 #define DIGITS_IN_RESPONSE_CODE 12

@@ -72,10 +72,7 @@ double tree_node_exploitation_score(TreeNode* tree_node)
     if (!node_data->selected) return INFINITY;
 
     g_assert(node_data->selected);
-//    g_printf("%u / %u = %lf\n",
-//             get_tree_node_data(tree_node)->stats.paths_discovered,
-//             get_tree_node_data(tree_node)->stats.selected_times,
-//             (double) get_tree_node_data(tree_node)->stats.paths_discovered / get_tree_node_data(tree_node)->stats.selected_times);
+
     return (double) node_data->discovered / node_data->selected;
 }
 
@@ -91,10 +88,7 @@ double tree_node_exploration_score(TreeNode* tree_node)
     g_assert(tree_node->parent);
     TreeNodeData* node_data = get_tree_node_data(tree_node);
     TreeNodeData* parent_data = get_tree_node_data(tree_node->parent);
-//    g_printf("%lf * sqrt(2*log(%u)/%u)\n",
-//             RHO,
-//             get_tree_node_data(tree_node->parent)->stats.selected_times,
-//             get_tree_node_data(tree_node)->stats.selected_times);
+
     return  RHO * sqrt(2 * log((double) parent_data->selected) / node_data->selected);
 }
 
@@ -147,25 +141,6 @@ double seed_score(TreeNode* tree_node, int seed_index)
 
     return exploit_score + explore_score;
 }
-
-//gboolean is_fully_explored(TreeNode *  tree_node)
-//{
-//    /*
-//     * Check if a node is fully explored:
-//     *  1. If not in PERSISTENT mode, return the exact stats of the tree node
-//     *  2. If in PERSISTENT mode, but the root is not fully explored, return the exact stats
-//     *  3. If in PERSISTENT mode and the root is fully explored, but the node is root, return the exact stats
-//     *  4. Else a node is fully explored if it is a non-Golden leaf, or it is exhausted
-//     */
-//    TreeNodeData * tree_node_data = get_tree_node_data(tree_node);
-//    if (!PERSISTENT)    return tree_node_data->fully_explored;
-//
-//    if (!get_tree_node_data(g_node_get_root(tree_node))->fully_explored)  return tree_node_data->fully_explored;
-//
-//    if (G_NODE_IS_ROOT(tree_node))  return tree_node_data->fully_explored;
-//
-//    return (is_leaf(tree_node) && tree_node_data->colour != Golden) || tree_node_data->exhausted;
-//}
 
 gboolean is_leaf(TreeNode* tree_node) {
     /*
@@ -297,68 +272,6 @@ void print_reversed_path(TreeNode* tree_node)
     g_printf("\n");
 }
 
-u32* collect_node_path(TreeNode* tree_node, u32* path_len)
-{
-  u32* path = NULL;
-  u32* reversed_path = NULL;
-
-  *path_len = 0;
-  u32 path_size = 0;
-
-  //NOTE: If the tree_node is Golden, then its path is the same as its parent
-  if (get_tree_node_data(tree_node)->colour == Golden) {
-    assert(tree_node->parent);
-    tree_node = tree_node->parent;
-    assert(get_tree_node_data(tree_node)->colour != Golden);
-  }
-
-  // NOTE: The condition is tree_node->parent instead of tree_node,
-  //  because we don't want to include the id of ROOT in the path,
-  //  given the id of ROOT is always 0 and does not represent any valid response code.
-  while (tree_node->parent) {
-    //NOTE: dynamically expanding the size of array
-    // g_printf("%d of %d: %d\n", *path_len, path_size, (*path_len) >= (path_size));
-    if ((*path_len) >= (path_size)) {
-      path_size += 100;
-//      g_printf("%d\n", path_size);
-      u32* new_reversed_path = ck_alloc(path_size * sizeof(u32));
-      if (new_reversed_path) {
-        for (u32 i = 0; i < *path_len; ++i) {
-          new_reversed_path[i] = reversed_path[i];
-        }
-        // TOASK: free causes error
-//                ck_free(reversed_path);
-//                int * reversed_path = new_reversed_path;
-        reversed_path = new_reversed_path;
-      }
-      else {
-        g_print("Insufficient Memory when collecting path");
-        exit(0);
-      }
-    }
-
-    // collect addresses from leaf to root
-    reversed_path[*path_len] = get_tree_node_data(tree_node)->id;
-    *path_len += 1;
-    tree_node = tree_node->parent;
-  }
-//    g_printf("%d of %d\n", *path_len, path_size);
-
-//    for (u32 i = 0; i < *path_len; i++) {
-//        g_printf("%d ", reversed_path[i]);
-//    }
-
-//    return reversed_path;
-  // TOASK: free causes error
-  // ck_free(reversed_path);
-
-  path = ck_alloc((*path_len) * sizeof(u32));
-  for (u32 i = 0; i < *path_len; i++) {
-    path[i] = reversed_path[(*path_len) - i - 1];
-  }
-  return path;
-}
-
 void print_path(TreeNode* tree_node)
 {
     u32 path_len;
@@ -469,54 +382,8 @@ char* tree_node_repr(TreeNode* tree_node)
            tree_node_score(tree_node),
            tree_node_exploitation_score(tree_node),
            tree_node_exploration_score(tree_node));
-
-//  char* repr = malloc(100);
-//  sprintf(repr, "\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
-//           colour_encoder(tree_node_data->colour),
-//           tree_node_data->id,
-//           tree_node_score(tree_node),
-//           tree_node_exploitation_score(tree_node),
-//           tree_node_exploration_score(tree_node));
   return message;
 }
-
-void tree_node_log(TreeNode* tree_node)
-{
-  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-  log_info("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
-           colour_encoder(tree_node_data->colour),
-           tree_node_data->id,
-           tree_node_score(tree_node),
-           tree_node_exploitation_score(tree_node),
-           tree_node_exploration_score(tree_node));
-}
-
-void tree_node_print(TreeNode* tree_node)
-{
-    TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-    g_printf ("\033[1;%dmres_code: %u, score: %lf (%lf + %lf) \033[0m",
-              colour_encoder(tree_node_data->colour),
-              tree_node_data->id,
-              tree_node_score(tree_node),
-              tree_node_exploitation_score(tree_node),
-              tree_node_exploration_score(tree_node));
-}
-
-//
-//void
-//tree_node_free (TreeNode * tree_node)
-//{
-//    g_free (tree_node->input_prefix); /* causes segfault*/
-//    g_free (tree_node);
-//}
-//
-//
-//gboolean
-//traverse_free_func (GNode * gnode, gpointer data)
-//{
-//    tree_node_free (TreeNode(gnode->data));
-//    return FALSE;
-//}
 
 
 seed_info_t* construct_seed_with_queue_entry(void *q)
@@ -689,6 +556,117 @@ void parent(TreeNode* child, TreeNode** parent){
 
 /* ================================================ MCTS Functions ================================================ */
 
+//gboolean is_fully_explored(TreeNode *  tree_node)
+//{
+//    /*
+//     * Check if a node is fully explored:
+//     *  1. If not in PERSISTENT mode, return the exact stats of the tree node
+//     *  2. If in PERSISTENT mode, but the root is not fully explored, return the exact stats
+//     *  3. If in PERSISTENT mode and the root is fully explored, but the node is root, return the exact stats
+//     *  4. Else a node is fully explored if it is a non-Golden leaf, or it is exhausted
+//     */
+//    TreeNodeData * tree_node_data = get_tree_node_data(tree_node);
+//    if (!PERSISTENT)    return tree_node_data->fully_explored;
+//
+//    if (!get_tree_node_data(g_node_get_root(tree_node))->fully_explored)  return tree_node_data->fully_explored;
+//
+//    if (G_NODE_IS_ROOT(tree_node))  return tree_node_data->fully_explored;
+//
+//    return (is_leaf(tree_node) && tree_node_data->colour != Golden) || tree_node_data->exhausted;
+//}
 
+//void prepare_path_str(TreeNode* tree_node)
+//{
+//  u32 path_len = 0;
+//  u32* path = collect_node_path(tree_node, &path_len);
+//
+//  u32 path_str_len = 0;
+//  for (u32 i = 0; i < path_len; i++) {
+//    path_str_len += (int)((ceil(log10(path[i]))+1)*sizeof(char));
+//  }
+//
+//  log_info("Node path len: %d", path_len);
+//  for (int i = 0; i < path_len; ++i) {
+//
+//    log_info("Node path (%d/%d): %d", i, path_len, path[i]);
+//    g_printf("%d, ", path[i]);
+//    printf("%d, ", path[i]);
+//  }
+//
+//  u32 n = 0, m = 0;
+//
+//  char path_str[100] = {0};
+//  for (u32 i = 0; i < path_len; i++) {
+//    m = snprintf(&path_str[n], 100-n, "%d", path[i]);
+//    if (m<0) {
+//      exit(1);
+//    }
+//    n += m;
+//  }
+//
+////  g_printf("%s", path_str);
+//  log_info("Node path: %s", path_str);
+//}
 
+//u32* collect_node_path(TreeNode* tree_node, u32* path_len)
+//{
+//  u32* path = NULL;
+//  u32* reversed_path = NULL;
+//
+//  *path_len = 0;
+//  u32 path_size = 0;
+//
+//  //NOTE: If the tree_node is Golden, then its path is the same as its parent
+//  if (get_tree_node_data(tree_node)->colour == Golden) {
+//    assert(tree_node->parent);
+//    tree_node = tree_node->parent;
+//    assert(get_tree_node_data(tree_node)->colour != Golden);
+//  }
+//
+//  // NOTE: The condition is tree_node->parent instead of tree_node,
+//  //  because we don't want to include the id of ROOT in the path,
+//  //  given the id of ROOT is always 0 and does not represent any valid response code.
+//  while (tree_node->parent) {
+//    //NOTE: dynamically expanding the size of array
+//    // g_printf("%d of %d: %d\n", *path_len, path_size, (*path_len) >= (path_size));
+//    if ((*path_len) >= (path_size)) {
+//      path_size += 100;
+////      g_printf("%d\n", path_size);
+//      u32* new_reversed_path = ck_alloc(path_size * sizeof(u32));
+//      if (new_reversed_path) {
+//        for (u32 i = 0; i < *path_len; ++i) {
+//          new_reversed_path[i] = reversed_path[i];
+//        }
+//        // TOASK: free causes error
+////                ck_free(reversed_path);
+////                int * reversed_path = new_reversed_path;
+//        reversed_path = new_reversed_path;
+//      }
+//      else {
+//        g_print("Insufficient Memory when collecting path");
+//        exit(0);
+//      }
+//    }
+//
+//    // collect addresses from leaf to root
+//    reversed_path[*path_len] = get_tree_node_data(tree_node)->id;
+//    *path_len += 1;
+//    tree_node = tree_node->parent;
+//  }
+////    g_printf("%d of %d\n", *path_len, path_size);
+//
+////    for (u32 i = 0; i < *path_len; i++) {
+////        g_printf("%d ", reversed_path[i]);
+////    }
+//
+////    return reversed_path;
+//  // TOASK: free causes error
+//  // ck_free(reversed_path);
+//
+//  path = ck_alloc((*path_len) * sizeof(u32));
+//  for (u32 i = 0; i < *path_len; i++) {
+//    path[i] = reversed_path[(*path_len) - i - 1];
+//  }
+//  return path;
+//}
 /* EOF */
