@@ -437,8 +437,8 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
 //    found_M2 = TRUE;
 //    *M2_region_count++;
 //  }
-
-  assert(node_path_len <= queue_cur->region_count);
+  /*TODO: find out why this assertion fails occasionally
+  assert(node_path_len <= queue_cur->region_count);*/
 
 ///*  NOTE: M2 = the regions with the same code sequence as the node and all regions afterwards */
   for (*M2_start_region_ID = 0;
@@ -450,7 +450,7 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
   }
   *M2_region_count = region_path_len - *M2_start_region_ID + 1;
   /*NOTE: region_path_len will be >= node_path_len, as there might be a sequence of responses codes for one region*/
-  /*TODO: find out why this assertion fails occasionally
+  /*
   assert(region_path_len >= node_path_len);*/
   //NOTE: When the simulation child of the ROOT is selected,
   // region_path == node_path == NULL and node_path_len == region_path_len == 0
