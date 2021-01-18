@@ -34,8 +34,6 @@
 #include <string.h>
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
-//#include <limits.h>
 
 #include "types.h"
 #include "alloc-inl.h"
@@ -76,7 +74,8 @@ int log_add_fp(FILE *fp, int level);
 void log_log(int level, const char *file, int line, const char *fmt, ...);
 
 char* u32_array_to_str(u32* a, u32 a_len);
-int message_format(char** message, const char *fmt, ...);
+//int message_array(char** message, u32* a, u32 a_len);
+int message_append(char** message, const char* fmt, ...);
 
 #endif //AFLNET_UTILS_H
 

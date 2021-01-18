@@ -170,27 +170,6 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
   unlock();
 }
 
-int message_format(char** message, const char *fmt, ...) {
-  va_list argptr;
-  char *fmt_str = NULL;
-  va_start(argptr,fmt);
-  int fmt_str_len = vasprintf(&fmt_str, fmt, argptr); /* vasprintf returns the str length including the `\0` */
-  va_end(argptr);
-  log_debug("Source_len: %d", fmt_str_len);
-  log_debug("Source: %s", fmt_str);
-
-  if (fmt_str_len == -1) {exit(1);}
-
-  if (*message) {
-    char* new_message = NULL;
-    fmt_str_len = message_format(&new_message, "%s%s", *message, fmt_str);
-    *message = new_message;
-  } else {
-    *message = fmt_str;
-  }
-  return fmt_str_len;
-}
-
 char* u32_array_to_str(u32* a, u32 a_len)
 {
   // Compute the len of str
@@ -246,4 +225,53 @@ char* u32_array_to_str(u32* a, u32 a_len)
 
   }
   return str;
+}
+/* TOASK: Why does not this work? */
+//int message_array(char** message, u32* a, u32 a_len) {
+//  assert(a_len);
+//  int a_str_len = - 1;
+//  char* new_message = NULL;
+//  if (*message) {a_str_len = message_append(&new_message, "%s%u", *message, a[0]);}
+//  else  {a_str_len = message_append(&new_message, "%u", a[0]);}
+//  *message = malloc(a_str_len);
+//  strncpy(*message, new_message, a_str_len);
+//  free(new_message);
+//
+//  for (int i = 1; i < a_len; ++i) {
+//    if (a_str_len == -1)  {exit(1);}
+//    new_message = NULL;
+//    a_str_len = message_append(&new_message, "%s, %u", message, a[i]);
+//    /* TOASK: How to free message? */
+////    free(*message);
+//    *message = malloc(a_str_len);
+//    strncpy(*message, new_message, a_str_len);
+//    free(new_message);
+////    *message = new_message;
+//  }
+//  return a_str_len;
+//}
+
+int message_append(char** message, const char *fmt, ...) {
+  va_list argptr;
+  char *fmt_str = NULL;
+  va_start(argptr,fmt);
+  int fmt_str_len = vasprintf(&fmt_str, fmt, argptr); /* vasprintf returns the str length including the `\0` */
+  va_end(argptr);
+  log_debug("Source_len: %d", fmt_str_len);
+  log_debug("Source: %s", fmt_str);
+
+  if (fmt_str_len == -1) {exit(1);}
+
+  if (*message) {
+    char* new_message = NULL;
+    fmt_str_len = message_append(&new_message, "%s%s", *message, fmt_str);
+    /* TOASK: How to free message? */
+//    free(*message);
+    *message = new_message;
+  } else {
+    /* TOASK: How to free message? */
+//    free(*message);
+    *message = fmt_str;
+  }
+  return fmt_str_len;
 }
