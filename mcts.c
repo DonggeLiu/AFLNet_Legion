@@ -422,7 +422,7 @@ TreeNode* select_tree_node(TreeNode* parent_tree_node)
 //        g_print("\n");
         parent_tree_node = best_child(parent_tree_node);
         /* NOTE: Selected stats propagation of nodes along the selection path is done here */
-        get_tree_node_data(parent_tree_node)->selected++;
+//        get_tree_node_data(parent_tree_node)->selected++;
         assert(parent_tree_node);
     }
     return parent_tree_node;
@@ -539,11 +539,14 @@ TreeNode* Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_c
 
 void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new)
 {
-    while (leaf_selected) {
-      get_tree_node_data(leaf_selected)->discovered += is_new;
-      leaf_selected = leaf_selected->parent;
-    }
-    seed_selected->discovered += is_new;
+  while (leaf_selected) {
+    TreeNodeData* tree_node_data = get_tree_node_data(leaf_selected);
+    tree_node_data->discovered += is_new;
+    tree_node_data->selected += 1;
+    leaf_selected = leaf_selected->parent;
+  }
+  seed_selected->discovered += is_new;
+  seed_selected->selected += 1;
 }
 
 void parent(TreeNode* child, TreeNode** parent){
