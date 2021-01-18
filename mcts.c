@@ -329,7 +329,7 @@ void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
     for (int i = 0; i < indent-1; ++i) strcat(layer, "|  ");
     if (indent) strcat(layer, "|-- ");
     strcat(layer, tree_node_repr(tree_node));
-    if (tree_node == mark_node) strcat(layer, "\033[1;32m <=< found\033[0;m");
+    if (tree_node == mark_node) strcat(layer, "\033[1;32m <=< found\033[0m");
     strcat(layer, "\n");
     log_info(layer);
     if (g_node_n_children(tree_node)) indent++;
@@ -341,27 +341,30 @@ void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 {
 //    log_Message* message = (log_Message*) message_init();
-    char* message = NULL;
-
-    for (int i = 0; i < indent-1; ++i) message_format(&message, "|  ");
-    if (indent) message_format(&message, "|-- ");
-    message_format(&message, tree_node_repr(tree_node));
-    if (tree_node == mark_node) message_format(&message, "\033[1;32m <=< found\033[0;m");
-//    message_format(message, "\n");
+  char* message = NULL;
+  for (int i = 0; i < indent-1 && i < 6; ++i) message_append(&message, "|  ");
+  if (indent) message_append(&message, "|-- ");
+  if (indent>5) {
+    message_append(&message, " ... ");
     log_info(message);
-    if (g_node_n_children(tree_node)) indent++;
-    for (int i = 0; i < g_node_n_children(tree_node); ++i) {
-      tree_log(g_node_nth_child(tree_node, i), mark_node, indent, found);
-    }
+    return;
+  }
+  message_append(&message, tree_node_repr(tree_node));
+  if (tree_node == mark_node && found >= 0) message_append(&message, "\033[1;32m <=< found\033[0m");
+  log_info(message);
+
+  if (g_node_n_children(tree_node)) indent++;
+  for (int i = 0; i < g_node_n_children(tree_node); ++i) {
+    tree_log(g_node_nth_child(tree_node, i), mark_node, indent, found);
+  }
 }
 
 char* tree_node_repr(TreeNode* tree_node)
 {
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-//  log_Message* message = message_init();
   char* message = NULL;
-//  message_format(message, "id: %u", tree_node_data->id);
-  message_format(&message, "res_code: %u, score: %lf (%lf + %lf)",
+
+  message_append(&message, "\033[1;%dm %03u, score: %lf (%lf + %lf)\033[0m",
            colour_encoder(tree_node_data->colour),
            tree_node_data->id,
            tree_node_score(tree_node),
