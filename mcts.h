@@ -41,12 +41,12 @@ typedef struct
     u32 path_len;
 
     // statistics
-    gint selected;
-    gint discovered;
+    u32 selected;
+    u32 discovered;
 
     // input generation
     void **seeds; // keeps all seeds reaching this node -- can be casted to struct seed_info_t*
-    int seeds_count;
+    u32 seeds_count;
     TreeNode *simulation_child;
 
     // property
@@ -59,8 +59,8 @@ typedef struct
 typedef struct
 {
     void *q; // Pointing to a specific queue entry/seed
-    int selected;
-    int discovered;
+    u32 selected;
+    u32 discovered;
 } seed_info_t;
 
 /* Precomputation */

@@ -2,9 +2,9 @@
 
 /* Hyper-parameters */
 gdouble RHO = 1.414;  //sqrt(2)
-gint MIN_SAMPLES = 1;
-gint MAX_SAMPLES = 100;
-gint CONEX_TIMEOUT = 0;
+u32 MIN_SAMPLES = 1;
+u32 MAX_SAMPLES = 100;
+u32 CONEX_TIMEOUT = 0;
 gboolean PERSISTENT = FALSE;
 gboolean COVERAGE_ONLY = TRUE;
 enum score_function SCORE_FUNCTION = UCT;
@@ -178,9 +178,9 @@ gboolean is_leaf(TreeNode* tree_node) {
 TreeNode* best_child(TreeNode* tree_node)
 {
     gdouble max_score = -INFINITY;
-    gint number_of_children = g_node_n_children(tree_node);
-    gint number_of_ties = 0;
-    gint ties[number_of_children];
+    u32 number_of_children = g_node_n_children(tree_node);
+    u32 number_of_ties = 0;
+    u32 ties[number_of_children];
 
     if (number_of_children == 1) {
 //        g_printf("Only one child: ");
@@ -188,7 +188,7 @@ TreeNode* best_child(TreeNode* tree_node)
         return g_node_nth_child(tree_node, 0);
     }
 
-    for (gint child_index = 0; child_index < number_of_children; child_index++) {
+    for (u32 child_index = 0; child_index < number_of_children; child_index++) {
         gdouble score = tree_node_score(g_node_nth_child(tree_node, child_index));
 //        g_printf("max score: %lf, current score: %lf\n", max_score, score);
         if (score < max_score) continue;
@@ -218,16 +218,16 @@ TreeNode* best_child(TreeNode* tree_node)
 seed_info_t* best_seed(TreeNode* tree_node)
 {
     gdouble max_score = -INFINITY;
-    gint number_of_seeds = get_tree_node_data(tree_node)->seeds_count;
-    gint number_of_ties = 0;
-    gint ties[number_of_seeds];
+    u32 number_of_seeds = get_tree_node_data(tree_node)->seeds_count;
+    u32 number_of_ties = 0;
+    u32 ties[number_of_seeds];
 
     if (number_of_seeds == 1) {
         g_printf("Only one seed: ");
         return get_tree_node_data(tree_node)->seeds[0];
     }
 
-    for (gint seed_index = 0; seed_index < number_of_seeds; seed_index++) {
+    for (u32 seed_index = 0; seed_index < number_of_seeds; seed_index++) {
         int score = seed_score(tree_node, seed_index);
 
         if (score < max_score) continue;
@@ -243,7 +243,7 @@ seed_info_t* best_seed(TreeNode* tree_node)
         return get_tree_node_data(tree_node)->seeds[ties[0]];
     }
 
-    int winner_index = ties[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties)];
+    u32 winner_index = ties[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties)];
     return get_tree_node_data(tree_node)->seeds[winner_index];
 }
 
