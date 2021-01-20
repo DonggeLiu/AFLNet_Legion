@@ -242,6 +242,7 @@ static s32 cpu_aff = -1;       	      /* Selected CPU core                */
 
 static FILE* plot_file;               /* Gnuplot output file              */
 
+#ifndef MCTS_H
 struct queue_entry {
 
   u8* fname;                          /* File name for the test case      */
@@ -277,6 +278,7 @@ struct queue_entry {
   u32 unique_state_count;             /* Unique number of states traversed by this queue entry */
 
 };
+#endif
 
 static struct queue_entry *queue,     /* Fuzzing queue (linked list)      */
                           *queue_cur, /* Current offset within the queue  */
