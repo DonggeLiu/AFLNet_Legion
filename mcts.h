@@ -98,7 +98,6 @@ TreeNode* exists_child(TreeNode* tree_node, u32 target_response_code);
 
 TreeNode* append_child(TreeNode* tree_node, u32 child_response_code, enum node_colour colour, u32* path, u32 path_len);
 
-void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found);
 void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found);
 char* tree_node_repr(TreeNode* tree_node);
 

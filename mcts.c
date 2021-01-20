@@ -323,21 +323,6 @@ int colour_encoder(enum node_colour colour) {
     return colour_code;
 }
 
-void tree_print(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
-{
-    char* layer = malloc(200);
-    for (int i = 0; i < indent-1; ++i) strcat(layer, "|  ");
-    if (indent) strcat(layer, "|-- ");
-    strcat(layer, tree_node_repr(tree_node));
-    if (tree_node == mark_node) strcat(layer, "\033[1;32m <=< found\033[0m");
-    strcat(layer, "\n");
-    log_info(layer);
-    if (g_node_n_children(tree_node)) indent++;
-    for (int i = 0; i < g_node_n_children(tree_node); ++i) {
-        tree_print(g_node_nth_child(tree_node, i), mark_node, indent, found);
-    }
-}
-
 void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 {
 //    log_Message* message = (log_Message*) message_init();
