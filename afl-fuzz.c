@@ -421,43 +421,22 @@ region_t* (*extract_requests)(unsigned char* buf, unsigned int buf_size, unsigne
 void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region_ID, u32* M2_region_count)
 {
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-  u32 region_path_len = 0, node_path_len = tree_node_data->path_len;
-  u32* region_path = NULL;
-  u32* node_path = &tree_node_data->path[1];
+  struct queue_entry* q = seed->q;
 
-  *M2_start_region_ID = *M2_region_count = 0;
-
-///*  NOTE: M2 = the regions with the same code sequence as the node */
-//  gboolean found_M2 = FALSE;
-//  for (u32 region_id = 0; region_id < seed->q->region_count; region_id++) {
-//    region_path = collect_region_path(seed->q->regions[region_id], region_path_len);
-//    if (region_path_len < node_path_len) continue;
-//    if (region_path_len > node_path_len) break;
-//    if (!found_M2) *M2_start_region_ID = region_id;
-//    found_M2 = TRUE;
-//    *M2_region_count++;
-//  }
-  /*TODO: find out why this assertion fails occasionally
-  assert(node_path_len <= queue_cur->region_count);*/
-
-///*  NOTE: M2 = the regions with the same code sequence as the node and all regions afterwards */
-  for (*M2_start_region_ID = 0;
-       (*M2_start_region_ID < queue_cur->region_count) && (*M2_start_region_ID < node_path_len);
-       (*M2_start_region_ID)++) {
-    region_path = collect_region_path(queue_cur->regions[*M2_start_region_ID], &region_path_len);
-    if (region_path_len < node_path_len) continue;
-    break;
+  if (G_NODE_IS_ROOT(tree_node->parent)) {
+    /*NOTE: M2 starts at the beginning for ROOT*/
+    *M2_start_region_ID = 0;
+  }else {
+    *M2_start_region_ID = tree_node_data->region_indices[seed->parent_index];
   }
-  *M2_region_count = region_path_len - *M2_start_region_ID + 1;
-  /*NOTE: region_path_len will be >= node_path_len, as there might be a sequence of responses codes for one region*/
-  /*
-  assert(region_path_len >= node_path_len);*/
-  //NOTE: When the simulation child of the ROOT is selected,
-  // region_path == node_path == NULL and node_path_len == region_path_len == 0
-//  assert(
-//          (!region_path && !node_path && !node_path_len)
-//          || memcmp(region_path, node_path, region_path_len)
-//  );
+  *M2_region_count = q->regions[q->region_count-1].state_count - *M2_start_region_ID + 1;
+
+  /*NOTE: Assert the path is preserved, if the node is not the Simulation child of the ROOT*/
+  assert(*M2_region_count >= 1);
+  assert(G_NODE_IS_ROOT(tree_node->parent) ||
+         tree_node_data->path_len == q->regions[*M2_start_region_ID].state_count);
+  assert(G_NODE_IS_ROOT(tree_node->parent) ||
+         !memcmp(tree_node_data->path, q->regions[*M2_start_region_ID].state_sequence, tree_node_data->path_len));
 }
 
 /* Initialize the implemented state machine as a graphviz graph */
@@ -819,7 +798,7 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   if (dry_run) {
     cur_seed = construct_seed_with_queue_entry(q);
     cur_tree_node = get_simulation_child(ROOT);
-    add_seed_to_node(cur_seed, cur_tree_node);
+    add_seed_to_node(cur_seed, 0, cur_tree_node);
 
 //    return;
   }

@@ -33,6 +33,7 @@ TreeNodeData* new_tree_node_data (u32 response_code, enum node_colour colour, u3
     tree_node_data->discovered = 0;
     // tree_node_data->stats.selected_seed_index = 0;
     tree_node_data->seeds = NULL;
+    tree_node_data->region_indices = NULL;
     tree_node_data->seeds_count = 0;
 
     //TODO: Detect terminations (i.e. leaves) with some response code, and mark them fully explored.
@@ -368,14 +369,21 @@ seed_info_t* construct_seed_with_queue_entry(void *q)
   return seed;
 }
 
-void add_seed_to_node(seed_info_t* seed, TreeNode * node)
+void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode * node)
 {
   assert(get_tree_node_data(node)->colour == Golden);
+  /*NOTE: Figure out M2 at here so that we don't have to do it repeatedly when the same queue_entry is selected*/
+  struct queue_entry *q = seed->q;
+  region_t* regions = q->regions;
+  TreeNodeData* tree_node_data = get_tree_node_data(node);
 
   // TOASK: Should we allocate more spaces to avoid repeated reallocation?
   TreeNodeData* node_data = get_tree_node_data(node);
   node_data->seeds = (void **) ck_realloc (node_data->seeds, (node_data->seeds_count + 1) * sizeof(void *));
   node_data->seeds[node_data->seeds_count] = (void *) seed;
+  node_data->region_indices = (u32*) ck_realloc (node_data->region_indices, (node_data->seeds_count + 1) * sizeof(u32));
+  node_data->region_indices[node_data->seeds_count] = matching_region_index;
+  seed->parent_index = node_data->seeds_count;
   node_data->seeds_count++;
 }
 
@@ -442,10 +450,12 @@ char* Simulation(TreeNode* target)
     return NULL;
 }
 
-TreeNode* Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_codes, gboolean* is_new)
+TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
   TreeNode* parent_node;
   *is_new = FALSE;
+  u32 matching_region_index = 0;
+  gboolean matched_last_code = FALSE;
 
   // Construct seed with queue_entry q
   seed_info_t* seed = construct_seed_with_queue_entry(q);
@@ -453,51 +463,47 @@ TreeNode* Expansion(TreeNode* tree_node, void* q, u32* response_codes, u32 len_c
   // Check if the response code sequence is new
   // And add the new queue entry to each node along the paths
   assert(response_codes[0] == 0);
-  for (u32 i = 1; i < len_codes; i++) {
-      parent_node = tree_node;
-      if (!(tree_node = exists_child(tree_node, response_codes[i]))){
-        *is_new = TRUE;
-        tree_node = append_child(parent_node, response_codes[i], White, response_codes, i+1);
+  for (u32 path_index = 1; path_index < len_codes; path_index++) {
+    parent_node = tree_node;
+    if (!(tree_node = exists_child(tree_node, response_codes[path_index]))){
+      *is_new = TRUE;
+
+      for (u32 region_index = matching_region_index;
+           (region_index < q->region_count) && (region_index < len_codes);
+           ++region_index)
+      {
+        region_t region = q->regions[region_index];
+        //NOTE: some regions are NULL for some reason, but we should not expect a matching tree node anyway
+        // Because NULL regions only show up after the region with the longest state sequence,
+        // which means their region indices will not be greater than len_codes
+//        assert(region);
+        // NOTE: The state_count of a path preserving region should always
+        //  be greater than or equal to the path_len (path_index+1) of its matching node
+        //  Node Colour:
+        //    White if the last state of the region's state sequence is the
+        log_info("Region %d of Queue_entry %u: %s",
+                 region_index, q->fname, u32_array_to_str(region.state_sequence, region.state_count));
+        if (path_index+1 <= region.state_count) {
+          log_info("Match found");
+          matched_last_code = response_codes[path_index] == region.state_sequence[region.state_count-1];
+          matching_region_index = region_index;
+          break;
+        }
       }
-      add_seed_to_node(seed, get_simulation_child(tree_node));
+      enum node_colour colour;
+      if (matched_last_code)  {colour = White;}
+      else  {colour = Black;}
+      tree_node = append_child(parent_node, response_codes[path_index], colour, response_codes, path_index+1);
 
-//        //Cache the path & path_len of each tree_node
-//        TreeNodeData* node_data = get_tree_node_data(tree_node);
-//        node_data->path = response_codes;
-//        node_data->path_len = i + 1;
+    }
+    if (matched_last_code) {add_seed_to_node(seed, matching_region_index, get_simulation_child(tree_node));}
+    log_info(tree_node_repr(tree_node));
+    TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+    log_info("Node's path:%s", u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
 
-      //TODO: assert the path & path_len of each tree_node here
-//      u32 path_len;
-//      u32* path = collect_node_path(tree_node, &path_len);
-      TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-      assert(tree_node_data->path_len == i+1);
-//      if (tree_node_data->path_len != i+1){
-//        log_error(message_log("Unmatch path len of path: %s", node_path_str(tree_node)));
-//        log_error(message_log("\nnode path len: %u; path len: %u\n", node_data->path_len, path_len));
-//      }
-//      for (int j = 0; j < tree_node_data->path_len; ++j) {
-//        assert(tree_node_data->path[j] == response_codes[j]);
-//      }
+      /* NOTE: Assert the path of each node is saved correctly */
+      assert(tree_node_data->path_len == path_index+1);
       assert(!memcmp(tree_node_data->path, response_codes, sizeof(u32)*tree_node_data->path_len));
-//      if (!memcmp(node_data->path, path, node_data->path_len)){
-//        //TOASK: How are these two arrays different?
-//        for (int j = 0; j < path_len; ++j) {
-//          assert(node_data->path[j] == path[j]);
-//        }
-//          printf("\nUnmatch path:\n");
-//          printf("Path from responses:\n");
-//          for (int j = 0; j < node_data->path_len; ++j) {
-//            printf("%d ", node_data->path[j]);
-//          }
-//          printf("\n");
-//          printf("Path from my function:\n");
-//          for (int j = 0; j < path_len; ++j) {
-//            printf("%d ", path[j]);
-//          }
-//          printf("\n");
-//      }
-//      assert(node_data->path_len == path_len);
-//        assert(memcmp(node_data->path, path, path_len));
   }
   parent_node = tree_node;
 

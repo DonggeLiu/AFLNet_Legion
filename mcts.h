@@ -47,6 +47,7 @@ typedef struct
     // input generation
     void **seeds; // keeps all seeds reaching this node -- can be casted to struct seed_info_t*
     u32 seeds_count;
+    u32* region_indices; // Pointing to the index of the region corresponds to the node
     TreeNode *simulation_child;
 
     // property
@@ -59,6 +60,7 @@ typedef struct
 typedef struct
 {
     void *q; // Pointing to a specific queue entry/seed
+    u32 parent_index;
     u32 selected;
     u32 discovered;
 } seed_info_t;
@@ -107,7 +109,7 @@ seed_info_t* select_seed(TreeNode* tree_node_selected);
 TreeNode* Initialisation();
 seed_info_t* Selection(TreeNode** parent_tree_node);
 char* Simulation(TreeNode* target);
-TreeNode* Expansion(TreeNode* tree_node, void*, u32* response_codes, u32 len_codes, gboolean* is_new);
+TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new);
 void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new);
 
 
@@ -126,7 +128,7 @@ int colour_encoder(enum node_colour colour);
 
 seed_info_t* construct_seed_with_queue_entry(void* q);
 
-void add_seed_to_node(seed_info_t* seed, TreeNode* node);
+void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode* node);
 
 char* node_path_str(TreeNode* tree_node);
 
