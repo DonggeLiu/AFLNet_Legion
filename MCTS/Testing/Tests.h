@@ -5,6 +5,6 @@
 #ifndef AFLNET_TESTS_H
 #define AFLNET_TESTS_H
 
-#include "../TreeNode.c"
+#include "../../mcts.h"
 
 #endif //AFLNET_TESTS_H
