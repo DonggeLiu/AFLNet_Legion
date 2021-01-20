@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+(
+    cd AFLNet_MCTS; 
+    make clean all;
+    (
+        cd llvm_mode;
+        make;
+    )
+)

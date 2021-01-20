@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+./aflnet_setup
+./LightFTP_setup

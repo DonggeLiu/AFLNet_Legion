@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+
+# Move to the folder
+cd $WORKDIR/LightFTP
+# Apply a patch to handle multi-threaded server
+patch -p1 < $AFLNET/tutorials/lightftp/5980ea1.patch
+# Move to the source folder
+cd Source/Release
+# Compile source
+CC=afl-clang-fast make clean all
+# Copy configuration file
+cp $AFLNET/tutorials/lightftp/fftp.conf ./
+# Setup certificate and shared folder
+# In this tutorial, we have created ready-to-use certificate files
+# Please look at the LightFTP document if you want to create these files yourself
+cp -r $AFLNET/tutorials/lightftp/certificate ~/
+# We assume that the home folder is /home/ubuntu
+# If you want to use another folder, you need to update the fftp.conf file accordingly
+mkdir ~/ftpshare
+
+## Step 2
+cd $WORKDIR/LightFTP/Source/Release
+cp $AFLNET/tutorials/lightftp/ftpclean.sh ./
+# afl-fuzz -d -i $AFLNET/tutorials/lightftp/in-ftp -o out-lightftp -N tcp://127.0.0.1/2200 -x $AFLNET/tutorials/lightftp/ftp.dict -P FTP -D 10000 -q 3 -s 3 -E -R -c ./ftpclean.sh ./fftp fftp.conf 2200
+
