@@ -481,7 +481,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
         //  be greater than or equal to the path_len (path_index+1) of its matching node
         //  Node Colour:
         //    White if the last state of the region's state sequence is the
-        log_info("Region %d of Queue_entry %u: %s",
+        log_info("Region %d of Queue_entry %s: %s",
                  region_index, q->fname, u32_array_to_str(region.state_sequence, region.state_count));
         if (path_index+1 <= region.state_count) {
           log_info("Match found");
