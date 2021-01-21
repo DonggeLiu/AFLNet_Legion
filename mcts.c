@@ -434,7 +434,7 @@ seed_info_t* Selection(TreeNode** tree_node)
     assert(G_NODE_IS_ROOT(*tree_node));
 
     *tree_node = select_tree_node(*tree_node);
-    log_info("Selection path: %s", node_path_str(*tree_node));
+    log_info("[SELECTION] Selection path: %s", node_path_str(*tree_node));
 //    prepare_path_str(*tree_node);
 //    g_printf("\tTree node selected: ");
 //    tree_node_print(tree_node);
@@ -481,10 +481,10 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
         //  be greater than or equal to the path_len (path_index+1) of its matching node
         //  Node Colour:
         //    White if the last state of the region's state sequence is the
-        log_info("Region %d of Queue_entry %s: %s",
+        log_info("[MCTS-EXPANSION] Region %d of Queue_entry %s: %s",
                  region_index, q->fname, u32_array_to_str(region.state_sequence, region.state_count));
         if (path_index+1 <= region.state_count) {
-          log_info("Match found");
+          log_info("[MCTS-EXPANSION] Match found");
           matched_last_code = response_codes[path_index] == region.state_sequence[region.state_count-1];
           matching_region_index = region_index;
           break;
@@ -499,7 +499,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
     if (matched_last_code) {add_seed_to_node(seed, matching_region_index, get_simulation_child(tree_node));}
     log_info(tree_node_repr(tree_node));
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-    log_info("Node's path:%s", u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+    log_info("[MCTS-EXPANSION] Node's path:%s", u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
 
       /* NOTE: Assert the path of each node is saved correctly */
       assert(tree_node_data->path_len == path_index+1);

@@ -814,7 +814,7 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
 //  log_info(message);
 //  free(message);
 
-  log_info("RES Codes: %s", u32_array_to_str(node_sequence, node_count));
+  log_info("[UPDATE-MCTS-TREE] RES Codes: %s", u32_array_to_str(node_sequence, node_count));
   /* NOTE: MCTS Expansion and check if the new input finds a new sequence */
   gboolean is_new = FALSE;
   Expansion(ROOT, q, node_sequence, node_count, &is_new);
@@ -9233,9 +9233,9 @@ int main(int argc, char** argv) {
 
         cur_tree_node = ROOT;
         tree_log(ROOT, cur_tree_node, 0, -1);
-        log_info("Node selection starts from: %s", tree_node_repr(cur_tree_node));
+        log_info("[MAIN LOOP] Node selection starts from: %s", tree_node_repr(cur_tree_node));
         cur_seed = Selection(&cur_tree_node);
-        log_info("Node selection ends at: %s", tree_node_repr(cur_tree_node));
+        log_info("[MAIN LOOP] Node selection ends at: %s", tree_node_repr(cur_tree_node));
 //        tree_node_print(cur_tree_node);
 
         selected_seed = (struct queue_entry*) cur_seed->q;
