@@ -431,7 +431,9 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
   }else {
     *M2_start_region_ID = tree_node_data->region_indices[seed->parent_index];
   }
-  *M2_region_count = q->regions[q->region_count-1].state_count - *M2_start_region_ID + 1;
+	
+  //*M2_region_count = q->regions[q->region_count-1].state_count - *M2_start_region_ID + 1;
+  *M2_region_count = q->region_count - *M2_start_region_ID + 1;
 
   /*NOTE: Assert the path is preserved, if the node is not the Simulation child of the ROOT*/
   assert(*M2_region_count >= 1);
