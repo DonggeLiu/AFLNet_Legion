@@ -428,19 +428,21 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
   if (G_NODE_IS_ROOT(tree_node->parent)) {
     /*NOTE: M2 starts at the beginning for ROOT*/
     *M2_start_region_ID = 0;
-  }else {
-    *M2_start_region_ID = tree_node_data->region_indices[seed->parent_index];
+    *M2_region_count = q->region_count;
+    return;
   }
-	
-  //*M2_region_count = q->regions[q->region_count-1].state_count - *M2_start_region_ID + 1;
+  *M2_start_region_ID = tree_node_data->region_indices[seed->parent_index] + 1;
   *M2_region_count = q->region_count - *M2_start_region_ID + 1;
+  log_info("[find_M2_region] M1: %s", u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence,
+                                                       q->regions[*M2_start_region_ID-1].state_count));
+  log_info("[find_M2_region] M2 ID %d, M2 count %d", *M2_start_region_ID, *M2_region_count);
 
   /*NOTE: Assert the path is preserved, if the node is not the Simulation child of the ROOT*/
   assert(*M2_region_count >= 1);
   assert(G_NODE_IS_ROOT(tree_node->parent) ||
-         tree_node_data->path_len == q->regions[*M2_start_region_ID].state_count);
+         tree_node_data->path_len == q->regions[*M2_start_region_ID-1].state_count);
   assert(G_NODE_IS_ROOT(tree_node->parent) ||
-         !memcmp(tree_node_data->path, q->regions[*M2_start_region_ID].state_sequence, tree_node_data->path_len));
+         !memcmp(tree_node_data->path, q->regions[*M2_start_region_ID-1].state_sequence, tree_node_data->path_len));
 }
 
 /* Initialize the implemented state machine as a graphviz graph */
