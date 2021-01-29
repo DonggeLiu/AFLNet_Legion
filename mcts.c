@@ -65,7 +65,7 @@ TreeNode* get_simulation_child(TreeNode* tree_node)
   TreeNodeData* node_data = get_tree_node_data(tree_node);
   TreeNode* sim_child = node_data->simulation_child;
 
-  assert(node_data->colour != Golden);
+  assert(node_data->colour != Golden && node_data->colour != Black);
   assert(get_tree_node_data(sim_child)->colour == Golden);
 
   return sim_child;
@@ -440,6 +440,8 @@ seed_info_t* Selection(TreeNode** tree_node)
 //    tree_node_print(tree_node);
 //    struct queue_entry * seed_selected = NULL;
     seed_info_t* seed_selected = select_seed(*tree_node);
+    struct queue_entry* q = seed_selected->q;
+    log_info("[SELECTION] Selection seed: %s", q->fname);
 
     return seed_selected;
 }
@@ -548,6 +550,15 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       assert(!memcmp(tree_node_data->path, response_codes, sizeof(u32)*tree_node_data->path_len));
   }
   parent_node = tree_node;
+  log_info("[MCTS-EXPANSION] Node: %s", tree_node_repr(tree_node));
+  log_info("[MCTS-EXPANSION] Node's path:%s", u32_array_to_str(get_tree_node_data(tree_node)->path,
+                                                               get_tree_node_data(tree_node)->path_len));
+  log_info("[MCTS-EXPANSION] Exec's path:%s", u32_array_to_str(response_codes, len_codes));
+  get_tree_node_data(tree_node)->fully_explored = is_leaf(tree_node);
+  log_info("[MCTS-EXPANSION] Node: %s", tree_node_repr(tree_node));
+  if (G_NODE_IS_ROOT(tree_node->parent)) {
+    log_info("");
+  }
 
   /*NOTE: Stats propagation along the execution path is done here*/
   while (parent_node) {
