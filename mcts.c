@@ -465,38 +465,80 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   assert(response_codes[0] == 0);
   for (u32 path_index = 1; path_index < len_codes; path_index++) {
     parent_node = tree_node;
+
+    if ((path_index != len_codes - 1) && get_tree_node_data(tree_node)->fully_explored){
+      //NOTE: If the node is not the last in an execution sequence, but somehow it was marked as fully explored
+      //  then correct this mistake
+      get_tree_node_data(tree_node)->fully_explored = FALSE;
+    }
+
     if (!(tree_node = exists_child(tree_node, response_codes[path_index]))){
       *is_new = TRUE;
+    }
 
-      for (u32 region_index = matching_region_index;
-           (region_index < q->region_count) && (region_index < len_codes);
-           ++region_index)
-      {
-        region_t region = q->regions[region_index];
-        //NOTE: some regions are NULL for some reason, but we should not expect a matching tree node anyway
-        // Because NULL regions only show up after the region with the longest state sequence,
-        // which means their region indices will not be greater than len_codes
+    for (u32 region_index = matching_region_index + matched_last_code;
+         (region_index < q->region_count) && (region_index < len_codes);
+         ++region_index)
+    {
+      region_t region = q->regions[region_index];
+      //NOTE: some regions are NULL for some reason, but we should not expect a matching tree node anyway
+      // Because NULL regions only show up after the region with the longest state sequence,
+      // which means their region indices will not be greater than len_codes
 //        assert(region);
-        // NOTE: The state_count of a path preserving region should always
-        //  be greater than or equal to the path_len (path_index+1) of its matching node
-        //  Node Colour:
-        //    White if the last state of the region's state sequence is the
-        log_info("[MCTS-EXPANSION] Region %d of Queue_entry %s: %s",
-                 region_index, q->fname, u32_array_to_str(region.state_sequence, region.state_count));
-        if (path_index+1 <= region.state_count) {
-          log_info("[MCTS-EXPANSION] Match found");
-          matched_last_code = response_codes[path_index] == region.state_sequence[region.state_count-1];
-          matching_region_index = region_index;
-          break;
-        }
+      // NOTE: The state_count of a path preserving region should always
+      //  be greater than or equal to the path_len (path_index+1) of its matching node
+      //  Node Colour:
+      //    White if the last state of the region's state sequence is the
+      log_info("[MCTS-EXPANSION] Region %d of Queue_entry %s: %s",
+                region_index, q->fname, u32_array_to_str(region.state_sequence, region.state_count));
+      if (path_index+1 <= region.state_count) {
+//        exact_match = (path_index+1 == region.state_count);
+        matched_last_code = response_codes[path_index] == region.state_sequence[region.state_count-1];
+        matching_region_index = region_index;
+        if (matched_last_code) {log_info("[MCTS-EXPANSION] Exact Match found");}
+        else  {log_info("[MCTS-EXPANSION] Partial Match found");}
+        break;
       }
+    }
+
+    if (*is_new)  {
       enum node_colour colour;
       if (matched_last_code)  {colour = White;}
       else  {colour = Black;}
       tree_node = append_child(parent_node, response_codes[path_index], colour, response_codes, path_index+1);
+    }
+    if (matched_last_code) {
+      TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+      if (tree_node_data->colour == Black && path_index + 1 != len_codes) {
+        // NOTE: Flip a node if this is black and is not an termination point
+        //  But still was considered as Black
+        log_info("[MCTS-EXPANSION] Flipping node: %s", tree_node_repr(tree_node));
+//        tree_log(ROOT, tree_node, 0, 0);
+        tree_node_data->colour = White;
+        tree_node_data->simulation_child = append_child(tree_node, 999, Golden, response_codes, path_index+1);
+        log_info(tree_node_repr(tree_node));
+
+//        tree_log(ROOT, tree_node, 0, 0);
+      }
+      if (tree_node_data->colour == White && q->regions[matching_region_index].state_count < len_codes) {
+        //NOTE: Only add seed to node if node colour is White  (Otherwise there is no simulation child)
+        // and the matching region is not the last region in the q, (otherwise M2 count is 0)
+        add_seed_to_node(seed, matching_region_index, get_simulation_child(tree_node));
+        TreeNodeData* sim_data = get_tree_node_data(get_simulation_child(tree_node));
+        seed_info_t* seed = sim_data->seeds[sim_data->seeds_count-1];
+        struct queue_entry* new_q = (struct queue_entry*) seed->q;
+        region_t region = q->regions[matching_region_index];
+        log_info("The following two paths should match");
+        log_info("[MCTS-EXPANSION] Region %d: %s",
+                 matching_region_index, u32_array_to_str(region.state_sequence, region.state_count));
+        log_info("[MCTS-EXPANSION] Node %d: %s",
+                 tree_node_data->id, u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+        assert(region.state_count >= tree_node_data->path_len);
+        assert(!memcmp(region.state_sequence, tree_node_data->path,tree_node_data->path_len));
+        log_info("");
+      }
 
     }
-    if (matched_last_code) {add_seed_to_node(seed, matching_region_index, get_simulation_child(tree_node));}
     log_info(tree_node_repr(tree_node));
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
     log_info("[MCTS-EXPANSION] Node's path:%s", u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
@@ -522,7 +564,7 @@ void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean i
 {
   while (leaf_selected) {
     TreeNodeData* tree_node_data = get_tree_node_data(leaf_selected);
-    tree_node_data->discovered += is_new;
+//    tree_node_data->discovered += is_new;
     tree_node_data->selected += 1;
     leaf_selected = leaf_selected->parent;
   }
