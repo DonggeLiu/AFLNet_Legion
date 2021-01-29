@@ -328,9 +328,9 @@ void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 {
 //    log_Message* message = (log_Message*) message_init();
   char* message = NULL;
-  for (int i = 0; i < indent-1 && i < 6; ++i) message_append(&message, "|  ");
+  for (int i = 0; i < indent-1; ++i) message_append(&message, "|  ");
   if (indent) message_append(&message, "|-- ");
-  if (indent>5) {
+  if (indent>MAX_TREE_LOG_DEPTH) {
     message_append(&message, " ... ");
     log_info(message);
     return;
