@@ -385,6 +385,22 @@ void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode * n
   node_data->region_indices[node_data->seeds_count] = matching_region_index;
   seed->parent_index = node_data->seeds_count;
   node_data->seeds_count++;
+
+  seed_info_t* node_seed = node_data->seeds[node_data->seeds_count-1];
+  struct queue_entry* node_q = node_seed->q;
+  region_t node_region = node_q->regions[node_data->region_indices[seed->parent_index]];
+
+  log_info("[ADD_SEED_TO_NODE] Region ID of node    : %u", node_data->region_indices[node_seed->parent_index]);
+  log_info("[ADD_SEED_TO_NODE] Region count of queue: %u", node_q->region_count);
+  assert(node_data->region_indices[node_seed->parent_index] <= node_q->region_count);
+
+  log_info("[ADD_SEED_TO_NODE] Region state count: %u", node_region.state_count);
+  log_info("[ADD_SEED_TO_NODE] Node path length  : %u", tree_node_data->path_len);
+
+  log_info("[ADD_SEED_TO_NODE] Region states: %s", u32_array_to_str(node_region.state_sequence, node_region.state_count));
+  log_info("[ADD_SEED_TO_NODE] Node path    : %s", u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+  assert(node_region.state_count >= tree_node_data->path_len);
+  assert(!memcmp(node_region.state_sequence, tree_node_data->path, tree_node_data->path_len));
 }
 
 u32* collect_region_path(region_t region, u32* path_len)
@@ -434,15 +450,25 @@ seed_info_t* Selection(TreeNode** tree_node)
     assert(G_NODE_IS_ROOT(*tree_node));
 
     *tree_node = select_tree_node(*tree_node);
-    log_info("[SELECTION] Selection path: %s", node_path_str(*tree_node));
+    log_info("[SELECTION] Selected node   : %s", tree_node_repr(*tree_node));
+    log_info("[SELECTION] Selected parent : %s", tree_node_repr((*tree_node)->parent));
 //    prepare_path_str(*tree_node);
 //    g_printf("\tTree node selected: ");
 //    tree_node_print(tree_node);
 //    struct queue_entry * seed_selected = NULL;
     seed_info_t* seed_selected = select_seed(*tree_node);
     struct queue_entry* q = seed_selected->q;
-    log_info("[SELECTION] Selection seed: %s", q->fname);
 
+    log_info("[SELECTION] Selection seed  : %s", q->fname);
+    for (int i = 0; i < q->region_count; ++i) {
+      log_info("[SELECTION] Seed region %2d  : %s",
+               i, u32_array_to_str(q->regions[i].state_sequence, q->regions[i].state_count));
+    }
+    TreeNodeData* tree_node_data = get_tree_node_data(*tree_node);
+    log_info("[SELECTION] Selection path  : %s", node_path_str(*tree_node));
+    log_info("[SELECTION] Selection region: %s",
+             u32_array_to_str(q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_sequence,
+                              q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_count));
     return seed_selected;
 }
 
@@ -467,14 +493,18 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   assert(response_codes[0] == 0);
   for (u32 path_index = 1; path_index < len_codes; path_index++) {
     parent_node = tree_node;
-
+    log_info("[MCTS-EXPANSION] === Matching code %03u at index %u ===", response_codes[path_index], path_index);
     if ((path_index != len_codes - 1) && get_tree_node_data(tree_node)->fully_explored){
       //NOTE: If the node is not the last in an execution sequence, but somehow it was marked as fully explored
       //  then correct this mistake
       get_tree_node_data(tree_node)->fully_explored = FALSE;
+      log_info("[MCTS-EXPANSION] code %03u at index %u is not fully explored anymore",
+               response_codes[path_index], path_index);
     }
 
     if (!(tree_node = exists_child(tree_node, response_codes[path_index]))){
+      log_info("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
+               response_codes[path_index], path_index);
       *is_new = TRUE;
     }
 
@@ -491,8 +521,10 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       //  be greater than or equal to the path_len (path_index+1) of its matching node
       //  Node Colour:
       //    White if the last state of the region's state sequence is the
-      log_info("[MCTS-EXPANSION] Region %d of Queue_entry %s: %s",
-                region_index, q->fname, u32_array_to_str(region.state_sequence, region.state_count));
+      log_info("[MCTS-EXPANSION] Matching code %03u at index %3u: %s",
+               response_codes[path_index], path_index, u32_array_to_str(response_codes, path_index+1));
+      log_info("[MCTS-EXPANSION] With region at index %3u      : %s (Queue Entry %s)",
+                region_index, u32_array_to_str(region.state_sequence, region.state_count), q->fname);
       if (path_index+1 <= region.state_count) {
 //        exact_match = (path_index+1 == region.state_count);
         matched_last_code = response_codes[path_index] == region.state_sequence[region.state_count-1];
@@ -508,13 +540,15 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       if (matched_last_code)  {colour = White;}
       else  {colour = Black;}
       tree_node = append_child(parent_node, response_codes[path_index], colour, response_codes, path_index+1);
+      log_info("[MCTS-EXPANSION] Add a new child %s of parent %s",
+               tree_node_repr(tree_node), tree_node_repr(parent_node));
     }
     if (matched_last_code) {
       TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
       if (tree_node_data->colour == Black && path_index + 1 != len_codes) {
         // NOTE: Flip a node if this is black and is not an termination point
         //  But still was considered as Black
-        log_info("[MCTS-EXPANSION] Flipping node: %s", tree_node_repr(tree_node));
+        log_info("[MCTS-EXPANSION] Flipping node from Black to White: %s", tree_node_repr(tree_node));
 //        tree_log(ROOT, tree_node, 0, 0);
         tree_node_data->colour = White;
         tree_node_data->simulation_child = append_child(tree_node, 999, Golden, response_codes, path_index+1);
@@ -537,13 +571,14 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
                  tree_node_data->id, u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
         assert(region.state_count >= tree_node_data->path_len);
         assert(!memcmp(region.state_sequence, tree_node_data->path,tree_node_data->path_len));
-        log_info("");
+        log_info("Seed appended at index %u of the simulation child of node %s , with region id %u",
+                 sim_data->seeds_count-1, tree_node_repr(tree_node),
+                 sim_data->region_indices[seed->parent_index]);
       }
-
     }
-    log_info(tree_node_repr(tree_node));
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-    log_info("[MCTS-EXPANSION] Node's path:%s", u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+    log_info("[MCTS-EXPANSION] Node %s path:%s",
+             tree_node_repr(tree_node), u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
 
       /* NOTE: Assert the path of each node is saved correctly */
       assert(tree_node_data->path_len == path_index+1);
