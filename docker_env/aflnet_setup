@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 (
-    cd AFLNet_MCTS; 
+    cd AFLNet_Legion; 
     make clean all;
     (
         cd llvm_mode;
