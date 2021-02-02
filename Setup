@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# A temporary setup for ProFuzzBench
+(
+    # cd AFLNet_MCTS;
+    cd aflnet;
+    make clean all;
+    (
+        cd llvm_mode;
+        make;
+    )
+)

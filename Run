@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# A temporary runner for ProFuzzBench
+
+run aflnet out-lightftp-aflnet "-P FTP -D 10000 -q 4 -s 4 -E -K -c ./ftpclean.sh" 3600 5
