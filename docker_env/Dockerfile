@@ -10,7 +10,7 @@ RUN apt-get -y update \
     && apt source libc6 \
     && mkdir -p /build/glibc-e6zv40/ \
     && ln -s /opt/src/glibc-2.23 /build/glibc-e6zv40/ \
-    && mkdir AFLNet_MCTS \
+    && mkdir AFLNet_Legion \
     && groupadd ubuntu \
     && useradd -rm -d /home/ubuntu -s /bin/bash -g ubuntu -G sudo -u 1000 ubuntu -p "$(openssl passwd -1 ubuntu)"
 
@@ -20,15 +20,15 @@ RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime
 # Use ubuntu as default username
 USER ubuntu
 WORKDIR /home/ubuntu
-# Remember to mount AFLNet_MCTS at /home/ubuntu/AFLNet_MCTS
+# Remember to mount AFLNet_Legion at /home/ubuntu/AFLNet_Legion
 
 # Environment
 ENV WORKDIR='/home/ubuntu' \
     TZ=Australia/Melbourne \
-    AFLNET='/home/ubuntu/AFLNet_MCTS' \
-    AFL_NET='/home/ubuntu/AFLNet_MCTS' \
-    AFL_PATH='/home/ubuntu/AFLNet_MCTS' \
-    PATH="${PATH}:/home/ubuntu/AFLNet_MCTS" \
+    AFLNET='/home/ubuntu/AFLNet_Legion' \
+    AFL_NET='/home/ubuntu/AFLNet_Legion' \
+    AFL_PATH='/home/ubuntu/AFLNet_Legion' \
+    PATH="${PATH}:/home/ubuntu/AFLNet_Legion" \
     LLVM_CONFIG='llvm-config-3.8'
 
 COPY aflnet_setup /home/ubuntu/

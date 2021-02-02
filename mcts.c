@@ -440,7 +440,7 @@ TreeNode* Initialisation()
     u32 path[] = {0};
     TreeNode* root = new_tree_node(new_tree_node_data(0, White, path, 1));
     get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
-    log_add_fp(fopen("/home/ubuntu/AFLNet_MCTS/log.ansi", "w+"),2);
+    log_add_fp(fopen("/home/ubuntu/AFLNet_Legion/log.ansi", "w+"),2);
     log_set_quiet(TRUE);
     return root;
 }

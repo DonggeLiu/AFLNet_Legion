@@ -3,10 +3,10 @@
 ## LightFTP
 Build with
 ```shell
-docker build -t aflnet_mcts:LightFTP --no-cache --rm .
+docker build -t aflnet_legion:LightFTP --no-cache --rm .
 ```
-Run with
+In `docker_env`, run with
 ```shell
-rm tmp.cid AFLNet_MCTS/log.ansi; docker run --security-opt seccomp=unconfined  -v=/path/to/AFLNet_MCTS:/home/ubuntu/AFLNet_MCTS -ti --cidfile tmp.cid  aflnet_mcts:LightFTP
+rm tmp.cid ../log.ansi; docker run --security-opt seccomp=unconfined  -v=/path/to/AFLNet_Legion:/home/ubuntu/AFLNet_Legion -ti --cidfile tmp.cid  aflnet_legion:LightFTP
 ```
 
