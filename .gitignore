@@ -23,3 +23,6 @@ afl-llvm-rt-64.o
 afl-llvm-rt.o
 /log.ansi
 /logging.o
+
+# Docker container IDs
+**/*.cid
