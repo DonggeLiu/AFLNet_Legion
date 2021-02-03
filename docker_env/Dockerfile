@@ -29,7 +29,10 @@ ENV WORKDIR='/home/ubuntu' \
     AFL_NET='/home/ubuntu/AFLNet_Legion' \
     AFL_PATH='/home/ubuntu/AFLNet_Legion' \
     PATH="${PATH}:/home/ubuntu/AFLNet_Legion" \
-    LLVM_CONFIG='llvm-config-3.8'
+    LLVM_CONFIG='llvm-config-3.8' \
+    AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 \
+    AFL_SKIP_CPUFREQ=1 \
+    AFL_NO_AFFINITY=1
 
 COPY aflnet_setup /home/ubuntu/
 
