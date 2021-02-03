@@ -793,6 +793,7 @@ struct queue_entry *choose_seed(u32 target_state_id, u8 mode)
 /* Update tree_node-aware variables */
 void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
 {
+  if ((!response_buf_size) || (!response_bytes)) return;
   //MCTS_Expansion + Back Propagation
   //add q to the corresponding tree node -- one function would be needed for this
   //call update_region_annotations so that we know which state we can reach after sending a sequence of messages
@@ -838,7 +839,7 @@ void update_state_aware_variables(struct queue_entry *q, u8 dry_run)
   state_info_t *state;
   unsigned int state_count;
 
-  if (!response_buf_size) return;
+  if ((!response_buf_size) || (!response_bytes)) return;
 
   unsigned int *state_sequence = (*extract_response_codes)(response_buf, response_buf_size, &state_count);
 
@@ -1161,7 +1162,7 @@ HANDLE_RESPONSES:
 
   net_recv(sockfd, timeout, poll_wait_msecs, &response_buf, &response_buf_size);
 
-  if (messages_sent > 0) {
+  if ((messages_sent > 0) && response_bytes) {
     response_bytes[messages_sent - 1] = response_buf_size;
   }
 
