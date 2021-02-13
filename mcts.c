@@ -350,12 +350,14 @@ char* tree_node_repr(TreeNode* tree_node)
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
   char* message = NULL;
 
-  message_append(&message, "\033[1;%dm %03u, score: %lf (%lf + %lf)\033[0m",
+  message_append(&message, "\033[1;%dm %03u: %lf [%lf + %lf] {%03u, %03u}\033[0m",
            colour_encoder(tree_node_data->colour),
            tree_node_data->id,
            tree_node_score(tree_node),
            tree_node_exploitation_score(tree_node),
-           tree_node_exploration_score(tree_node));
+           tree_node_exploration_score(tree_node),
+           tree_node_data->selected,
+           tree_node_data->discovered);
   return message;
 }
 
