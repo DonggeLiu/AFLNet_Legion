@@ -9248,10 +9248,10 @@ int main(int argc, char** argv) {
       if (state_selection_algo == MCTS) {
 
         cur_tree_node = ROOT;
-        tree_log(ROOT, cur_tree_node, 0, -1);
-        log_info("[MAIN LOOP] Node selection starts from: %s", tree_node_repr(cur_tree_node));
+//        tree_log(ROOT, cur_tree_node, 0, -1);
+        log_debug("[MAIN LOOP] Node selection starts from: %s", tree_node_repr(cur_tree_node));
         cur_seed = Selection(&cur_tree_node);
-        log_info("[MAIN LOOP] Node selection ends at: %s", tree_node_repr(cur_tree_node));
+        log_debug("[MAIN LOOP] Node selection ends at: %s", tree_node_repr(cur_tree_node));
 //        tree_node_print(cur_tree_node);
 
         selected_seed = (struct queue_entry*) cur_seed->q;
