@@ -11,7 +11,7 @@ enum score_function SCORE_FUNCTION = UCT;
 
 
 /* Statistics */
-uint ROUND = 0
+uint ROUND = 0;
 
 
 /* ============================================== TreeNode Functions ============================================== */
