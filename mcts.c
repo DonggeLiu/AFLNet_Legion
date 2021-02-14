@@ -612,7 +612,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   /* NOTE: Stats propagation of the seed is done here */
   seed->discovered += *is_new;
-  seed_selected->selected += 1;
+  seed->selected += 1;
   return tree_node;
 }
 
