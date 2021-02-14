@@ -617,15 +617,24 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
 void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new)
 {
-  TreeNodeData* tree_node_data = get_tree_node_data(leaf_selected);
+  log_info("[PROPAGATION] Back-propagating from SimNode: %s", tree_node_repr(leaf_selected));
+  log_info("[PROPAGATION] The parent of the SimNode is : %s", tree_node_repr(leaf_selected->parent));
+
+  TreeNode* leaf_parent = leaf_selected;
+  TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);
   tree_node_data->discovered += is_new;
-  while (leaf_selected) {
-    TreeNodeData* tree_node_data = get_tree_node_data(leaf_selected);
+
+
+  while (leaf_parent) {
+    TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);
     tree_node_data->selected += 1;
-    leaf_selected = leaf_selected->parent;
+    log_info("[PROPAGATION] Back-propagated: %s", tree_node_repr(leaf_parent));
+    leaf_parent = leaf_parent->parent;
   }
   seed_selected->discovered += is_new;
   seed_selected->selected += 1;
+
+  tree_log(ROOT, leaf_selected, 0, is_new);
 }
 
 void parent(TreeNode* child, TreeNode** parent){
