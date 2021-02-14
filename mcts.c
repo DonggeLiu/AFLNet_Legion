@@ -612,6 +612,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   /* NOTE: Stats propagation of the seed is done here */
   seed->discovered += *is_new;
+  seed_selected->selected += 1;
   return tree_node;
 }
 
@@ -631,8 +632,8 @@ void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean i
     log_info("[PROPAGATION] Back-propagated: %s", tree_node_repr(leaf_parent));
     leaf_parent = leaf_parent->parent;
   }
-  seed_selected->discovered += is_new;
-  seed_selected->selected += 1;
+//  seed_selected->discovered += is_new;
+//  seed_selected->selected += 1;
 
   tree_log(ROOT, leaf_selected, 0, is_new);
 }
