@@ -9,6 +9,11 @@ gboolean PERSISTENT = FALSE;
 gboolean COVERAGE_ONLY = TRUE;
 enum score_function SCORE_FUNCTION = UCT;
 
+
+/* Statistics */
+uint ROUND = 0
+
+
 /* ============================================== TreeNode Functions ============================================== */
 
 TreeNodeData* new_tree_node_data (u32 response_code, enum node_colour colour, u32* path, u32 path_len)
@@ -449,6 +454,8 @@ TreeNode* Initialisation()
 
 seed_info_t* Selection(TreeNode** tree_node)
 {
+    ROUND += 1;
+    log_info("[SELECTION] ==========< ROUND %03d >==========", ROUND);
     assert(G_NODE_IS_ROOT(*tree_node));
 
     *tree_node = select_tree_node(*tree_node);
