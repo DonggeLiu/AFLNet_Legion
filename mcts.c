@@ -432,7 +432,7 @@ seed_info_t* select_seed(TreeNode* tree_node_selected)
 {
     seed_info_t* seed = best_seed(tree_node_selected);
     /* NOTE: Selected stats propagation of the seed is done here */
-    seed->selected++;
+//    seed->selected++;
     return seed;
 }
 
@@ -610,9 +610,10 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
 void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new)
 {
+  TreeNodeData* tree_node_data = get_tree_node_data(leaf_selected);
+  tree_node_data->discovered += is_new;
   while (leaf_selected) {
     TreeNodeData* tree_node_data = get_tree_node_data(leaf_selected);
-//    tree_node_data->discovered += is_new;
     tree_node_data->selected += 1;
     leaf_selected = leaf_selected->parent;
   }
