@@ -426,7 +426,7 @@ TreeNode* select_tree_node(TreeNode* parent_tree_node)
 //        g_print("\n");
         parent_tree_node = best_child(parent_tree_node);
         /* NOTE: Selected stats propagation of nodes along the selection path is done here */
-//        get_tree_node_data(parent_tree_node)->selected++;
+        get_tree_node_data(parent_tree_node)->selected++;
         assert(parent_tree_node);
     }
     return parent_tree_node;
@@ -437,7 +437,7 @@ seed_info_t* select_seed(TreeNode* tree_node_selected)
 {
     seed_info_t* seed = best_seed(tree_node_selected);
     /* NOTE: Selected stats propagation of the seed is done here */
-//    seed->selected++;
+    seed->selected++;
     return seed;
 }
 
@@ -612,7 +612,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   /* NOTE: Stats propagation of the seed is done here */
   seed->discovered += *is_new;
-  seed->selected += 1;
+//  seed->selected += 1;
   return tree_node;
 }
 
@@ -626,12 +626,12 @@ void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean i
   tree_node_data->discovered += is_new;
 
 
-  while (leaf_parent) {
-    TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);
-    tree_node_data->selected += 1;
-    log_info("[PROPAGATION] Back-propagated: %s", tree_node_repr(leaf_parent));
-    leaf_parent = leaf_parent->parent;
-  }
+//  while (leaf_parent) {
+//    TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);
+//    tree_node_data->selected += 1;
+//    log_info("[PROPAGATION] Back-propagated: %s", tree_node_repr(leaf_parent));
+//    leaf_parent = leaf_parent->parent;
+//  }
 //  seed_selected->discovered += is_new;
 //  seed_selected->selected += 1;
 
