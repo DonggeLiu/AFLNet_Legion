@@ -30,7 +30,7 @@
 #define TreeData(o) (TreeData*)(o)
 #define TreeNode GNode
 
-#define MAX_TREE_LOG_DEPTH 100
+#define MAX_TREE_LOG_DEPTH 10
 
 enum node_colour{White, Red, Golden, Purple, Black};
 enum score_function{Random, UCT};
