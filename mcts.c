@@ -317,7 +317,7 @@ int colour_encoder(enum node_colour colour) {
             colour_code = 35;
             break;
         case Black:
-            colour_code = 30;
+            colour_code = 90;
             break;
     }
     assert(colour_code);
