@@ -100,7 +100,7 @@ double tree_node_exploration_score(TreeNode* tree_node)
     TreeNodeData* node_data = get_tree_node_data(tree_node);
     TreeNodeData* parent_data = get_tree_node_data(tree_node->parent);
 
-    return  RHO * sqrt(2 * log((double) parent_data->selected) / node_data->selected);
+    return  RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected);
 }
 
 double seed_exploration_score(TreeNode* tree_node, int seed_index)
