@@ -103,7 +103,7 @@ double tree_node_exploration_score(TreeNode* tree_node)
     TreeNodeData* node_data = get_tree_node_data(tree_node);
     if (!node_data->selected) { return INFINITY; }
     TreeNodeData* parent_data = get_tree_node_data(tree_node->parent);
-    log_info("%lf * sqrt(2 * log(%lf) / %lf", RHO, (double) parent_data->selected, (double) node_data->selected);
+    log_debug("%lf * sqrt(2 * log(%lf) / %lf", RHO, (double) parent_data->selected, (double) node_data->selected);
 
     return  RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected);
 }
