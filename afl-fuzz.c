@@ -828,6 +828,11 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   //  print_path(execution_leaf);
 
   /* NOTE: MCTS Propagation: Record the result to the node and seed selected */
+
+  /* NOTE: Temporarily only propagate stats to SimNote during normal run
+   *  When the propagation logic changes, check this as well */
+  if (dry_run) { return; }
+
   Propagation(cur_tree_node, cur_seed, is_new);
 }
 
