@@ -90,6 +90,9 @@ double tree_node_exploitation_score(TreeNode* tree_node)
 double seed_exploitation_score(TreeNode* tree_node, int seed_index)
 {
     seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
+
+    if (!target_seed->selected) return INFINITY;
+
     return (double) target_seed->discovered / target_seed->selected;
 }
 
@@ -98,6 +101,7 @@ double tree_node_exploration_score(TreeNode* tree_node)
     if (G_NODE_IS_ROOT(tree_node)) return INFINITY;
     g_assert(tree_node->parent);
     TreeNodeData* node_data = get_tree_node_data(tree_node);
+    if (!node_data->selected) { return INFINITY; }
     TreeNodeData* parent_data = get_tree_node_data(tree_node->parent);
     log_info("%lf * sqrt(2 * log(%lf) / %lf", RHO, (double) parent_data->selected, (double) node_data->selected);
 
@@ -108,6 +112,7 @@ double seed_exploration_score(TreeNode* tree_node, int seed_index)
 {
     seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
     TreeNodeData* node_data = get_tree_node_data(tree_node);
+    if (!target_seed->selected) { return INFINITY; }
     return RHO * sqrt(2 * log((double)node_data->selected)/target_seed->selected);
 }
 
@@ -126,11 +131,11 @@ double tree_node_score(TreeNode* tree_node)
 
     if (get_tree_node_data(tree_node)->fully_explored) return -INFINITY;
 
-    if (G_NODE_IS_ROOT(tree_node))  return INFINITY;
+//    if (G_NODE_IS_ROOT(tree_node))  return INFINITY;
 
     // if (fits_fish_bone_optimisation(tree_node)) return -INFINITY;
 
-    if (!get_tree_node_data(tree_node)->selected)  return INFINITY;
+//    if (!get_tree_node_data(tree_node)->selected)  return INFINITY;
 
     double exploit_score = tree_node_exploitation_score(tree_node);
     double explore_score = tree_node_exploration_score(tree_node);
@@ -146,7 +151,7 @@ double seed_score(TreeNode* tree_node, int seed_index)
 
     seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
 
-    if (!target_seed->selected)  return INFINITY;
+//    if (!target_seed->selected)  return INFINITY;
 
     double exploit_score = seed_exploitation_score(tree_node, seed_index);
     double explore_score = seed_exploration_score(tree_node, seed_index);
