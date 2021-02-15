@@ -422,6 +422,7 @@ u32* collect_region_path(region_t region, u32* path_len)
 
 TreeNode* select_tree_node(TreeNode* parent_tree_node)
 {
+    get_tree_node_data(parent_tree_node)->selected++;
     while (get_tree_node_data(parent_tree_node)->colour != Golden) {
 //        tree_node_print(parent_tree_node);
 //        g_print("\n");
