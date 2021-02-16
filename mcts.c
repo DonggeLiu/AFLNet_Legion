@@ -456,7 +456,7 @@ TreeNode* Initialisation()
     get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
     char log_file[100];
     snprintf(log_file, sizeof(log_file), "%s", getenv("AFLNET_LEGION_LOG"));
-    printf("LOG PATH: %s", log_file);
+    log_info("LOG PATH: %s", log_file);
     log_add_fp(fopen(log_file, "w+"),2);
     log_set_quiet(TRUE);
     return root;
