@@ -347,7 +347,7 @@ void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
     return;
   }
   message_append(&message, tree_node_repr(tree_node));
-  if (tree_node == mark_node && found >= 0) message_append(&message, "\033[1;32m <=< found\033[0m");
+  if (tree_node == mark_node && found >= 0) message_append(&message, "\033[1;32m <=< found %u\033[0m", found);
   log_info(message);
 
   if (g_node_n_children(tree_node)) indent++;
