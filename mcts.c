@@ -637,7 +637,7 @@ s//     *  Tried disable propagation in both dry-run and 1st run,
 //     *  did not work */
     /*  NOTE: When the propagation logic changes, check this as well */
 
-    log_info("[PROPAGATION] Skipping propagation in round %03u", ROUND);
+    log_info("[PROPAGATION] Skipping propagations of the SimNode in round %03u", ROUND);
     return;
   }
 
