@@ -655,7 +655,7 @@ void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean i
 //  seed_selected->discovered += is_new;
 //  seed_selected->selected += 1;
 
-  tree_log(ROOT, leaf_selected, 0, is_new);
+//  tree_log(ROOT, leaf_selected, 0, is_new);
 }
 
 void parent(TreeNode* child, TreeNode** parent){

@@ -9298,6 +9298,7 @@ int main(int argc, char** argv) {
       }
 
       skipped_fuzz = fuzz_one(use_argv);
+      tree_log(ROOT, cur_tree_node, 0,  cur_discovered);
 
       if (!stop_soon && sync_id && !skipped_fuzz) {
 
