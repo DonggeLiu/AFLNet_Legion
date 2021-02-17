@@ -414,6 +414,7 @@ kliter_t(lms) *M2_prev, *M2_next;
 TreeNode* ROOT;
 TreeNode* cur_tree_node;
 seed_info_t* cur_seed;
+uint cur_discovered;
 
 //Function pointers pointing to Protocol-specific functions
 unsigned int* (*extract_response_codes)(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref) = NULL;
@@ -829,6 +830,7 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
 
   /* NOTE: MCTS Propagation: Record the result to the node and seed selected */
   Propagation(cur_tree_node, cur_seed, is_new);
+  cur_discovered += is_new;
 }
 
 /* Update state-aware variables */
@@ -9246,7 +9248,7 @@ int main(int argc, char** argv) {
       struct queue_entry *selected_seed = NULL;
    
       if (state_selection_algo == MCTS) {
-
+        cur_discovered = 0;
         cur_tree_node = ROOT;
 //        tree_log(ROOT, cur_tree_node, 0, -1);
         log_debug("[MAIN LOOP] Node selection starts from: %s", tree_node_repr(cur_tree_node));
