@@ -631,10 +631,10 @@ void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean i
   log_info("[PROPAGATION] Back-propagating from SimNode: %s", tree_node_repr(leaf_selected));
   log_info("[PROPAGATION] The parent of the SimNode is : %s", tree_node_repr(leaf_selected->parent));
 
-  if (ROUND <= 1) {
-    /* NOTE: Temporarily only propagate stats to SimNote from the 2nd normal run
-     *  This is because it is considered unfair to give credit of the finding in the dry-run and 1st run
-     *  to the simulation child of the root; */
+  if (ROUND <= 0) {
+    /* NOTE: Temporarily only propagate stats to SimNote during normal run
+s//     *  Tried disable propagation in both dry-run and 1st run,
+//     *  did not work */
     /*  NOTE: When the propagation logic changes, check this as well */
 
     log_info("[PROPAGATION] Skipping propagation in round %03u", ROUND);
