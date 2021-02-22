@@ -360,8 +360,10 @@ void seed_log(TreeNode* tree_node, seed_info_t* seed_selected)
 {
   char* message = NULL;
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-  for (int i = 0; i < tree_node_data->seeds_count; ++i) {
-    message_append(&message, seed_repr(tree_node, i, tree_node_data->seeds[i]));
+  for (uint i = 0; i < tree_node_data->seeds_count; ++i) {
+    message = NULL;
+    seed_info_t* seed = tree_node_data->seeds[i];
+    message_append(&message, seed_repr(tree_node, i, seed));
     if (seed_selected && tree_node_data->seeds[i] == seed_selected) {message_append(&message, "<= Selected");}
     log_info(message);
   }
@@ -374,7 +376,7 @@ char* seed_repr(TreeNode* tree_node, uint seed_index, seed_info_t* seed)
   message_append(&message,
                  "Seed %03u: %lf {%03u, %03u} (Name: %s)",
                  seed->parent_index, seed_score(tree_node, seed_index),
-                 seed->selected, seed->discovered, queue_entry->fnames);
+                 seed->selected, seed->discovered, queue_entry->fname);
   return message;
 }
 
@@ -497,7 +499,7 @@ seed_info_t* Selection(TreeNode** tree_node)
 //    g_printf("\tTree node selected: ");
 //    tree_node_print(tree_node);
 //    struct queue_entry * seed_selected = NULL;
-    seed_log(tree_node, NULL);
+    seed_log(*tree_node, NULL);
     seed_info_t* seed_selected = select_seed(*tree_node);
     struct queue_entry* q = seed_selected->q;
 

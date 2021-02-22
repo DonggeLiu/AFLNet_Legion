@@ -139,7 +139,7 @@ TreeNode* append_child(TreeNode* tree_node, u32 child_response_code, enum node_c
 
 void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found);
 char* tree_node_repr(TreeNode* tree_node);
-
+char* seed_repr(TreeNode* tree_node, uint seed_index, seed_info_t* seed);
 /* ================================================ MCTS Functions ================================================ */
 TreeNode* select_tree_node(TreeNode* parent_tree_node);
 seed_info_t* select_seed(TreeNode* tree_node_selected);
