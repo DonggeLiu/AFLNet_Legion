@@ -661,8 +661,9 @@ void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean i
 
   if (ROUND <= 0) {
     /* NOTE: Temporarily only propagate stats to SimNote during normal run
-s//     *  Tried disable propagation in both dry-run and 1st run,
-//     *  did not work */
+//     *  Tried disable propagation in both dry-run and 1st run,
+//     *  did not work
+     */
     /*  NOTE: When the propagation logic changes, check this as well */
 
     log_info("[PROPAGATION] Skipping propagations of the SimNode in round %03u", ROUND);
