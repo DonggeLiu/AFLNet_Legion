@@ -388,7 +388,7 @@ char* seed_repr(TreeNode* tree_node, uint seed_index, seed_info_t* seed)
   char* message = NULL;
   struct queue_entry* queue_entry = seed->q;
   message_append(&message,
-                 "Seed %03u: %lf {%03u, %03u} (Name: %s)",
+                 "Seed %03u: %06.2lf {%03u, %03u} (Name: %s)",
                  seed->parent_index, seed_score(tree_node, seed_index),
                  seed->selected, seed->discovered, queue_entry->fname);
   return message;
@@ -399,7 +399,7 @@ char* tree_node_repr(TreeNode* tree_node)
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
   char* message = NULL;
 
-  message_append(&message, "\033[1;%dm %03u: %lf [%lf + %lf] {%03u, %03u}\033[0m",
+  message_append(&message, "\033[1;%dm %03u: %06.2lf [%06.2lf + %06.2lf] {%03u, %03u}\033[0m",
            colour_encoder(tree_node_data->colour),
            tree_node_data->id,
            tree_node_score(tree_node),
