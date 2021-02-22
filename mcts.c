@@ -143,7 +143,7 @@ double tree_node_score(TreeNode* tree_node)
     return exploit_score + explore_score;
 }
 
-double seed_score(TreeNode* tree_node, int seed_index)
+double seed_score(TreeNode* tree_node, u32 seed_index)
 {
     // return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
