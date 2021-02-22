@@ -528,7 +528,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   gboolean matched_last_code = FALSE;
 
   // Construct seed with queue_entry q
-  seed_info_t* seed = construct_seed_with_queue_entry(q);
+  seed_info_t* seed = NULL;
 
   // Check if the response code sequence is new
   // And add the new queue entry to each node along the paths
@@ -601,6 +601,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       if (tree_node_data->colour == White && q->regions[matching_region_index].state_count < len_codes) {
         //NOTE: Only add seed to node if node colour is White  (Otherwise there is no simulation child)
         // and the matching region is not the last region in the q, (otherwise M2 count is 0)
+        seed = construct_seed_with_queue_entry(q);
         add_seed_to_node(seed, matching_region_index, get_simulation_child(tree_node));
         TreeNodeData* sim_data = get_tree_node_data(get_simulation_child(tree_node));
         seed_info_t* seed = sim_data->seeds[sim_data->seeds_count-1];
