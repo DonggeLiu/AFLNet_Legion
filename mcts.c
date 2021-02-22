@@ -408,6 +408,7 @@ seed_info_t* construct_seed_with_queue_entry(void *q)
 
 void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode * node)
 {
+  assert(seed);
   assert(get_tree_node_data(node)->colour == Golden);
   /*NOTE: Figure out M2 at here so that we don't have to do it repeatedly when the same queue_entry is selected*/
   struct queue_entry *q = seed->q;
@@ -501,6 +502,7 @@ seed_info_t* Selection(TreeNode** tree_node)
 //    struct queue_entry * seed_selected = NULL;
     seed_log(*tree_node, NULL);
     seed_info_t* seed_selected = select_seed(*tree_node);
+    seed_log(*tree_node, seed_selected);
     struct queue_entry* q = seed_selected->q;
 
     log_info("[SELECTION] Selection seed  : %s", q->fname);
