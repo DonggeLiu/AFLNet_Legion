@@ -648,8 +648,8 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       parent_node = parent_node->parent;
   }
 
-  /* NOTE: Stats propagation of the seed is done here */
-  seed->discovered += *is_new;
+//  /* NOTE: Stats propagation of the seed is done here */
+//  seed->discovered += *is_new;
 //  seed->selected += 1;
   return tree_node;
 }
@@ -673,6 +673,8 @@ s//     *  Tried disable propagation in both dry-run and 1st run,
   TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);
   tree_node_data->discovered += is_new;
 
+  /* NOTE: Stats propagation of the seed is done here */
+  seed_selected->discovered += is_new;
 
 //  while (leaf_parent) {
 //    TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);
