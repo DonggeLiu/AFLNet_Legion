@@ -521,6 +521,8 @@ seed_info_t* Selection(TreeNode** tree_node)
 //    tree_node_print(tree_node);
 //    struct queue_entry * seed_selected = NULL;
     seed_log(*tree_node, NULL, "[SELECTION] ");
+
+    assert(tree_node_score(*tree_node) > -INFINITY);
     seed_info_t* seed_selected = select_seed(*tree_node);
     seed_selected_log(*tree_node, seed_selected, "[SELECTION] ");
     struct queue_entry* q = seed_selected->q;
