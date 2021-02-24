@@ -544,14 +544,40 @@ TreeNode* select_tree_node(TreeNode* parent_tree_node)
 
 gboolean is_fully_explored(TreeNode* parent_tree_node)
 {
+  /*NOTE: There are four possibilities:
+   * 1. White parent + white children:
+   *  By definition, the parent is not fully explored even if all children are.
+   *  Because there might be missing children that can be found by simulating from parent's SimNode
+   * 2. White parent + Black children:
+   *  Same above, as being a black child only means all existing inputs bound the black child with a grandchild
+   *  (i.e. by making the server returns more than response code as the same time.)
+   *  It has nothing to do with the parent node
+   * 3. Black parent + white child:
+   *  This is case we care about.
+   *  As far as we know, it happens when the white child is a leaf. There could be other corner cases that cause this.
+   *  Here I use -inf to represent "being a leaf" or "fully explored", in case of other corner cases.
+   *  But the implication is the same:
+   *   a) The white child must be the only child;
+   *   b) The parent does not have any SimNode;
+   *   c) The black parent should not be selected, otherwise we will fuzz a leaf, which is problematic and unnecessary.
+   * 4. Black parent + black child:
+   *  This should be the same as 3, except the black child is not a leaf.
+   *  The black child might have a single white leaf.
+   *  After marking the black child fully explored in the past, this will make the black parent fully explored, too.
+   *  Again:
+   *   a) the black child must be the only child;
+   *   b) The parent does not have any SimNode;
+   *   c) The black parent should not be selected, otherwise we will fuzz a leaf, which is problematic and unnecessary.
+   * In short:
+   *  a) If the parent is not black, it is not fully explored, return False;
+   *  b) If the parent is black, it is fully explored only if the score of its only child is -inf.
+   */
   if (get_tree_node_data(parent_tree_node)->fully_explored) {return TRUE;}
+  if (get_tree_node_data(parent_tree_node)->colour != Black) {return FALSE;}
 
-  for (u32 child_index; child_index < g_node_n_children(parent_tree_node); child_index++)
-  {
-    if (get_tree_node_data(g_node_nth_child(parent_tree_node, child_index))->colour == Golden) {continue;}
-    if (tree_node_score(g_node_nth_child(parent_tree_node, child_index)) > -INFINITY) {return FALSE;}
-  }
-  return TRUE;
+  assert(g_node_n_children(parent_tree_node) == 1);
+  assert(get_tree_node_data(g_node_nth_child(parent_tree_node, 0))->colour != Golden);
+  return tree_node_score(g_node_nth_child(parent_tree_node, 0)) == -INFINITY;
 }
 
 seed_info_t* select_seed(TreeNode* tree_node_selected)
