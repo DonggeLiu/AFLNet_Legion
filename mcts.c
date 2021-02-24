@@ -577,19 +577,25 @@ TreeNode* Initialisation()
 seed_info_t* Selection(TreeNode** tree_node)
 {
     ROUND += 1;
+    TreeNode* root = *tree_node;
     log_info("[SELECTION] ==========< ROUND %03d >==========", ROUND);
     assert(G_NODE_IS_ROOT(*tree_node));
 
     *tree_node = select_tree_node(*tree_node);
     log_info("[SELECTION] Selected node   : %s", tree_node_repr(*tree_node));
     log_info("[SELECTION] Selected parent : %s", tree_node_repr((*tree_node)->parent));
-//    prepare_path_str(*tree_node);
-//    g_printf("\tTree node selected: ");
-//    tree_node_print(tree_node);
-//    struct queue_entry * seed_selected = NULL;
-    seed_log(*tree_node, NULL, "[SELECTION] ");
+
+    while (tree_node_score((*tree_node)->parent) == -INFINITY) {
+      log_info("[SELECTION] The score of the parent of the simulation child is -inf, redo selection");
+      assert(G_NODE_IS_ROOT(root));
+      *tree_node = select_tree_node(root);
+      log_info("[SELECTION] Selected node   : %s", tree_node_repr(*tree_node));
+      log_info("[SELECTION] Selected parent : %s", tree_node_repr((*tree_node)->parent));
+    }
 
     assert(tree_node_score((*tree_node)->parent) > -INFINITY);
+    seed_log(*tree_node, NULL, "[SELECTION] ");
+
     seed_info_t* seed_selected = select_seed(*tree_node);
     seed_selected_log(*tree_node, seed_selected, "[SELECTION] ");
     struct queue_entry* q = seed_selected->q;
