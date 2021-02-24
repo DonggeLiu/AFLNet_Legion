@@ -203,7 +203,7 @@ TreeNode* best_child(TreeNode* tree_node)
     log_info("max score: %lf, current score: %lf, number of ties: %d\n", max_score, score, number_of_ties);
     for (u32 child_index = 0; child_index < number_of_children; child_index++) {
         gdouble score = tree_node_score(g_node_nth_child(tree_node, child_index));
-        log_info("Current index %u: %s", child_index, tree_node_repr(g_node_n_children(tree_node, child_index)));
+        log_info("Current index %u: %s", child_index, tree_node_repr(g_node_nth_child(tree_node, child_index)));
         if (score < max_score) continue;
         if (score > max_score) number_of_ties = 0;
         max_score = score;
@@ -230,7 +230,7 @@ TreeNode* best_child(TreeNode* tree_node)
     u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
     u32 winner = ties[winner_index];
     log_info("Winner index in ties is: %u", winner_index);
-    log_info("Winner is the %u th child: %s", winner, tree_node_repr(g_node_n_children(tree_node, winner)));
+    log_info("Winner is the %u th child: %s", winner, tree_node_repr(g_node_nth_child(tree_node, winner)));
     return g_node_nth_child(tree_node, winner);
 }
 
