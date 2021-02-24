@@ -249,7 +249,7 @@ seed_info_t* best_seed(TreeNode* tree_node)
 
     log_debug("[BEST_SEED] Selecting the best seed of: %s", tree_node_repr(tree_node));
     if (number_of_seeds == 1) {
-        log_debug("[BEST_SEED] Only one seed: %s", seed_repr(tree_node, 0);
+        log_debug("[BEST_SEED] Only one seed: %s", seed_repr(tree_node, 0));
         return get_tree_node_data(tree_node)->seeds[0];
     }
 
