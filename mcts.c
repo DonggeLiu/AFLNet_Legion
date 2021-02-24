@@ -249,7 +249,7 @@ seed_info_t* best_seed(TreeNode* tree_node)
 
     log_debug("[BEST_SEED] Selecting the best seed of: %s", tree_node_repr(tree_node));
     if (number_of_seeds == 1) {
-        log_debug("[BEST_SEED] Only one seed: %s", seed_repr(tree_node, 0));
+        log_debug("[BEST_SEED] Only one seed: %s", seed_repr(tree_node, 0, NULL));
         return get_tree_node_data(tree_node)->seeds[0];
     }
 
@@ -259,7 +259,7 @@ seed_info_t* best_seed(TreeNode* tree_node)
         double score = seed_score(tree_node, seed_index);
 
         log_debug("[BEST_SEED] Current index %u: %lf (%s)",
-                 seed_index, score, seed_repr(tree_node, seed_index));
+                 seed_index, score, seed_repr(tree_node, seed_index, NULL));
         if (score < max_score) continue;
         if (score > max_score) number_of_ties = 0;
         max_score = score;
@@ -269,26 +269,26 @@ seed_info_t* best_seed(TreeNode* tree_node)
                  max_score, score, number_of_ties);
         for (u32 tie_index; tie_index < number_of_ties; tie_index++)
         {
-            log_debug("[BEST_SEED] Tie index %u: %s", tie_index, seed_repr(tree_node, ties[tie_index]));
+            log_debug("[BEST_SEED] Tie index %u: %s", tie_index, seed_repr(tree_node, ties[tie_index], NULL));
         }
     }
 
     if (number_of_ties == 1)
     {
-        log_debug("[BEST_SEED] Only one candidate: %s", seed_repr(tree_node, ties[0]));
+        log_debug("[BEST_SEED] Only one candidate: %s", seed_repr(tree_node, ties[0], NULL));
         return get_tree_node_data(tree_node)->seeds[ties[0]];
     }
 
     log_debug("[BEST_SEED] Best seed has %u candidates", number_of_ties);
     for (u32 i = 0; i < number_of_ties; ++i) {
         log_debug("[BEST_SEED] The %u th candidates in ties is the %u th seed: %s",
-               i, ties[i], seed_repr(tree_node, ties[i]));
+               i, ties[i], seed_repr(tree_node, ties[i], NULL));
     }
 
     u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
     u32 winner = ties[winner_index];
     log_debug("[BEST_SEED] Winner index in ties is: %u", winner_index);
-    log_debug("[BEST_SEED] Winner is the %u th seed: %s", winner, seed_repr(tree_node, winner));
+    log_debug("[BEST_SEED] Winner is the %u th seed: %s", winner, seed_repr(tree_node, winner, NULL));
 
     return get_tree_node_data(tree_node)->seeds[winner];
 }
@@ -423,6 +423,8 @@ void seed_selected_log(TreeNode* tree_node, seed_info_t* seed_selected, char* lo
 
 char* seed_repr(TreeNode* tree_node, uint seed_index, seed_info_t* seed)
 {
+  if (!seed)  {seed = get_tree_node_data(tree_node)->seeds[seed_index];}
+  else {assert(seed == get_tree_node_data(tree_node)->seeds[seed_index]);}
   char* message = NULL;
   struct queue_entry* queue_entry = seed->q;
   message_append(&message,
