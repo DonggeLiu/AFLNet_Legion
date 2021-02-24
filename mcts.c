@@ -195,36 +195,43 @@ TreeNode* best_child(TreeNode* tree_node)
     u32 ties[number_of_children];
 
     if (number_of_children == 1) {
-//        g_printf("Only one child: ");
-//        tree_node_print(g_node_nth_child(tree_node, 0));
+        log_info("Only one child: ");
+        log_info(tree_node_repr(g_node_nth_child(tree_node, 0)));
         return g_node_nth_child(tree_node, 0);
     }
 
+    log_info("max score: %lf, current score: %lf, number of ties: %d\n", max_score, score, number_of_ties);
     for (u32 child_index = 0; child_index < number_of_children; child_index++) {
         gdouble score = tree_node_score(g_node_nth_child(tree_node, child_index));
-//        g_printf("max score: %lf, current score: %lf\n", max_score, score);
+        log_info("Current index %u: %s", child_index, tree_node_repr(g_node_n_children(tree_node, child_index)));
         if (score < max_score) continue;
         if (score > max_score) number_of_ties = 0;
         max_score = score;
         ties[number_of_ties] = child_index;
         number_of_ties ++;
-//        g_printf("max score: %lf, current score: %lf, number of ties: %d, current child index: %d\n",
-//               max_score, score, number_of_ties, child_index);
+        log_info("max score: %lf, current score: %lf, number of ties: %d\n", max_score, score, number_of_ties);
+        for (u32 tie_index; tie_index < number_of_ties; tie_index++)
+        {
+          log_info("Tie index %u: %s", tie_index, tree_node_repr(g_node_nth_child(tree_node, ties[tie_index])));
+        }
     }
 
     if (number_of_ties == 1)
     {
-//        g_printf("Only one candidate: ");
-//        tree_node_print(g_node_nth_child(tree_node, ties[0]));
+        log_info("Only one candidate: ");
+        log_info(tree_node_repr(g_node_nth_child(tree_node, ties[0])));
         return g_node_nth_child(tree_node, ties[0]);
     }
 
-//    g_printf("Best child has %d candidates: \n", number_of_ties);
-//    for (int i = 0; i < number_of_ties; ++i) {
-//        tree_node_print(g_node_nth_child(tree_node, ties[i]));
-//    }
-//    g_printf("\n");
-    return g_node_nth_child(tree_node, ties[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties)]);
+    log_info("Best child has %d candidates: \n", number_of_ties);
+    for (int i = 0; i < number_of_ties; ++i) {
+        log_info(tree_node_repr(g_node_nth_child(tree_node, ties[i])));
+    }
+    u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
+    u32 winner = ties[winner_index];
+    log_info("Winner index in ties is: %u", winner_index);
+    log_info("Winner is the %u th child: %s", winner, tree_node_repr(g_node_n_children(tree_node, winner)));
+    return g_node_nth_child(tree_node, winner);
 }
 
 seed_info_t* best_seed(TreeNode* tree_node)
@@ -522,7 +529,7 @@ seed_info_t* Selection(TreeNode** tree_node)
 //    struct queue_entry * seed_selected = NULL;
     seed_log(*tree_node, NULL, "[SELECTION] ");
 
-    assert(tree_node_score(*tree_node) > -INFINITY);
+    assert(tree_node_score((*tree_node)->parent) > -INFINITY);
     seed_info_t* seed_selected = select_seed(*tree_node);
     seed_selected_log(*tree_node, seed_selected, "[SELECTION] ");
     struct queue_entry* q = seed_selected->q;
