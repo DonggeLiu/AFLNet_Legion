@@ -200,7 +200,7 @@ TreeNode* best_child(TreeNode* tree_node)
         return g_node_nth_child(tree_node, 0);
     }
 
-    log_info("max score: %lf, current score: %lf, number of ties: %d\n", max_score, score, number_of_ties);
+    log_info("max score: %lf, number of ties: %d\n", max_score, number_of_ties);
     for (u32 child_index = 0; child_index < number_of_children; child_index++) {
         gdouble score = tree_node_score(g_node_nth_child(tree_node, child_index));
         log_info("Current index %u: %s", child_index, tree_node_repr(g_node_nth_child(tree_node, child_index)));
