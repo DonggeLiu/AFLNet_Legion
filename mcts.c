@@ -506,19 +506,51 @@ u32* collect_region_path(region_t region, u32* path_len)
 
 TreeNode* select_tree_node(TreeNode* parent_tree_node)
 {
+  get_tree_node_data(parent_tree_node)->selected++;
+  while (get_tree_node_data(parent_tree_node)->colour != Golden) {
+    parent_tree_node = best_child(parent_tree_node);
+    log_info("[SELECT_TREE_NODE] Best child is: %s", tree_node_repr(parent_tree_node));
+    /* NOTE: Selected stats propagation of nodes along the selection path is done here */
     get_tree_node_data(parent_tree_node)->selected++;
-    while (get_tree_node_data(parent_tree_node)->colour != Golden) {
-//        tree_node_print(parent_tree_node);
-//        g_print("\n");
-        parent_tree_node = best_child(parent_tree_node);
-        log_info("[SELECT_TREE_NODE] Best child is: %s", tree_node_repr(parent_tree_node));
-        /* NOTE: Selected stats propagation of nodes along the selection path is done here */
-        get_tree_node_data(parent_tree_node)->selected++;
-        assert(parent_tree_node);
+    /*NOTE: If the score of the best child is -inf,
+     * then the score of the parent of the best child should be -inf
+     * e.g. parent is a black node, whose only child is a leaf
+     */
+    assert(tree_node_score(parent_tree_node) > -INFINITY ||
+           (!G_NODE_IS_ROOT(parent_tree_node) && get_tree_node_data(parent_tree_node->parent)->colour == Black));
+    while (tree_node_score(parent_tree_node) == -INFINITY)
+    {
+      log_info("[SELECT_TREE_NODE] The score of the best child is -inf: %s", tree_node_repr(parent_tree_node));
+      /* NOTE: If the score of the root is -inf, then ROOT must be fully explored,
+       *  hence there is no point continuing;
+       */
+      assert(!G_NODE_IS_ROOT(parent_tree_node));
+      parent_tree_node = parent_tree_node->parent;
+      log_info("[SELECT_TREE_NODE] Checking its parent: %s", tree_node_repr(parent_tree_node));
+      if (!is_fully_explored(parent_tree_node)) {
+        log_info("[SELECT_TREE_NODE] Resume selection from its parent: %s", tree_node_repr(parent_tree_node));
+        break;
+      }
+      get_tree_node_data(parent_tree_node)->fully_explored = TRUE;
+      log_info("[SELECT_TREE_NODE] Setting its parent fully explored: %s", tree_node_repr(parent_tree_node));
     }
-    return parent_tree_node;
+    assert(tree_node_score(parent_tree_node) > -INFINITY);
+    assert(parent_tree_node);
+  }
+  return parent_tree_node;
 }
 
+gboolean is_fully_explored(TreeNode* parent_tree_node)
+{
+  if (get_tree_node_data(parent_tree_node)->fully_explored) {return TRUE;}
+
+  for (u32 child_index; child_index < g_node_n_children(parent_tree_node); child_index++)
+  {
+    if (get_tree_node_data(g_node_nth_child(parent_tree_node, child_index))->colour == Golden) {continue;}
+    if (tree_node_score(g_node_nth_child(parent_tree_node, child_index)) > -INFINITY) {return FALSE;}
+  }
+  return TRUE;
+}
 
 seed_info_t* select_seed(TreeNode* tree_node_selected)
 {
