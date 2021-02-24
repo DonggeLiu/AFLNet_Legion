@@ -30,8 +30,9 @@ TreeNodeData* new_tree_node_data (u32 response_code, enum node_colour colour, u3
     //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
 
-    if (colour == Golden) {assert(tree_node_data->id == 999);}
-    else  {assert(tree_node_data->id == tree_node_data->path[tree_node_data->path_len - 1]);}
+//    if (colour == Golden) {assert(tree_node_data->id == 999);}
+//    else  {assert(tree_node_data->id == tree_node_data->path[tree_node_data->path_len - 1]);}
+    assert(tree_node_data->id == tree_node_data->path[tree_node_data->path_len - 1]);
 
     // set statistics
     tree_node_data->selected = 0;
@@ -282,7 +283,7 @@ TreeNode* exists_child(TreeNode* tree_node, u32 target_response_code)
 TreeNode* append_child(TreeNode* tree_node, u32 child_response_code, enum node_colour colour, u32* path, u32 path_len)
 {
     TreeNode* child = g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour, path, path_len));
-    if (colour == White) get_tree_node_data(child)->simulation_child = append_child(child, 999, Golden, path, path_len);
+    if (colour == White) get_tree_node_data(child)->simulation_child = append_child(child, child_response_code, Golden, path, path_len);
 
     return child;
 }
@@ -505,7 +506,7 @@ TreeNode* Initialisation()
 {
     u32 path[] = {0};
     TreeNode* root = new_tree_node(new_tree_node_data(0, White, path, 1));
-    get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
+    get_tree_node_data(root)->simulation_child = append_child(root, 0, Golden, path, 1);
     char log_file[100];
     snprintf(log_file, sizeof(log_file), "%s", getenv("AFLNET_LEGION_LOG"));
     log_info("LOG PATH: %s", log_file);
@@ -626,7 +627,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
         log_debug("[MCTS-EXPANSION] Flipping node from Black to White: %s", tree_node_repr(tree_node));
 //        tree_log(ROOT, tree_node, 0, 0);
         tree_node_data->colour = White;
-        tree_node_data->simulation_child = append_child(tree_node, 999, Golden, response_codes, path_index+1);
+        tree_node_data->simulation_child = append_child(tree_node, tree_node_data->id, Golden, response_codes, path_index+1);
         log_debug(tree_node_repr(tree_node));
 
 //        tree_log(ROOT, tree_node, 0, 0);
