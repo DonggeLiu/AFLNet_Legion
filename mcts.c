@@ -195,76 +195,102 @@ TreeNode* best_child(TreeNode* tree_node)
     u32 number_of_ties = 0;
     u32 ties[number_of_children];
 
+    log_info("[BEST_CHILD] Selecting the best child of: %s", tree_node_repr(tree_node));
     if (number_of_children == 1) {
-        log_info("Only one child: ");
-        log_info(tree_node_repr(g_node_nth_child(tree_node, 0)));
+        log_info("[BEST_CHILD] Only one child: %s", tree_node_repr(g_node_nth_child(tree_node, 0)));
         return g_node_nth_child(tree_node, 0);
     }
-
-    log_info("max score: %lf, number of ties: %d\n", max_score, number_of_ties);
+    log_info("[BEST_CHILD] Multiple children");
+    log_info("[BEST_CHILD] Max score: %lf; Number of ties: %u", max_score, number_of_ties);
     for (u32 child_index = 0; child_index < number_of_children; child_index++) {
         gdouble score = tree_node_score(g_node_nth_child(tree_node, child_index));
-        log_info("Current index %u: %s", child_index, tree_node_repr(g_node_nth_child(tree_node, child_index)));
+        log_info("[BEST_CHILD] Current index %u: %lf (%s)",
+                 child_index, score, tree_node_repr(g_node_nth_child(tree_node, child_index)));
         if (score < max_score) continue;
         if (score > max_score) number_of_ties = 0;
         max_score = score;
         ties[number_of_ties] = child_index;
         number_of_ties ++;
-        log_info("max score: %lf, current score: %lf, number of ties: %d\n", max_score, score, number_of_ties);
+        log_info("[BEST_CHILD] Max score: %lf; Current score: %lf; Number of ties: %u",
+                 max_score, score, number_of_ties);
         for (u32 tie_index; tie_index < number_of_ties; tie_index++)
         {
-          log_info("Tie index %u: %s", tie_index, tree_node_repr(g_node_nth_child(tree_node, ties[tie_index])));
+          log_info("[BEST_CHILD] Tie index %u: %s",
+                   tie_index, tree_node_repr(g_node_nth_child(tree_node, ties[tie_index])));
         }
     }
 
     if (number_of_ties == 1)
     {
-        log_info("Only one candidate: ");
-        log_info(tree_node_repr(g_node_nth_child(tree_node, ties[0])));
+        log_info("[BEST_CHILD] Only one candidate: %s",
+                 tree_node_repr(g_node_nth_child(tree_node, ties[0])));
         return g_node_nth_child(tree_node, ties[0]);
     }
 
-    log_info("Best child has %d candidates: \n", number_of_ties);
-    for (int i = 0; i < number_of_ties; ++i) {
-        log_info(tree_node_repr(g_node_nth_child(tree_node, ties[i])));
+    log_info("[BEST_CHILD] Best child has %u candidates", number_of_ties);
+    for (u32 i = 0; i < number_of_ties; ++i) {
+        log_info("[BEST_CHILD] The %u th candidates in ties is the %u th child: %s",
+                 i, ties[i], tree_node_repr(g_node_nth_child(tree_node, ties[i])));
     }
     u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
     u32 winner = ties[winner_index];
-    log_info("Winner index in ties is: %u", winner_index);
-    log_info("Winner is the %u th child: %s", winner, tree_node_repr(g_node_nth_child(tree_node, winner)));
+    log_info("[BEST_CHILD] Winner index in ties is: %u", winner_index);
+    log_info("[BEST_CHILD] Winner is the %u th child: %s", winner, tree_node_repr(g_node_nth_child(tree_node, winner)));
     return g_node_nth_child(tree_node, winner);
 }
 
 seed_info_t* best_seed(TreeNode* tree_node)
 {
+    TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
     gdouble max_score = -INFINITY;
-    u32 number_of_seeds = get_tree_node_data(tree_node)->seeds_count;
+    u32 number_of_seeds = tree_node_data->seeds_count;
     u32 number_of_ties = 0;
     u32 ties[number_of_seeds];
 
+    log_debug("[BEST_SEED] Selecting the best seed of: %s", tree_node_repr(tree_node));
     if (number_of_seeds == 1) {
-        g_printf("Only one seed: ");
+        log_debug("[BEST_SEED] Only one seed: %s", seed_repr(tree_node, 0);
         return get_tree_node_data(tree_node)->seeds[0];
     }
 
+    log_debug("[BEST_SEED] Multiple seeds");
+    log_debug("[BEST_SEED] Max score: %lf; Number of ties: %u", max_score, number_of_ties);
     for (u32 seed_index = 0; seed_index < number_of_seeds; seed_index++) {
-        int score = seed_score(tree_node, seed_index);
+        double score = seed_score(tree_node, seed_index);
 
+        log_debug("[BEST_SEED] Current index %u: %lf (%s)",
+                 seed_index, score, seed_repr(tree_node, seed_index));
         if (score < max_score) continue;
         if (score > max_score) number_of_ties = 0;
         max_score = score;
         ties[number_of_ties] = seed_index;
         number_of_ties ++;
+        log_debug("[BEST_SEED] Max score: %lf; Current score: %lf; Number of ties: %u",
+                 max_score, score, number_of_ties);
+        for (u32 tie_index; tie_index < number_of_ties; tie_index++)
+        {
+            log_debug("[BEST_SEED] Tie index %u: %s", tie_index, seed_repr(tree_node, ties[tie_index]));
+        }
     }
 
     if (number_of_ties == 1)
     {
-        g_printf("Only one candidate: ");
+        log_debug("[BEST_SEED] Only one candidate: %s", seed_repr(tree_node, ties[0]));
         return get_tree_node_data(tree_node)->seeds[ties[0]];
     }
 
-    u32 winner_index = ties[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties)];
-    return get_tree_node_data(tree_node)->seeds[winner_index];
+    log_debug("[BEST_SEED] Best seed has %u candidates", number_of_ties);
+    for (u32 i = 0; i < number_of_ties; ++i) {
+        log_debug("[BEST_SEED] The %u th candidates in ties is the %u th seed: %s",
+               i, ties[i], seed_repr(tree_node, ties[i]));
+    }
+
+    u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
+    u32 winner = ties[winner_index];
+    log_debug("[BEST_SEED] Winner index in ties is: %u", winner_index);
+    log_debug("[BEST_SEED] Winner is the %u th seed: %s", winner, seed_repr(tree_node, winner));
+
+    return get_tree_node_data(tree_node)->seeds[winner];
 }
 
 TreeNode* exists_child(TreeNode* tree_node, u32 target_response_code)
@@ -485,6 +511,7 @@ TreeNode* select_tree_node(TreeNode* parent_tree_node)
 //        tree_node_print(parent_tree_node);
 //        g_print("\n");
         parent_tree_node = best_child(parent_tree_node);
+        log_info("[SELECT_TREE_NODE] Best child is: %s", tree_node_repr(parent_tree_node));
         /* NOTE: Selected stats propagation of nodes along the selection path is done here */
         get_tree_node_data(parent_tree_node)->selected++;
         assert(parent_tree_node);
