@@ -415,6 +415,7 @@ TreeNode* ROOT;
 TreeNode* cur_tree_node;
 seed_info_t* cur_seed;
 uint cur_discovered;
+uint FUZZ_M3 = 1; /*TODO: Make this a cmdline param?*/
 
 //Function pointers pointing to Protocol-specific functions
 unsigned int* (*extract_response_codes)(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref) = NULL;
@@ -436,6 +437,23 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
   *M2_region_count = q->region_count - *M2_start_region_ID;
   log_info("[find_M2_region] M1: %s", u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence,
                                                        q->regions[*M2_start_region_ID-1].state_count));
+  if (FUZZ_M3) {
+    *M2_region_count = q->region_count - *M2_start_region_ID;
+  } else {
+    //To compute M2_region_count, we identify the first region which has a different annotation
+    //Now we quickly compare the state count, we could make it more fine grained by comparing the exact response codes
+    *M2_region_count = 0;
+    for(u32 i = *M2_start_region_ID; i < q->region_count; i++) {
+      if (q->regions[i].state_count != q->regions[*M2_start_region_ID].state_count) break;
+      (*M2_region_count)++;
+    }
+    for(u32 i = 0; i < q->region_count; i++) {
+      char* message = NULL;
+      message_append(&message, "[find_M2_region] Region %2u: %s",
+                     i, u32_array_to_str(q->regions[i].state_sequence, q->regions[i].state_count));
+      log_info(message);
+    }
+  }
   log_info("[find_M2_region] M2 ID %d, M2 count %d", *M2_start_region_ID, *M2_region_count);
 
   /*NOTE: Assert the path is preserved, if the node is not the Simulation child of the ROOT*/
