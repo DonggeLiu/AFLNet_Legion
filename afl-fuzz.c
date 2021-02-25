@@ -434,9 +434,9 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
     return;
   }
   *M2_start_region_ID = tree_node_data->region_indices[seed->parent_index] + 1;
-  *M2_region_count = q->region_count - *M2_start_region_ID;
-  log_info("[find_M2_region] M1: %s", u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence,
-                                                       q->regions[*M2_start_region_ID-1].state_count));
+  log_info("[find_M2_region] M1       : %s",
+           u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence,
+                            q->regions[*M2_start_region_ID-1].state_count));
   if (FUZZ_M3) {
     *M2_region_count = q->region_count - *M2_start_region_ID;
   } else {
