@@ -183,21 +183,21 @@ char* u32_array_to_str(u32* a, u32 a_len)
     } else {
       str_len += 1;
     }
-    log_debug("code: %d, len %d:\n"
-              "\tlog10(code): %lf\n"
-              "\tfloor(log10(a[i])): %lf\n"
-              "\t(u32)(floor(log10(a[i]))): %d\n"
-              "\t(u32)(floor(log10(a[i]))) + 1: %d",
-              a[i], (u32)(ceil(log10(a[i]))) + 1,
-              log10(a[i]),
-              floor(log10(a[i])),
-              (u32)(floor(log10(a[i]))),
-              (u32)(floor(log10(a[i]))) + 1
-              );
+//    log_debug("code: %d, len %d:\n"
+//              "\tlog10(code): %lf\n"
+//              "\tfloor(log10(a[i])): %lf\n"
+//              "\t(u32)(floor(log10(a[i]))): %d\n"
+//              "\t(u32)(floor(log10(a[i]))) + 1: %d",
+//              a[i], (u32)(ceil(log10(a[i]))) + 1,
+//              log10(a[i]),
+//              floor(log10(a[i])),
+//              (u32)(floor(log10(a[i]))),
+//              (u32)(floor(log10(a[i]))) + 1
+//              );
   }
   // number of delimiters (", ")
   str_len += 2 * (a_len - 1);
-  log_debug("str_len: %d", str_len);
+//  log_debug("str_len: %d", str_len);
   // The size of str = len*char_size + 1
   char* str = (char *) malloc(str_len * sizeof (char) + 1);
 
@@ -257,8 +257,8 @@ int message_append(char** message, const char *fmt, ...) {
   va_start(argptr,fmt);
   int fmt_str_len = vasprintf(&fmt_str, fmt, argptr); /* vasprintf returns the str length including the `\0` */
   va_end(argptr);
-  log_debug("Source_len: %d", fmt_str_len);
-  log_debug("Source: %s", fmt_str);
+//  log_debug("Source_len: %d", fmt_str_len);
+//  log_debug("Source: %s", fmt_str);
 
   if (fmt_str_len == -1) {exit(1);}
 
