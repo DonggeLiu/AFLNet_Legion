@@ -105,7 +105,10 @@ double tree_node_exploration_score(TreeNode* tree_node)
     TreeNodeData* node_data = get_tree_node_data(tree_node);
     if (!node_data->selected) { return INFINITY; }
     TreeNodeData* parent_data = get_tree_node_data(tree_node->parent);
-    log_debug("%lf * sqrt(2 * log(%lf) / %lf", RHO, (double) parent_data->selected, (double) node_data->selected);
+    log_trace("[TREE_NODE_EXPLORATION_SCORE] Node %03u explore score: %lf = %lf * sqrt(2 * log(%lf) / %lf)",
+              node_data->id,
+              RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected),
+              RHO, (double) parent_data->selected, (double) node_data->selected);
 
     return  RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected);
 }
@@ -115,7 +118,10 @@ double seed_exploration_score(TreeNode* tree_node, int seed_index)
     seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
     TreeNodeData* node_data = get_tree_node_data(tree_node);
     if (!target_seed->selected) { return INFINITY; }
-    return RHO * sqrt(2 * log((double)node_data->selected)/target_seed->selected);
+    log_trace("[SEED_EXPLORATION_SCORE] %lf = %lf * sqrt(2 * log(%lf) / %lf)",
+              RHO * sqrt(2 * log((double)node_data->selected)/target_seed->selected),
+              RHO, (double)node_data->selected, (double) target_seed->selected);
+    return RHO * sqrt(2 * log((double)node_data->selected)/ (double) target_seed->selected);
 }
 
 double tree_node_score(TreeNode* tree_node)
@@ -597,9 +603,9 @@ TreeNode* Initialisation()
     get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
     char log_file[100];
     snprintf(log_file, sizeof(log_file), "%s", getenv("AFLNET_LEGION_LOG"));
-    log_info("LOG PATH: %s", log_file);
     log_add_fp(fopen(log_file, "w+"),2);
     log_set_quiet(TRUE);
+    log_info("[INITIALISATION] LOG PATH: %s", log_file);
     return root;
 }
 
@@ -636,7 +642,7 @@ seed_info_t* Selection(TreeNode** tree_node)
     }
     TreeNodeData* tree_node_data = get_tree_node_data(*tree_node);
     log_info("[SELECTION] Selection path    : %s", node_path_str(*tree_node));
-    log_debug("[SELECTION] Selection region : %s",
+    log_debug("[SELECTION] Selection region  : %s",
              u32_array_to_str(q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_sequence,
                               q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_count));
     return seed_selected;
@@ -657,6 +663,11 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   // Construct seed with queue_entry q
   seed_info_t* seed = NULL;
+
+  log_info("[MCTS-EXPANSION] Starts");
+  log_info("[MCTS-EXPANSION] The states of each region in queue entry are:");
+  queue_state_log(q);
+  log_info("State seq has %02u states: %s", len_codes, u32_array_to_str(response_codes, len_codes));
 
   // Check if the response code sequence is new
   // And add the new queue entry to each node along the paths
@@ -722,7 +733,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 //        tree_log(ROOT, tree_node, 0, 0);
         tree_node_data->colour = White;
         tree_node_data->simulation_child = append_child(tree_node, 999, Golden, response_codes, path_index+1);
-        log_debug(tree_node_repr(tree_node));
+        log_debug("[MCTS-EXPANSION] Flipped node: %s", tree_node_repr(tree_node));
 
 //        tree_log(ROOT, tree_node, 0, 0);
       }
@@ -735,14 +746,14 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
         seed_info_t* seed = sim_data->seeds[sim_data->seeds_count-1];
         struct queue_entry* new_q = (struct queue_entry*) seed->q;
         region_t region = q->regions[matching_region_index];
-        log_debug("The following two paths should match");
+        log_debug("[MCTS-EXPANSION] The following two paths should match");
         log_debug("[MCTS-EXPANSION] Region %d: %s",
                  matching_region_index, u32_array_to_str(region.state_sequence, region.state_count));
         log_debug("[MCTS-EXPANSION] Node %d: %s",
                  tree_node_data->id, u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
         assert(region.state_count >= tree_node_data->path_len);
         assert(!memcmp(region.state_sequence, tree_node_data->path,tree_node_data->path_len));
-        log_debug("Seed appended at index %u of the simulation child of node %s , with region id %u",
+        log_debug("[MCTS-EXPANSION] Seed appended at index %u of the simulation child of node %s , with region id %u",
                  sim_data->seeds_count-1, tree_node_repr(tree_node),
                  sim_data->region_indices[seed->parent_index]);
       }
@@ -763,7 +774,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   get_tree_node_data(tree_node)->fully_explored = is_leaf(tree_node);
   log_debug("[MCTS-EXPANSION] Node: %s", tree_node_repr(tree_node));
   if (G_NODE_IS_ROOT(tree_node->parent)) {
-    log_debug("");
+    log_debug("[MCTS-EXPANSION] Reached ROOT;");
   }
 
   /*NOTE: Stats propagation along the execution path is done here*/
