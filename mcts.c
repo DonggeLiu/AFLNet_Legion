@@ -497,7 +497,7 @@ void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode * n
 
   // TOASK: Should we allocate more spaces to avoid repeated reallocation?
   TreeNodeData* node_data = get_tree_node_data(node);
-  node_data->seeds = (void **) ck_realloc (node_data->seeds, (node_data->seeds_count + 1) * sizeof(void *));
+  node_data->seeds = (seed_info_t **) ck_realloc (node_data->seeds, (node_data->seeds_count + 1) * sizeof(void *));
   node_data->seeds[node_data->seeds_count] = (seed_info_t *) seed;
   node_data->region_indices = (u32*) ck_realloc (node_data->region_indices, (node_data->seeds_count + 1) * sizeof(u32));
   node_data->region_indices[node_data->seeds_count] = matching_region_index;

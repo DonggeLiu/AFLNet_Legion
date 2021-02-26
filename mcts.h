@@ -35,29 +35,6 @@
 enum node_colour{White, Red, Golden, Purple, Black};
 enum score_function{Random, UCT};
 
-typedef struct
-{
-    // info
-    u32 id;
-    u32 *path;
-    u32 path_len;
-
-    // statistics
-    u32 selected;
-    u32 discovered;
-
-    // input generation
-    void **seeds; // keeps all seeds reaching this node -- can be casted to struct seed_info_t*
-    u32 seeds_count;
-    u32* region_indices; // Pointing to the index of the region corresponds to the node
-    TreeNode *simulation_child;
-
-    // property
-    enum node_colour colour;
-    gboolean fully_explored;
-    gboolean exhausted;
-} TreeNodeData;
-
 struct queue_entry {
 
     u8* fname;                          /* File name for the test case      */
@@ -96,11 +73,34 @@ struct queue_entry {
 
 typedef struct
 {
-    void *q; // Pointing to a specific queue entry/seed
+    struct queue_entry* q; // Pointing to a specific queue entry/seed
     u32 parent_index;
     u32 selected;
     u32 discovered;
 } seed_info_t;
+
+typedef struct
+{
+    // info
+    u32 id;
+    u32 *path;
+    u32 path_len;
+
+    // statistics
+    u32 selected;
+    u32 discovered;
+
+    // input generation
+    seed_info_t **seeds; // keeps all seeds reaching this node -- can be casted to struct seed_info_t*
+    u32 seeds_count;
+    u32* region_indices; // Pointing to the index of the region corresponds to the node
+    TreeNode *simulation_child;
+
+    // property
+    enum node_colour colour;
+    gboolean fully_explored;
+    gboolean exhausted;
+} TreeNodeData;
 
 /* Precomputation */
 //static TreeNode * ROOT = new_tree_node(new_tree_node_data(0,White,""));
@@ -163,7 +163,7 @@ int colour_encoder(enum node_colour colour);
 
 //void tree_node_print (TreeNode* tree_node);
 
-seed_info_t* construct_seed_with_queue_entry(void* q);
+seed_info_t* construct_seed_with_queue_entry(struct queue_entry* q);
 
 void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode* node);
 
