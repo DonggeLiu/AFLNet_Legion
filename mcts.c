@@ -157,8 +157,7 @@ double seed_score(TreeNode* tree_node, u32 seed_index)
 
     if (SCORE_FUNCTION == Random) return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
-    seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
-
+//    seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
 //    if (!target_seed->selected)  return INFINITY;
 
     double exploit_score = seed_exploitation_score(tree_node, seed_index);
@@ -376,6 +375,45 @@ int colour_encoder(enum node_colour colour) {
     return colour_code;
 }
 
+char* seed_repr(TreeNode* tree_node, uint seed_index, seed_info_t* seed)
+{
+  if (!seed)  {seed = get_tree_node_data(tree_node)->seeds[seed_index];}
+  else {assert(seed == get_tree_node_data(tree_node)->seeds[seed_index]);}
+  char* message = NULL;
+  struct queue_entry* queue_entry = seed->q;
+  message_append(&message,
+                 "Seed %03u: %06.2lf [%06.2lf + %06.2lf] {%03u, %03u} (%s)",
+                 seed->parent_index, seed_score(tree_node, seed_index),
+                 seed_exploitation_score(tree_node, seed_index),
+                 seed_exploration_score(tree_node, seed_index),
+                 seed->selected, seed->discovered, queue_entry->fname);
+  return message;
+}
+
+char* tree_node_repr(TreeNode* tree_node)
+{
+  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+  char* message = NULL;
+
+  message_append(&message, "\033[1;%dm %03u: %06.2lf [%06.2lf + %06.2lf] {%03u, %03u}\033[0m",
+           colour_encoder(tree_node_data->colour),
+           tree_node_data->id,
+           tree_node_score(tree_node),
+           tree_node_exploitation_score(tree_node),
+           tree_node_exploration_score(tree_node),
+           tree_node_data->selected,
+           tree_node_data->discovered);
+  return message;
+}
+
+char* region_state_repr(region_t region)
+{
+  char* message = NULL;
+  message_append(&message, "%02u states: %s",
+                 region.state_count, u32_array_to_str(region.state_sequence, region.state_count));
+  return message;
+}
+
 void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
 {
 //    log_Message* message = (log_Message*) message_init();
@@ -428,39 +466,18 @@ void seed_selected_log(TreeNode* tree_node, seed_info_t* seed_selected, char* lo
   }
 }
 
-char* seed_repr(TreeNode* tree_node, uint seed_index, seed_info_t* seed)
+void queue_state_log(struct queue_entry* queue)
 {
-  if (!seed)  {seed = get_tree_node_data(tree_node)->seeds[seed_index];}
-  else {assert(seed == get_tree_node_data(tree_node)->seeds[seed_index]);}
   char* message = NULL;
-  struct queue_entry* queue_entry = seed->q;
-  message_append(&message,
-                 "Seed %03u: %06.2lf [%06.2lf + %06.2lf] {%03u, %03u} (%s)",
-                 seed->parent_index, seed_score(tree_node, seed_index),
-                 seed_exploitation_score(tree_node, seed_index),
-                 seed_exploration_score(tree_node, seed_index),
-                 seed->selected, seed->discovered, queue_entry->fname);
-  return message;
+  for (u32 region_index = 0; region_index < queue->region_count; ++region_index) {
+    message = NULL;
+    message_append(&message, "Region %2u has %s", region_index, region_state_repr(queue->regions[region_index]));
+    if (queue->regions[region_index].state_sequence) { log_info(message); }
+    else { log_warn(message); }
+  }
 }
 
-char* tree_node_repr(TreeNode* tree_node)
-{
-  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-  char* message = NULL;
-
-  message_append(&message, "\033[1;%dm %03u: %06.2lf [%06.2lf + %06.2lf] {%03u, %03u}\033[0m",
-           colour_encoder(tree_node_data->colour),
-           tree_node_data->id,
-           tree_node_score(tree_node),
-           tree_node_exploitation_score(tree_node),
-           tree_node_exploration_score(tree_node),
-           tree_node_data->selected,
-           tree_node_data->discovered);
-  return message;
-}
-
-
-seed_info_t* construct_seed_with_queue_entry(void *q)
+seed_info_t* construct_seed_with_queue_entry(struct queue_entry* q)
 {
   seed_info_t* seed = (seed_info_t*) ck_alloc (sizeof(seed_info_t));
   seed->q = q;
@@ -474,8 +491,8 @@ void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode * n
   assert(seed);
   assert(get_tree_node_data(node)->colour == Golden);
   /*NOTE: Figure out M2 at here so that we don't have to do it repeatedly when the same queue_entry is selected*/
-  struct queue_entry *q = seed->q;
-  region_t* regions = q->regions;
+//  struct queue_entry* q = seed->q;
+//  region_t* regions = q->regions;
   TreeNodeData* tree_node_data = get_tree_node_data(node);
 
   // TOASK: Should we allocate more spaces to avoid repeated reallocation?
@@ -744,7 +761,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
         add_seed_to_node(seed, matching_region_index, get_simulation_child(tree_node));
         TreeNodeData* sim_data = get_tree_node_data(get_simulation_child(tree_node));
         seed_info_t* seed = sim_data->seeds[sim_data->seeds_count-1];
-        struct queue_entry* new_q = (struct queue_entry*) seed->q;
+//        struct queue_entry* new_q = (struct queue_entry*) seed->q;
         region_t region = q->regions[matching_region_index];
         log_debug("[MCTS-EXPANSION] The following two paths should match");
         log_debug("[MCTS-EXPANSION] Region %d: %s",
