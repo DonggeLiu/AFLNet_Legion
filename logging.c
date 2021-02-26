@@ -22,9 +22,9 @@
  * IN THE SOFTWARE.
  */
 //
+#define _GNU_SOURCE
 #include "logging.h"
 
-#define _GNU_SOURCE
 #define MAX_CALLBACKS 32
 
 typedef struct {
