@@ -219,7 +219,7 @@ TreeNode* best_child(TreeNode* tree_node)
         number_of_ties ++;
         log_info("[BEST_CHILD] Max score: %lf; Current score: %lf; Number of ties: %u",
                  max_score, score, number_of_ties);
-        for (u32 tie_index; tie_index < number_of_ties; tie_index++)
+        for (u32 tie_index=0; tie_index < number_of_ties; tie_index++)
         {
           log_info("[BEST_CHILD] Tie index %u: %s",
                    tie_index, tree_node_repr(g_node_nth_child(tree_node, ties[tie_index])));
@@ -273,7 +273,7 @@ seed_info_t* best_seed(TreeNode* tree_node)
         number_of_ties ++;
         log_debug("[BEST_SEED] Max score: %lf; Current score: %lf; Number of ties: %u",
                  max_score, score, number_of_ties);
-        for (u32 tie_index; tie_index < number_of_ties; tie_index++)
+        for (u32 tie_index=0; tie_index < number_of_ties; tie_index++)
         {
             log_debug("[BEST_SEED] Tie index %u: %s", tie_index, seed_repr(tree_node, ties[tie_index], NULL));
         }
