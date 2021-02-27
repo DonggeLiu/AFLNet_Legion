@@ -682,6 +682,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   seed_info_t* seed = NULL;
 
   log_info("[MCTS-EXPANSION] Starts");
+  log_info("[MCTS-EXPANSION] Record Queue Entry: %s", q->fname);
   log_info("[MCTS-EXPANSION] The states of each region in queue entry are:");
   queue_state_log(q);
   log_info("State seq has %02u states: %s", len_codes, u32_array_to_str(response_codes, len_codes));

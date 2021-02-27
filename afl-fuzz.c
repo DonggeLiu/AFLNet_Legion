@@ -427,6 +427,7 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
   struct queue_entry* q = seed->q;
 
+  log_info("[find_M2_region] Queue Entry: %s", seed->q->fname);
   if (G_NODE_IS_ROOT(tree_node->parent)) {
     /*NOTE: M2 starts at the beginning for ROOT*/
     *M2_start_region_ID = 0;
@@ -9212,6 +9213,7 @@ int main(int argc, char** argv) {
      - we should do intialisation here so that the tree is ready to perform dry run with given seed inputs/message sequences
   */  
   ROOT = Initialisation();
+  log_info("[MAIN] FUZZ M3: %s", FUZZ_M3?"True":"False");
 
   setup_dirs_fds();
   read_testcases();
