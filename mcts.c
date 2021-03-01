@@ -2,7 +2,7 @@
 #include "mcts.h"
 
 /* Hyper-parameters */
-gdouble RHO = 0.0025;  //or sqrt(2)
+gdouble RHO = 1.414;  //or sqrt(2)
 u32 MIN_SAMPLES = 1;
 u32 MAX_SAMPLES = 100;
 u32 CONEX_TIMEOUT = 0;
