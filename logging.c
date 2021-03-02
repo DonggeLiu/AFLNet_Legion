@@ -52,6 +52,7 @@ static const char *level_colors[] = {
 };
 #endif
 
+int IGNORE_ASSERT = 0;
 
 static void stdout_callback(log_Event *ev) {
   char buf[16];
@@ -274,4 +275,17 @@ int message_append(char** message, const char *fmt, ...) {
     *message = fmt_str;
   }
   return fmt_str_len;
+}
+
+
+void set_ignore_assertion(int ignore_assertion) {
+  IGNORE_ASSERT = ignore_assertion;
+}
+
+void log_assert(int condition, const char *fmt, ...) {
+  if (!IGNORE_ASSERT) {assert(condition);}
+
+  if (condition) {return;}
+
+//  log_fatal(*fmt, ...);doc
 }

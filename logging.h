@@ -77,6 +77,9 @@ char* u32_array_to_str(u32* a, u32 a_len);
 //int message_array(char** message, u32* a, u32 a_len);
 int message_append(char** message, const char* fmt, ...);
 
+void set_ignore_assertion(int ignore_assertion);
+void log_assert(int condition, const char *fmt, ...);
+
 #endif //AFLNET_UTILS_H
 
 
