@@ -454,21 +454,21 @@ void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
   }
 }
 
-void seed_log(TreeNode* tree_node, seed_info_t* seed_selected, char* location)
+void seed_log(TreeNode* tree_node, seed_info_t* seed_selected, char* calling_function)
 {
   char* message = NULL;
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
   for (uint i = 0; i < tree_node_data->seeds_count; ++i) {
     message = NULL;
     seed_info_t* seed = tree_node_data->seeds[i];
-    message_append(&message, location);
+    message_append(&message, calling_function);
     message_append(&message, "Candidate ");
     message_append(&message, seed_repr(tree_node, i, seed));
     log_info(message);
   }
 }
 
-void seed_selected_log(TreeNode* tree_node, seed_info_t* seed_selected, char* location)
+void seed_selected_log(TreeNode* tree_node, seed_info_t* seed_selected, char* calling_function)
 {
   log_assert(seed_selected != NULL,
              "[SEED_SELECTED_LOG] Seed selected cannot be NULL: %s of %s", seed_selected, tree_node_repr(tree_node));
@@ -478,7 +478,7 @@ void seed_selected_log(TreeNode* tree_node, seed_info_t* seed_selected, char* lo
     seed_info_t* seed = tree_node_data->seeds[i];
     if (seed != seed_selected) {continue;}
     message = NULL;
-    message_append(&message, location);
+    message_append(&message, calling_function);
     message_append(&message, "Selected ");
     message_append(&message, seed_repr(tree_node, i, seed));
     message_append(&message, "\033[1;32m <=< Selected\033[0m");
