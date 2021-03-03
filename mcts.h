@@ -30,7 +30,7 @@
 #define TreeData(o) (TreeData*)(o)
 #define TreeNode GNode
 
-#define MAX_TREE_LOG_DEPTH 5
+//#define MAX_TREE_LOG_DEPTH 5
 
 enum node_colour{White, Red, Golden, Purple, Black};
 enum score_function{Random, UCT};
@@ -143,7 +143,7 @@ char* seed_repr(TreeNode* tree_node, uint seed_index, seed_info_t* seed);
 /* ================================================ MCTS Functions ================================================ */
 TreeNode* select_tree_node(TreeNode* parent_tree_node);
 seed_info_t* select_seed(TreeNode* tree_node_selected);
-TreeNode* Initialisation();
+TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho);
 seed_info_t* Selection(TreeNode** parent_tree_node);
 char* Simulation(TreeNode* target);
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new);

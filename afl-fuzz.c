@@ -410,12 +410,19 @@ khash_t(hms) *khms_states;
 //If M3 is empty, M2_next point to the end of the kl_messages linked list
 kliter_t(lms) *M2_prev, *M2_next;
 
-//MCTS global variables
+// Command line parameters
+uint LOG_LVL = 0;
+uint TREE_DP = 5;
+uint IGN_AST = 0;
+uint FUZZ_M3 = 0;
+double RHO_V = 1.414;
+
+
+// MCTS global variables
 TreeNode* ROOT;
 TreeNode* cur_tree_node;
 seed_info_t* cur_seed;
 uint cur_discovered;
-uint FUZZ_M3 = 1; /*TODO: Make this a cmdline param?*/
 
 //Function pointers pointing to Protocol-specific functions
 unsigned int* (*extract_response_codes)(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref) = NULL;
@@ -8872,7 +8879,7 @@ int main(int argc, char** argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:QN:D:W:w:P:KEq:s:RFc:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:QN:D:W:w:P:KEq:s:RFc:l:p:azr:")) > 0)
 
     switch (opt) {
 
@@ -9137,6 +9144,31 @@ int main(int argc, char** argv) {
         cleanup_script = optarg;
         break;
 
+      case 'l': /* Logging level */
+        if (LOG_LVL) FATAL("Multiple -l options not supported");
+        if (sscanf(optarg, "%u", &LOG_LVL) < 1 || optarg[0] == '-') FATAL("Bad syntax used for -l");
+        break;
+
+      case 'p': /* Log tree depth level */
+        if (TREE_DP != 5) FATAL("Multiple -p options not supported");
+        if (sscanf(optarg, "%u", &TREE_DP) < 1 || optarg[0] == '-') FATAL("Bad syntax used for -p");
+        break;
+
+      case 'a': /* Exit on assertion failures */
+        if (IGN_AST) FATAL("Multiple -a options not supported");
+        IGN_AST = 1;
+        break;
+
+      case 'z': /* Fuzz M3 */
+        if (FUZZ_M3) FATAL("Multiple -z options not supported");
+        FUZZ_M3 = 1;
+        break;
+
+      case 'r': /* Value of RHO */
+        if (RHO_V != 1.414) FATAL("Multiple -r options not supported");
+        if (sscanf(optarg, "%lf", &RHO_V) < 1 || optarg[0] == '-') FATAL("Bad syntax used for -r");
+        break;
+
       default:
 
         usage(argv[0]);
@@ -9212,7 +9244,7 @@ int main(int argc, char** argv) {
   /* Thuan's comments:
      - we should do intialisation here so that the tree is ready to perform dry run with given seed inputs/message sequences
   */  
-  ROOT = Initialisation();
+  ROOT = Initialisation(LOG_LVL, TREE_DP, IGN_AST, RHO_V);
   log_info("[MAIN] FUZZ M3: %s", FUZZ_M3?"True":"False");
 
   setup_dirs_fds();

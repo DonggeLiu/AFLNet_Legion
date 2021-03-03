@@ -1,11 +1,11 @@
 #define _GNU_SOURCE
 #include "mcts.h"
 
-/* SETTING */
-gboolean IGNORE_ASSERTION = FALSE;
 
 /* Hyper-parameters */
 gdouble RHO = 1.414;  //or sqrt(2)
+u32 MAX_TREE_LOG_DEPTH = 5;
+/* Not in use */
 u32 MIN_SAMPLES = 1;
 u32 MAX_SAMPLES = 100;
 u32 CONEX_TIMEOUT = 0;
@@ -653,17 +653,23 @@ seed_info_t* select_seed(TreeNode* tree_node_selected)
 }
 
 
-TreeNode* Initialisation()
+TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho)
 {
     u32 path[] = {0};
     TreeNode* root = new_tree_node(new_tree_node_data(0, White, path, 1));
     get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
     char log_file[100];
     snprintf(log_file, sizeof(log_file), "%s", getenv("AFLNET_LEGION_LOG"));
-    log_add_fp(fopen(log_file, "w+"), 0);
+    log_add_fp(fopen(log_file, "w+"), log_lvl);
     log_set_quiet(TRUE);
-    set_ignore_assertion(IGNORE_ASSERTION);
+    set_ignore_assertion(ign_ast);
     log_info("[INITIALISATION] LOG PATH: %s", log_file);
+    MAX_TREE_LOG_DEPTH = tree_dp;
+    RHO = rho;
+    log_info("[INITIALISATION] Log level: %u", log_lvl);
+    log_info("[INITIALISATION] Max tree log depth: %u", MAX_TREE_LOG_DEPTH);
+    log_info("[INITIALISATION] Ignore assertions: %s", ign_ast?"True":"False");
+    log_info("[INITIALISATION] Rho: %lf", RHO);
     return root;
 }
 
@@ -715,7 +721,7 @@ char* Simulation(TreeNode* target)
     return NULL;
 }
 
-void* preprocess_queue_entry(struct queue_entry* q)
+void preprocess_queue_entry(struct queue_entry* q)
 {
   u32 null_region_count = 0;
   for (u32 region_index = 0; region_index < q->region_count; ++region_index) {
@@ -756,7 +762,7 @@ void* preprocess_queue_entry(struct queue_entry* q)
   }
 }
 
-void* preprocess_response_codes(struct queue_entry* q, u32* response_codes, u32* len_codes)
+void preprocess_response_codes(struct queue_entry* q, u32* response_codes, u32* len_codes)
 {
   *len_codes = q->regions[q->region_count-1].state_count;
   log_assert(!memcmp(q->regions[q->region_count-1].state_sequence, response_codes, *len_codes),
@@ -765,7 +771,7 @@ void* preprocess_response_codes(struct queue_entry* q, u32* response_codes, u32*
              u32_array_to_str(q->regions[q->region_count-1].state_sequence, *len_codes));
 }
 
-void* preprocess_simulation_results(struct queue_entry* q, u32* response_codes, u32* len_codes)
+void preprocess_simulation_results(struct queue_entry* q, u32* response_codes, u32* len_codes)
 {
   preprocess_queue_entry(q);
   preprocess_response_codes(q, response_codes, len_codes);
