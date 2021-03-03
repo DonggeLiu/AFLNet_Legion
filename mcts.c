@@ -715,6 +715,64 @@ char* Simulation(TreeNode* target)
     return NULL;
 }
 
+void* preprocess_queue_entry(struct queue_entry* q)
+{
+  u32 null_region_count = 0;
+  for (u32 region_index = 0; region_index < q->region_count; ++region_index) {
+    log_assert((q->regions[region_index].state_count > 0) == (q->regions[region_index].state_sequence != NULL),
+               "The state count %u does not match with state sequence:\n%s",
+               q->regions[region_index].state_count,
+               u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count));
+    if (!null_region_count && q->regions[region_index].state_sequence != NULL) {continue;}
+    while (region_index+null_region_count < q->region_count
+           && q->regions[region_index+null_region_count].state_sequence == NULL)
+    {
+      null_region_count++;
+    }
+    if (region_index+null_region_count >= q->region_count)
+    {
+      log_info("[PREPROCESS_QUEUE_ENTRY] Reached region count %u while searching for region at index %u",
+               q->region_count, region_index+null_region_count);
+      q->region_count = region_index;
+      log_info("[PREPROCESS_QUEUE_ENTRY] Set region count to be %u accordingly", q->region_count);
+      break;
+    }
+    log_info("[PREPROCESS_QUEUE_ENTRY] Replacing region ID %u with %u", region_index, region_index+null_region_count);
+    log_assert(q->regions[region_index+null_region_count].state_sequence != NULL,
+               "State sequence at region index %u should not be NULL: %s",
+               region_index+null_region_count,
+               u32_array_to_str(q->regions[region_index+null_region_count].state_sequence,
+                                q->regions[region_index+null_region_count].state_count));
+    q->regions[region_index] = q->regions[region_index+null_region_count];
+  }
+
+  for (u32 region_index = 0; region_index < q->region_count; ++region_index)
+  {
+    log_assert(q->regions[region_index].state_sequence != NULL && q->regions[region_index].state_count,
+               "After preprocessing q, region %u has %u states: %s",
+               region_index,
+               q->regions[region_index].state_count,
+               u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count));
+  }
+}
+
+void* preprocess_response_codes(struct queue_entry* q, u32* response_codes, u32* len_codes)
+{
+  *len_codes = q->regions[q->region_count-1].state_count;
+  log_assert(!memcmp(q->regions[q->region_count-1].state_sequence, response_codes, *len_codes),
+             "Response codes are not the same as the state sequences in the last region of q:\nRSP: %s\nRGN: %s",
+             u32_array_to_str(response_codes, *len_codes),
+             u32_array_to_str(q->regions[q->region_count-1].state_sequence, *len_codes));
+}
+
+void* preprocess_simulation_results(struct queue_entry* q, u32* response_codes, u32* len_codes)
+{
+  preprocess_queue_entry(q);
+  preprocess_response_codes(q, response_codes, len_codes);
+}
+
+
+
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
   TreeNode* parent_node;
@@ -727,7 +785,13 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   log_info("[MCTS-EXPANSION] Starts");
   log_info("[MCTS-EXPANSION] Record Queue Entry: %s", q->fname);
-  log_info("[MCTS-EXPANSION] The states of each region in queue entry are:");
+  log_info("[MCTS-EXPANSION] Before preprocessing simulation results, the states of each region in queue entry are:");
+  queue_state_log(q);
+  log_info("State seq has %02u states: %s", len_codes, u32_array_to_str(response_codes, len_codes));
+
+  preprocess_simulation_results(q, response_codes, &len_codes);
+
+  log_info("[MCTS-EXPANSION] After preprocessing simulation results, the states of each region in queue entry are:");
   queue_state_log(q);
   log_info("State seq has %02u states: %s", len_codes, u32_array_to_str(response_codes, len_codes));
 
