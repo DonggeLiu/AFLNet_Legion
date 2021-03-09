@@ -388,7 +388,7 @@ int colour_encoder(enum node_colour colour) {
             colour_code = 90;
             break;
     }
-    log_assert(colour_code, "[COLOUR_ENCODER] Colour code was not set, incorrect colour enum? %s", colour);
+    log_assert(colour_code, "[COLOUR_ENCODER] Colour code was not set, incorrect colour enum? %d", colour);
     return colour_code;
 }
 
