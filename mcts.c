@@ -655,9 +655,6 @@ seed_info_t* select_seed(TreeNode* tree_node_selected)
 
 TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho)
 {
-    u32 path[] = {0};
-    TreeNode* root = new_tree_node(new_tree_node_data(0, White, path, 1));
-    get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
     char log_file[100];
     snprintf(log_file, sizeof(log_file), "%s", getenv("AFLNET_LEGION_LOG"));
     log_add_fp(fopen(log_file, "w+"), log_lvl);
@@ -670,6 +667,9 @@ TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho)
     log_info("[INITIALISATION] Max tree log depth: %u", MAX_TREE_LOG_DEPTH);
     log_info("[INITIALISATION] Ignore assertions: %s", ign_ast?"True":"False");
     log_info("[INITIALISATION] Rho: %lf", RHO);
+    u32 path[] = {0};
+    TreeNode* root = new_tree_node(new_tree_node_data(0, White, path, 1));
+    get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
     return root;
 }
 
