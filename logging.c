@@ -282,10 +282,37 @@ void set_ignore_assertion(int ignore_assertion) {
   IGNORE_ASSERT = ignore_assertion;
 }
 
-void log_assert(int condition, const char *fmt, ...) {
+void log_assertion(int condition, int level, const char *file, int line, const char *fmt, ...) {
+
   if (!IGNORE_ASSERT) {assert(condition);}
 
   if (condition) {return;}
 
-//  log_fatal(*fmt, ...);doc
+  log_Event ev = {
+          .fmt   = fmt,
+          .file  = file,
+          .line  = line,
+          .level = level,
+  };
+
+  lock();
+
+  if (!L.quiet && level >= L.level) {
+    init_event(&ev, stderr);
+    va_start(ev.ap, fmt);
+    stdout_callback(&ev);
+    va_end(ev.ap);
+  }
+
+  for (int i = 0; i < MAX_CALLBACKS && L.callbacks[i].fn; i++) {
+    Callback *cb = &L.callbacks[i];
+    if (level >= cb->level) {
+      init_event(&ev, cb->udata);
+      va_start(ev.ap, fmt);
+      cb->fn(&ev);
+      va_end(ev.ap);
+    }
+  }
+
+  unlock();
 }
