@@ -161,6 +161,7 @@ u32* collect_region_path(region_t region, u32* path_len);
 
 int colour_encoder(enum node_colour colour);
 
+void preprocess_queue_entry(struct queue_entry* q);
 //void tree_node_print (TreeNode* tree_node);
 
 seed_info_t* construct_seed_with_queue_entry(struct queue_entry* q);
