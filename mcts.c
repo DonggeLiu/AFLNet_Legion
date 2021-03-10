@@ -842,8 +842,8 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       if (path_index+1 <= region.state_count) {
 //        exact_match = (path_index+1 == region.state_count);
 //        matched_exactly = response_codes[path_index] == region.state_sequence[region.state_count-1];
-        matched_len = path_index == region.state_count-1;
-        matched_sequence = memcmp(response_codes, region.state_sequence, region.state_count) == 0;
+        gboolean matched_len = path_index == region.state_count-1;
+        gboolean matched_sequence = memcmp(response_codes, region.state_sequence, region.state_count) == 0;
         matched_exactly = matched_len && matched_sequence;
         matching_region_index = region_index;
         if (matched_exactly) {log_debug("[MCTS-EXPANSION] Exact Match found");}
