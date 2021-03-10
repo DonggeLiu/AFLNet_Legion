@@ -828,8 +828,8 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   // Update the annotation of each region of the q
   update_region_annotations(q);
   preprocess_queue_entry(q);
-//  unsigned int * node_sequence = q->regions[q->region_count-1].state_sequence;
-//  unsigned int node_count = q->regions[q->region_count-1].state_count;
+  unsigned int * node_sequence = q->regions[q->region_count-1].state_sequence;
+  unsigned int node_count = q->regions[q->region_count-1].state_count;
 
   // During dry run: Save the given queue entry to the sim child of ROOT only
   if (dry_run) {
@@ -841,9 +841,9 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   }
 
   // During normal run: Collect the sequence of response code and expand the tree with it
-  unsigned int node_count = 0;
+//  unsigned int node_count = 0;
   // TOASK: Is this necessary? We can get this from the last region of the q
-  unsigned int * node_sequence = (*extract_response_codes)(response_buf, response_buf_size, &node_count);
+//  unsigned int * node_sequence = (*extract_response_codes)(response_buf, response_buf_size, &node_count);
 //  char* message = "RES Codes: ";
 //  message_array(&message, node_sequence, node_count);
 //  log_info(message);
