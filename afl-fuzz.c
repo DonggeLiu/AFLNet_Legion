@@ -827,10 +827,12 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
 
   // Update the annotation of each region of the q
   update_region_annotations(q);
+  preprocess_queue_entry(q);
+//  unsigned int * node_sequence = q->regions[q->region_count-1].state_sequence;
+//  unsigned int node_count = q->regions[q->region_count-1].state_count;
 
   // During dry run: Save the given queue entry to the sim child of ROOT only
   if (dry_run) {
-    preprocess_queue_entry(q);
     cur_seed = construct_seed_with_queue_entry(q);
     cur_tree_node = get_simulation_child(ROOT);
     add_seed_to_node(cur_seed, 0, cur_tree_node);
