@@ -784,7 +784,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   TreeNode* parent_node;
   *is_new = FALSE;
   u32 matching_region_index = 0;
-  gboolean matched_last_code = FALSE;
+  gboolean matched_exactly = FALSE;
 
   // Construct seed with queue_entry q
   seed_info_t* seed = NULL;
@@ -822,7 +822,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       *is_new = TRUE;
     }
 
-    for (u32 region_index = matching_region_index + matched_last_code;
+    for (u32 region_index = matching_region_index + matched_exactly;
          (region_index < q->region_count) && (region_index < len_codes);
          ++region_index)
     {
@@ -841,9 +841,12 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
                 region_index, u32_array_to_str(region.state_sequence, region.state_count), q->fname);
       if (path_index+1 <= region.state_count) {
 //        exact_match = (path_index+1 == region.state_count);
-        matched_last_code = response_codes[path_index] == region.state_sequence[region.state_count-1];
+//        matched_exactly = response_codes[path_index] == region.state_sequence[region.state_count-1];
+        matched_len = path_index == region.state_count-1;
+        matched_sequence = memcmp(response_codes, region.state_sequence, region.state_count) == 0;
+        matched_exactly = matched_len && matched_sequence;
         matching_region_index = region_index;
-        if (matched_last_code) {log_debug("[MCTS-EXPANSION] Exact Match found");}
+        if (matched_exactly) {log_debug("[MCTS-EXPANSION] Exact Match found");}
         else  {log_debug("[MCTS-EXPANSION] Partial Match found");}
         break;
       }
@@ -851,13 +854,13 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
     if (*is_new)  {
       enum node_colour colour;
-      if (matched_last_code)  {colour = White;}
+      if (matched_exactly)  {colour = White;}
       else  {colour = Black;}
       tree_node = append_child(parent_node, response_codes[path_index], colour, response_codes, path_index+1);
       log_debug("[MCTS-EXPANSION] Add a new child %s of parent %s",
                tree_node_repr(tree_node), tree_node_repr(parent_node));
     }
-    if (matched_last_code) {
+    if (matched_exactly) {
       TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
       if (tree_node_data->colour == Black && path_index + 1 != len_codes) {
         // NOTE: Flip a node if this is black and is not an termination point
