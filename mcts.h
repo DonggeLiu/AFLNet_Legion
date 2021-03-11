@@ -170,5 +170,7 @@ void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode* no
 
 char* node_path_str(TreeNode* tree_node);
 
+void queue_state_log(struct queue_entry* queue);
+
 #endif //MCTS_H
 

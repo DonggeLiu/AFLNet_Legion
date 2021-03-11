@@ -827,7 +827,12 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
 
   // Update the annotation of each region of the q
   update_region_annotations(q);
+  log_debug("[UPDATE_MCTS_TREE] Before preprocessing queue entry, the states of each region are:");
+  queue_state_log(q);
   preprocess_queue_entry(q);
+  log_info("[UPDATE_MCTS_TREE] After preprocessing queue entry, the states of each region are:");
+  queue_state_log(q);
+
   unsigned int * node_sequence = q->regions[q->region_count-1].state_sequence;
   unsigned int node_count = q->regions[q->region_count-1].state_count;
 
@@ -836,19 +841,9 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
     cur_seed = construct_seed_with_queue_entry(q);
     cur_tree_node = get_simulation_child(ROOT);
     add_seed_to_node(cur_seed, 0, cur_tree_node);
-
-//    return;
   }
 
   // During normal run: Collect the sequence of response code and expand the tree with it
-//  unsigned int node_count = 0;
-  // TOASK: Is this necessary? We can get this from the last region of the q
-//  unsigned int * node_sequence = (*extract_response_codes)(response_buf, response_buf_size, &node_count);
-//  char* message = "RES Codes: ";
-//  message_array(&message, node_sequence, node_count);
-//  log_info(message);
-//  free(message);
-
   log_info("[UPDATE-MCTS-TREE] RES Codes: %s", u32_array_to_str(node_sequence, node_count));
   /* NOTE: MCTS Expansion and check if the new input finds a new sequence */
   gboolean is_new = FALSE;

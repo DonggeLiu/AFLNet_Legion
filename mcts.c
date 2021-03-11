@@ -762,22 +762,6 @@ void preprocess_queue_entry(struct queue_entry* q)
   }
 }
 
-void preprocess_response_codes(struct queue_entry* q, u32* response_codes, u32* len_codes)
-{
-  *len_codes = q->regions[q->region_count-1].state_count;
-  log_assert(!memcmp(q->regions[q->region_count-1].state_sequence, response_codes, *len_codes),
-             "Response codes are not the same as the state sequences in the last region of q:\nRSP: %s\nRGN: %s",
-             u32_array_to_str(response_codes, *len_codes),
-             u32_array_to_str(q->regions[q->region_count-1].state_sequence, *len_codes));
-}
-
-void preprocess_simulation_results(struct queue_entry* q, u32* response_codes, u32* len_codes)
-{
-  preprocess_queue_entry(q);
-  preprocess_response_codes(q, response_codes, len_codes);
-}
-
-
 
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
@@ -791,15 +775,19 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   log_info("[MCTS-EXPANSION] Starts");
   log_info("[MCTS-EXPANSION] Record Queue Entry: %s", q->fname);
-  log_info("[MCTS-EXPANSION] Before preprocessing simulation results, the states of each region in queue entry are:");
-  queue_state_log(q);
-  log_info("State seq has %02u states: %s", len_codes, u32_array_to_str(response_codes, len_codes));
+  log_info("[MCTS-EXPANSION] State seq has %02u states: %s", len_codes, u32_array_to_str(response_codes, len_codes));
+  log_info("[MCTS-EXPANSION] Last reg  has %02u states: %s",
+           q->regions[q->region_count-1].state_count,
+           u32_array_to_str(q->regions[q->region_count-1].state_sequence,
+                            q->regions[q->region_count-1].state_count));
 
-  preprocess_simulation_results(q, response_codes, &len_codes);
-
-  log_info("[MCTS-EXPANSION] After preprocessing simulation results, the states of each region in queue entry are:");
-  queue_state_log(q);
-  log_info("State seq has %02u states: %s", len_codes, u32_array_to_str(response_codes, len_codes));
+  log_assert(q->regions[q->region_count-1].state_count == len_codes,
+             "State count in the last region (%02u) != response code len (%02u)",
+             q->regions[q->region_count-1].state_count, len_codes);
+  log_assert(!memcmp(q->regions[q->region_count-1].state_sequence, response_codes, len_codes),
+             "Response codes are not the same as the state sequences in the last region of q:\nRSP: %s\nRGN: %s",
+             u32_array_to_str(response_codes, len_codes),
+             u32_array_to_str(q->regions[q->region_count-1].state_sequence, len_codes));
 
   // Check if the response code sequence is new
   // And add the new queue entry to each node along the paths
@@ -1096,5 +1084,20 @@ void parent(TreeNode* child, TreeNode** parent){
 //    path[i] = reversed_path[(*path_len) - i - 1];
 //  }
 //  return path;
+//}
+
+//void preprocess_response_codes(struct queue_entry* q, u32* response_codes, u32* len_codes)
+//{
+//  *len_codes = q->regions[q->region_count-1].state_count;
+//  log_assert(!memcmp(q->regions[q->region_count-1].state_sequence, response_codes, *len_codes),
+//             "Response codes are not the same as the state sequences in the last region of q:\nRSP: %s\nRGN: %s",
+//             u32_array_to_str(response_codes, *len_codes),
+//             u32_array_to_str(q->regions[q->region_count-1].state_sequence, *len_codes));
+//}
+//
+//void preprocess_simulation_results(struct queue_entry* q, u32* response_codes, u32* len_codes)
+//{
+//  preprocess_queue_entry(q);
+//  preprocess_response_codes(q, response_codes, len_codes);
 //}
 /* EOF */
