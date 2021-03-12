@@ -151,11 +151,11 @@ void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean i
 
 
 /* Helper functions */
-void print_reversed_path(TreeNode* tree_node);
+//void print_reversed_path(TreeNode* tree_node);
 
-u32* collect_node_path(TreeNode* tree_node, u32* path_len);
+//u32* collect_node_path(TreeNode* tree_node, u32* path_len);
 
-void print_path(TreeNode* tree_node);
+//void print_path(TreeNode* tree_node);
 
 u32* collect_region_path(region_t region, u32* path_len);
 

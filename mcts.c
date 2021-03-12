@@ -383,23 +383,23 @@ TreeNode* append_child(TreeNode* tree_node, u32 child_response_code, enum node_c
     return child;
 }
 
-void print_reversed_path(TreeNode* tree_node)
-{
-    do {
-        g_printf("%u ", get_tree_node_data(tree_node)->id);
-        tree_node = tree_node->parent;
-    } while (tree_node);
-    g_printf("\n");
-}
-
-void print_path(TreeNode* tree_node)
-{
-  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-  for (u32 i = 0; i < tree_node_data->path_len; i++) {
-      g_printf("%u ", tree_node_data->path[i]);
-  }
-  g_print("\n");
-}
+//void print_reversed_path(TreeNode* tree_node)
+//{
+//    do {
+//        g_printf("%u ", get_tree_node_data(tree_node)->id);
+//        tree_node = tree_node->parent;
+//    } while (tree_node);
+//    g_printf("\n");
+//}
+//
+//void print_path(TreeNode* tree_node)
+//{
+//  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+//  for (u32 i = 0; i < tree_node_data->path_len; i++) {
+//      g_printf("%u ", tree_node_data->path[i]);
+//  }
+//  g_print("\n");
+//}
 
 char* node_path_str(TreeNode* tree_node)
 {
