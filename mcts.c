@@ -79,15 +79,19 @@ TreeNode* get_simulation_child(TreeNode* tree_node)
 {
   TreeNodeData* node_data = get_tree_node_data(tree_node);
   TreeNode* sim_child = node_data->simulation_child;
-
-  log_assert(sim_child != NULL, "[GET_SIMULATION_CHILD] No sim child of %s", tree_node_repr(tree_node));
+  char* message_tree_node_repr_tree_node = tree_node_repr(tree_node);
+  char* message_tree_node_repr_sim_node = tree_node_repr(tree_node);
+  log_assert(sim_child != NULL, "[GET_SIMULATION_CHILD] No sim child of %s", message_tree_node_repr_tree_node);
   log_assert(node_data->colour != Golden && node_data->colour != Black,
              "[GET_SIMULATION_CHILD] %s should not have a child SimNode %s",
-             tree_node_repr(tree_node), tree_node_repr(sim_child));
+             message_tree_node_repr_tree_node, message_tree_node_repr_sim_node);
   log_assert(get_tree_node_data(sim_child)->colour == Golden,
              "[GET_SIMULATION_CHILD] Golden is not the colour of the sim child (%s) of %s",
-             tree_node_repr(sim_child), tree_node_repr(tree_node));
-
+             message_tree_node_repr_sim_node, message_tree_node_repr_tree_node);
+  free(message_tree_node_repr_tree_node);
+  free(message_tree_node_repr_sim_node);
+  message_tree_node_repr_tree_node = NULL;
+  message_tree_node_repr_sim_node = NULL;
   return sim_child;
 }
 
@@ -218,17 +222,26 @@ TreeNode* best_child(TreeNode* tree_node)
     u32 number_of_ties = 0;
     u32 ties[number_of_children];
 
-    log_info("[BEST_CHILD] Selecting the best child of: %s", tree_node_repr(tree_node));
+    char* message = tree_node_repr(tree_node);
+    log_info("[BEST_CHILD] Selecting the best child of: %s", message);
+    free(message);
+    message = NULL;
     if (number_of_children == 1) {
-        log_info("[BEST_CHILD] Only one child: %s", tree_node_repr(g_node_nth_child(tree_node, 0)));
+        char* message = tree_node_repr(g_node_nth_child(tree_node, 0));
+        log_info("[BEST_CHILD] Only one child: %s", message);
+        free(message);
+        message = NULL;
         return g_node_nth_child(tree_node, 0);
     }
     log_info("[BEST_CHILD] Multiple children");
     log_info("[BEST_CHILD] Max score: %lf; Number of ties: %u", max_score, number_of_ties);
     for (u32 child_index = 0; child_index < number_of_children; child_index++) {
         gdouble score = tree_node_score(g_node_nth_child(tree_node, child_index));
+        message = tree_node_repr(g_node_nth_child(tree_node, child_index));
         log_info("[BEST_CHILD] Current index %u: %lf (%s)",
-                 child_index, score, tree_node_repr(g_node_nth_child(tree_node, child_index)));
+                 child_index, score, message);
+        free(message);
+        message = NULL;
         if (score < max_score) continue;
         if (score > max_score) number_of_ties = 0;
         max_score = score;
@@ -238,27 +251,38 @@ TreeNode* best_child(TreeNode* tree_node)
                  max_score, score, number_of_ties);
         for (u32 tie_index=0; tie_index < number_of_ties; tie_index++)
         {
+          char* message = tree_node_repr(g_node_nth_child(tree_node, ties[tie_index]));
           log_info("[BEST_CHILD] Tie index %u: %s",
-                   tie_index, tree_node_repr(g_node_nth_child(tree_node, ties[tie_index])));
+                   tie_index, message);
+          free(message);
+          message = NULL;
         }
     }
 
     if (number_of_ties == 1)
     {
-        log_info("[BEST_CHILD] Only one candidate: %s",
-                 tree_node_repr(g_node_nth_child(tree_node, ties[0])));
+        char* message = tree_node_repr(g_node_nth_child(tree_node, ties[0]));
+        log_info("[BEST_CHILD] Only one candidate: %s", message);
+        free(message);
+        message = NULL;
         return g_node_nth_child(tree_node, ties[0]);
     }
 
     log_info("[BEST_CHILD] Best child has %u candidates", number_of_ties);
     for (u32 i = 0; i < number_of_ties; ++i) {
+        char* message = tree_node_repr(g_node_nth_child(tree_node, ties[i]));
         log_info("[BEST_CHILD] The %u th candidates in ties is the %u th child: %s",
-                 i, ties[i], tree_node_repr(g_node_nth_child(tree_node, ties[i])));
+                 i, ties[i], message);
+        free(message);
+        message = NULL;
     }
     u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
     u32 winner = ties[winner_index];
     log_info("[BEST_CHILD] Winner index in ties is: %u", winner_index);
-    log_info("[BEST_CHILD] Winner is the %u th child: %s", winner, tree_node_repr(g_node_nth_child(tree_node, winner)));
+    message = tree_node_repr(g_node_nth_child(tree_node, winner));
+    log_info("[BEST_CHILD] Winner is the %u th child: %s", winner, message);
+    free(message);
+    message = NULL;
     return g_node_nth_child(tree_node, winner);
 }
 
@@ -270,9 +294,16 @@ seed_info_t* best_seed(TreeNode* tree_node)
     u32 number_of_ties = 0;
     u32 ties[number_of_seeds];
 
-    log_debug("[BEST_SEED] Selecting the best seed of: %s", tree_node_repr(tree_node));
+    char* message = tree_node_repr(tree_node);
+    log_debug("[BEST_SEED] Selecting the best seed of: %s", message);
+    free(message);
+    message = NULL;
+
     if (number_of_seeds == 1) {
-        log_debug("[BEST_SEED] Only one seed: %s", seed_repr(tree_node, 0, NULL));
+        message = seed_repr(tree_node, 0, NULL);
+        log_debug("[BEST_SEED] Only one seed: %s", message);
+        free(message);
+        message = NULL;
         return get_tree_node_data(tree_node)->seeds[0];
     }
 
@@ -281,8 +312,11 @@ seed_info_t* best_seed(TreeNode* tree_node)
     for (u32 seed_index = 0; seed_index < number_of_seeds; seed_index++) {
         double score = seed_score(tree_node, seed_index);
 
+        message = seed_repr(tree_node, seed_index, NULL);
         log_debug("[BEST_SEED] Current index %u: %lf (%s)",
-                 seed_index, score, seed_repr(tree_node, seed_index, NULL));
+                 seed_index, score, message);
+        free(message);
+        message = NULL;
         if (score < max_score) continue;
         if (score > max_score) number_of_ties = 0;
         max_score = score;
@@ -292,26 +326,38 @@ seed_info_t* best_seed(TreeNode* tree_node)
                  max_score, score, number_of_ties);
         for (u32 tie_index=0; tie_index < number_of_ties; tie_index++)
         {
-            log_debug("[BEST_SEED] Tie index %u: %s", tie_index, seed_repr(tree_node, ties[tie_index], NULL));
+            message = seed_repr(tree_node, ties[tie_index], NULL);
+            log_debug("[BEST_SEED] Tie index %u: %s", tie_index, message);
+            free(message);
+            message = NULL;
         }
     }
 
     if (number_of_ties == 1)
     {
-        log_debug("[BEST_SEED] Only one candidate: %s", seed_repr(tree_node, ties[0], NULL));
+        message = seed_repr(tree_node, ties[0], NULL);
+        log_debug("[BEST_SEED] Only one candidate: %s", message);
+        free(message);
+        message = NULL;
         return get_tree_node_data(tree_node)->seeds[ties[0]];
     }
 
     log_debug("[BEST_SEED] Best seed has %u candidates", number_of_ties);
     for (u32 i = 0; i < number_of_ties; ++i) {
+        message = seed_repr(tree_node, ties[i], NULL);
         log_debug("[BEST_SEED] The %u th candidates in ties is the %u th seed: %s",
-               i, ties[i], seed_repr(tree_node, ties[i], NULL));
+               i, ties[i], message);
+        free(message);
+        message = NULL;
     }
 
     u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
     u32 winner = ties[winner_index];
     log_debug("[BEST_SEED] Winner index in ties is: %u", winner_index);
-    log_debug("[BEST_SEED] Winner is the %u th seed: %s", winner, seed_repr(tree_node, winner, NULL));
+    message = seed_repr(tree_node, winner, NULL);
+    log_debug("[BEST_SEED] Winner is the %u th seed: %s", winner, message);
+    free(message);
+    message = NULL;
 
     return get_tree_node_data(tree_node)->seeds[winner];
 }
@@ -428,8 +474,11 @@ char* tree_node_repr(TreeNode* tree_node)
 char* region_state_repr(region_t region)
 {
   char* message = NULL;
+  char* message_arr = u32_array_to_str(region.state_sequence, region.state_count);
   message_append(&message, "%02u states: %s",
-                 region.state_count, u32_array_to_str(region.state_sequence, region.state_count));
+                 region.state_count, message_arr);
+  free(message_arr);
+  message_arr = NULL;
   return message;
 }
 
@@ -442,11 +491,18 @@ void tree_log(TreeNode* tree_node, TreeNode* mark_node, int indent, int found)
   if (indent>MAX_TREE_LOG_DEPTH) {
     message_append(&message, " ... ");
     log_info(message);
+    free(message);
+    message = NULL;
     return;
   }
-  message_append(&message, tree_node_repr(tree_node));
+  char* message_tree_node_repr_tree_node = tree_node_repr(tree_node);
+  message_append(&message, message_tree_node_repr_tree_node);
+  free(message_tree_node_repr_tree_node);
+  message_tree_node_repr_tree_node = NULL;
   if (tree_node == mark_node && found >= 0) message_append(&message, "\033[1;32m <=< found %u\033[0m", found);
   log_info(message);
+  free(message);
+  message = NULL;
 
   if (g_node_n_children(tree_node)) indent++;
   for (int i = 0; i < g_node_n_children(tree_node); ++i) {
@@ -463,16 +519,23 @@ void seed_log(TreeNode* tree_node, seed_info_t* seed_selected, char* calling_fun
     seed_info_t* seed = tree_node_data->seeds[i];
     message_append(&message, calling_function);
     message_append(&message, "Candidate ");
-    message_append(&message, seed_repr(tree_node, i, seed));
+    char* message_seed_repr = seed_repr(tree_node, i, seed);
+    message_append(&message, message_seed_repr);
+    free(message_seed_repr);
+    message_seed_repr = NULL;
     log_info(message);
+    free(message);
+    message = NULL;
   }
 }
 
 void seed_selected_log(TreeNode* tree_node, seed_info_t* seed_selected, char* calling_function)
 {
+  char* message = tree_node_repr(tree_node);
   log_assert(seed_selected != NULL,
-             "[SEED_SELECTED_LOG] Seed selected cannot be NULL: %s of %s", seed_selected, tree_node_repr(tree_node));
-  char* message = NULL;
+             "[SEED_SELECTED_LOG] Seed selected cannot be NULL: %s of %s", seed_selected, message);
+  free(message);
+  message = NULL;
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
   for (uint i = 0; i < tree_node_data->seeds_count; ++i) {
     seed_info_t* seed = tree_node_data->seeds[i];
@@ -480,20 +543,32 @@ void seed_selected_log(TreeNode* tree_node, seed_info_t* seed_selected, char* ca
     message = NULL;
     message_append(&message, calling_function);
     message_append(&message, "Selected ");
-    message_append(&message, seed_repr(tree_node, i, seed));
+    char* message_seed_repr = seed_repr(tree_node, i, seed);
+    message_append(&message, message_seed_repr);
+    free(message_seed_repr);
+    message_seed_repr = NULL;
     message_append(&message, "\033[1;32m <=< Selected\033[0m");
     log_info(message);
+    free(message);
+    message = NULL;
   }
 }
 
 void queue_state_log(struct queue_entry* queue)
 {
   char* message = NULL;
+  char* message_region_state_repr = NULL;
   for (u32 region_index = 0; region_index < queue->region_count; ++region_index) {
     message = NULL;
-    message_append(&message, "Region %2u has %s", region_index, region_state_repr(queue->regions[region_index]));
+    message_region_state_repr = NULL;
+    message_region_state_repr = region_state_repr(queue->regions[region_index]);
+    message_append(&message, "Region %2u has %s", region_index, message_region_state_repr);
+    free(message_region_state_repr);
+    message_region_state_repr = NULL;
     if (queue->regions[region_index].state_sequence) { log_info(message); }
     else { log_warn(message); }
+    free(message);
+    message = NULL;
   }
 }
 
@@ -509,7 +584,10 @@ seed_info_t* construct_seed_with_queue_entry(struct queue_entry* q)
 void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode * node)
 {
   log_assert(seed != NULL, "[ADD_SEED_TO_NODE] Seed does not exist");
-  log_assert(get_tree_node_data(node)->colour == Golden, "[ADD_SEED_TO_NODE] Not a SimNode: %s", tree_node_repr(node));
+  char* message = tree_node_repr(node);
+  log_assert(get_tree_node_data(node)->colour == Golden, "[ADD_SEED_TO_NODE] Not a SimNode: %s", message);
+  free(message);
+  message = NULL;
   /*NOTE: Figure out M2 at here so that we don't have to do it repeatedly when the same queue_entry is selected*/
 //  struct queue_entry* q = seed->q;
 //  region_t* regions = q->regions;
@@ -537,17 +615,27 @@ void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode * n
   log_debug("[ADD_SEED_TO_NODE] Region state count: %u", node_region.state_count);
   log_debug("[ADD_SEED_TO_NODE] Node path length  : %u", tree_node_data->path_len);
 
-  log_debug("[ADD_SEED_TO_NODE] Region states: %s", u32_array_to_str(node_region.state_sequence, node_region.state_count));
-  log_debug("[ADD_SEED_TO_NODE] Node path    : %s", u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+  message = u32_array_to_str(node_region.state_sequence, node_region.state_count);
+  log_debug("[ADD_SEED_TO_NODE] Region states: %s", message);
+  free(message);
+  message = NULL;
+  message = u32_array_to_str(tree_node_data->path, tree_node_data->path_len);
+  log_debug("[ADD_SEED_TO_NODE] Node path    : %s", message);
+  free(message);
+  message = NULL;
   log_assert(node_region.state_count >= tree_node_data->path_len,
              "[ADD_SEED_TO_NODE] The path len of a tree node is smaller than "
              "the state count of the matching region: %u < %u",
              tree_node_data->path_len, node_region.state_count);
+  message = u32_array_to_str(node_region.state_sequence, tree_node_data->path_len);
+  char* message_node = u32_array_to_str(tree_node_data->path, tree_node_data->path_len);
   log_assert(!memcmp(node_region.state_sequence, tree_node_data->path, tree_node_data->path_len),
              "[ADD_SEED_TO_NODE] The path of a tree node is different to "
-             "the states of the matching region:\nREGN: %s\nNODE: %s",
-             u32_array_to_str(node_region.state_sequence, tree_node_data->path_len),
-             u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+             "the states of the matching region:\nREGN: %s\nNODE: %s", message, message_node);
+  free(message);
+  free(message_node);
+  message = NULL;
+  message_node = NULL;
 }
 
 u32* collect_region_path(region_t region, u32* path_len)
@@ -562,44 +650,73 @@ u32* collect_region_path(region_t region, u32* path_len)
 TreeNode* select_tree_node(TreeNode* parent_tree_node)
 {
   get_tree_node_data(parent_tree_node)->selected++;
+  char* message1 = NULL;
+  char* message2 = NULL;
   while (get_tree_node_data(parent_tree_node)->colour != Golden) {
     parent_tree_node = best_child(parent_tree_node);
-    log_info("[SELECT_TREE_NODE] Best child is: %s", tree_node_repr(parent_tree_node));
+    message1 = tree_node_repr(parent_tree_node);
+    log_info("[SELECT_TREE_NODE] Best child is: %s", message1);
+    free(message1);
+    message1 = NULL;
     /* NOTE: Selected stats propagation of nodes along the selection path is done here */
     get_tree_node_data(parent_tree_node)->selected++;
     /*NOTE: If the score of the best child is -inf,
      * then the score of the parent of the best child should be -inf
      * e.g. parent is a black node, whose only child is a leaf
      */
+    message1 = tree_node_repr(parent_tree_node);
+    if (!G_NODE_IS_ROOT(parent_tree_node)) {message2 = tree_node_repr(parent_tree_node);}
     log_assert(
             tree_node_score(parent_tree_node) > -INFINITY ||
             (!G_NODE_IS_ROOT(parent_tree_node) && get_tree_node_data(parent_tree_node->parent)->colour == Black),
             "[SELECT_TREE_NODE] If the score of the best child is -inf, "
             "then the score of the parent of the best child should be -inf:"
             "e.g. parent is a black node, whose only child is a leaf.\nNode  :%s\nParent:%s",
-            tree_node_repr(parent_tree_node),
-            G_NODE_IS_ROOT(parent_tree_node)?"Is ROOT":tree_node_repr(parent_tree_node->parent));
+            message1,
+            G_NODE_IS_ROOT(parent_tree_node)?"Is ROOT":message2);
+    free(message1);
+    free(message2);
+    message1 = NULL;
+    message2 = NULL;
     while (tree_node_score(parent_tree_node) == -INFINITY)
     {
-      log_info("[SELECT_TREE_NODE] The score of the best child is -inf: %s", tree_node_repr(parent_tree_node));
+      message1 = tree_node_repr(parent_tree_node);
+      log_info("[SELECT_TREE_NODE] The score of the best child is -inf: %s", message1);
+      free(message1);
+      message1 = NULL;
       /* NOTE: If the score of the root is -inf, then ROOT must be fully explored,
        *  hence there is no point continuing;
        */
+      message1 = tree_node_repr(parent_tree_node);
       log_assert(!G_NODE_IS_ROOT(parent_tree_node),
                  "[SELECT_TREE_NODE] If the score of the root is -inf, then ROOT must be fully explored, "
-                 "hence there is no point continuing;\nNode: %s", tree_node_repr(parent_tree_node));
+                 "hence there is no point continuing;\nNode: %s", message1);
+      free(message1);
+      message1 = NULL;
       parent_tree_node = parent_tree_node->parent;
-      log_info("[SELECT_TREE_NODE] Checking its parent: %s", tree_node_repr(parent_tree_node));
+      message1 = tree_node_repr(parent_tree_node);
+      log_info("[SELECT_TREE_NODE] Checking its parent: %s", message1);
+      free(message1);
+      message1 = NULL;
       if (!is_fully_explored(parent_tree_node)) {
-        log_info("[SELECT_TREE_NODE] Resume selection from its parent: %s", tree_node_repr(parent_tree_node));
+        message1 = tree_node_repr(parent_tree_node);
+        log_info("[SELECT_TREE_NODE] Resume selection from its parent: %s", message1);
+        free(message1);
+        message1 = NULL;
         break;
       }
       get_tree_node_data(parent_tree_node)->fully_explored = TRUE;
-      log_info("[SELECT_TREE_NODE] Setting its parent fully explored: %s", tree_node_repr(parent_tree_node));
+      message1 = tree_node_repr(parent_tree_node);
+      log_info("[SELECT_TREE_NODE] Setting its parent fully explored: %s", message1);
+      free(message1);
+      message1 = NULL;
     }
     log_assert(parent_tree_node != NULL, "[SELECT_TREE_NODE] NULL is the best child");
+    message1 = tree_node_repr(parent_tree_node);
     log_assert(tree_node_score(parent_tree_node) > -INFINITY,
-               "[SELECT_TREE_NODE] -inf is the score of the best child %s", tree_node_repr(parent_tree_node));
+               "[SELECT_TREE_NODE] -inf is the score of the best child %s", message1);
+    free(message1);
+    message1 = NULL;
   }
   return parent_tree_node;
 }
@@ -637,10 +754,13 @@ gboolean is_fully_explored(TreeNode* parent_tree_node)
   if (get_tree_node_data(parent_tree_node)->fully_explored) {return TRUE;}
   if (get_tree_node_data(parent_tree_node)->colour != Black) {return FALSE;}
 
+  char* message = tree_node_repr(parent_tree_node);
   log_assert(g_node_n_children(parent_tree_node) == 1,
-             "[IS_FULLY_EXPLORED] More than one child exists under %s", tree_node_repr(parent_tree_node));
+             "[IS_FULLY_EXPLORED] More than one child exists under %s", message);
   log_assert(get_tree_node_data(g_node_nth_child(parent_tree_node, 0))->colour != Golden,
-             "[IS_FULLY_EXPLORED] A SimNode is the only child of %s", tree_node_repr(parent_tree_node));
+             "[IS_FULLY_EXPLORED] A SimNode is the only child of %s", message);
+  free(message);
+  message = NULL;
   return tree_node_score(g_node_nth_child(parent_tree_node, 0)) == -INFINITY;
 }
 
@@ -682,20 +802,38 @@ seed_info_t* Selection(TreeNode** tree_node)
                "[SELECTION] Selection does not start from ROOT, but from %s", tree_node_repr(*tree_node));
 
     *tree_node = select_tree_node(*tree_node);
-    log_info("[SELECTION] Selected node   : %s", tree_node_repr(*tree_node));
-    log_info("[SELECTION] Selected parent : %s", tree_node_repr((*tree_node)->parent));
+    char* message = tree_node_repr(*tree_node);
+    log_info("[SELECTION] Selected node   : %s", message);
+    free(message);
+    message = NULL;
+    message = tree_node_repr((*tree_node)->parent);
+    log_info("[SELECTION] Selected parent : %s", message);
+    free(message);
+    message = NULL;
 
     while (tree_node_score((*tree_node)->parent) == -INFINITY) {
       log_info("[SELECTION] The score of the parent of the simulation child is -inf, redo selection");
+      message = tree_node_repr(*tree_node);
       log_assert(G_NODE_IS_ROOT(*tree_node),
-                 "[SELECTION] Selection does not re-start from ROOT, but from %s", tree_node_repr(*tree_node));
+                 "[SELECTION] Selection does not re-start from ROOT, but from %s", message);
+      free(message);
+      message = NULL;
       *tree_node = select_tree_node(root);
-      log_info("[SELECTION] Selected node   : %s", tree_node_repr(*tree_node));
-      log_info("[SELECTION] Selected parent : %s", tree_node_repr((*tree_node)->parent));
+      message = tree_node_repr(*tree_node);
+      log_info("[SELECTION] Selected node   : %s", message);
+      free(message);
+      message = NULL;
+      message = tree_node_repr((*tree_node)->parent);
+      log_info("[SELECTION] Selected parent : %s", message);
+      free(message);
+      message = NULL;
     }
 
+    message = tree_node_repr((*tree_node)->parent);
     log_assert(tree_node_score((*tree_node)->parent) > -INFINITY,
-               "[SELECTION] Selected SimNode's parent has -inf score: %s", tree_node_repr((*tree_node)->parent));
+               "[SELECTION] Selected SimNode's parent has -inf score: %s", message);
+    free(message);
+    message = NULL;
     seed_log(*tree_node, NULL, "[SELECTION] ");
 
     seed_info_t* seed_selected = select_seed(*tree_node);
@@ -704,14 +842,19 @@ seed_info_t* Selection(TreeNode** tree_node)
 
     log_info("[SELECTION] Selection seed  : %s", q->fname);
     for (int i = 0; i < q->region_count; ++i) {
+      message = u32_array_to_str(q->regions[i].state_sequence, q->regions[i].state_count);
       log_debug("[SELECTION] Seed region %2d  : %s",
-               i, u32_array_to_str(q->regions[i].state_sequence, q->regions[i].state_count));
+               i, message);
+      free(message);
+      message = NULL;
     }
     TreeNodeData* tree_node_data = get_tree_node_data(*tree_node);
     log_info("[SELECTION] Selection path    : %s", node_path_str(*tree_node));
-    log_debug("[SELECTION] Selection region  : %s",
-             u32_array_to_str(q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_sequence,
-                              q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_count));
+    message = u32_array_to_str(q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_sequence,
+                               q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_count);
+    log_debug("[SELECTION] Selection region  : %s", message);
+    free(message);
+    message = NULL;
     return seed_selected;
 }
 
@@ -724,11 +867,14 @@ char* Simulation(TreeNode* target)
 void preprocess_queue_entry(struct queue_entry* q)
 {
   u32 null_region_count = 0;
+  char* message = NULL;
   for (u32 region_index = 0; region_index < q->region_count; ++region_index) {
+    message = u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count);
     log_assert((q->regions[region_index].state_count > 0) == (q->regions[region_index].state_sequence != NULL),
                "The state count %u does not match with state sequence:\n%s",
-               q->regions[region_index].state_count,
-               u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count));
+               q->regions[region_index].state_count, message);
+    free(message);
+    message = NULL;
     if (!null_region_count && q->regions[region_index].state_sequence != NULL) {continue;}
     while (region_index+null_region_count < q->region_count
            && q->regions[region_index+null_region_count].state_sequence == NULL)
@@ -744,21 +890,26 @@ void preprocess_queue_entry(struct queue_entry* q)
       break;
     }
     log_info("[PREPROCESS_QUEUE_ENTRY] Replacing region ID %u with %u", region_index, region_index+null_region_count);
+    message = u32_array_to_str(q->regions[region_index+null_region_count].state_sequence,
+                               q->regions[region_index+null_region_count].state_count);
     log_assert(q->regions[region_index+null_region_count].state_sequence != NULL,
                "State sequence at region index %u should not be NULL: %s",
-               region_index+null_region_count,
-               u32_array_to_str(q->regions[region_index+null_region_count].state_sequence,
-                                q->regions[region_index+null_region_count].state_count));
+               region_index+null_region_count, message);
+    free(message);
+    message = NULL;
     q->regions[region_index] = q->regions[region_index+null_region_count];
   }
 
   for (u32 region_index = 0; region_index < q->region_count; ++region_index)
   {
+    message = u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count);
     log_assert(q->regions[region_index].state_sequence != NULL && q->regions[region_index].state_count,
                "After preprocessing q, region %u has %u states: %s",
                region_index,
                q->regions[region_index].state_count,
-               u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count));
+               message);
+    free(message);
+    message = NULL;
   }
 }
 
@@ -769,25 +920,38 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   *is_new = FALSE;
   u32 matching_region_index = 0;
   gboolean matched_exactly = FALSE;
+  char* message = NULL;
+  char* message_node = NULL;
+  char* message_parent = NULL;
 
   // Construct seed with queue_entry q
   seed_info_t* seed = NULL;
 
   log_info("[MCTS-EXPANSION] Starts");
   log_info("[MCTS-EXPANSION] Record Queue Entry: %s", q->fname);
-  log_info("[MCTS-EXPANSION] State seq has %02u states: %s", len_codes, u32_array_to_str(response_codes, len_codes));
+  message = u32_array_to_str(response_codes, len_codes);
+  log_info("[MCTS-EXPANSION] State seq has %02u states: %s", len_codes, message);
+  free(message);
+  message = NULL;
+  message = u32_array_to_str(q->regions[q->region_count-1].state_sequence,
+                             q->regions[q->region_count-1].state_count);
   log_info("[MCTS-EXPANSION] Last reg  has %02u states: %s",
-           q->regions[q->region_count-1].state_count,
-           u32_array_to_str(q->regions[q->region_count-1].state_sequence,
-                            q->regions[q->region_count-1].state_count));
+           q->regions[q->region_count-1].state_count, message);
+  free(message);
+  message = NULL;
 
   log_assert(q->regions[q->region_count-1].state_count == len_codes,
              "State count in the last region (%02u) != response code len (%02u)",
              q->regions[q->region_count-1].state_count, len_codes);
+  message = u32_array_to_str(response_codes, len_codes);
+  message_node = u32_array_to_str(q->regions[q->region_count-1].state_sequence, len_codes);
   log_assert(!memcmp(q->regions[q->region_count-1].state_sequence, response_codes, len_codes),
              "Response codes are not the same as the state sequences in the last region of q:\nRSP: %s\nRGN: %s",
-             u32_array_to_str(response_codes, len_codes),
-             u32_array_to_str(q->regions[q->region_count-1].state_sequence, len_codes));
+             message, message_node);
+  free(message);
+  free(message_node);
+  message = NULL;
+  message_node = NULL;
 
   // Check if the response code sequence is new
   // And add the new queue entry to each node along the paths
@@ -823,10 +987,16 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       //  be greater than or equal to the path_len (path_index+1) of its matching node
       //  Node Colour:
       //    White if the last state of the region's state sequence is the
+      message = u32_array_to_str(response_codes, path_index+1);
       log_debug("[MCTS-EXPANSION] Matching code %03u at index %3u: %s",
-               response_codes[path_index], path_index, u32_array_to_str(response_codes, path_index+1));
+               response_codes[path_index], path_index, message);
+      free(message);
+      message = NULL;
+      message = u32_array_to_str(region.state_sequence, region.state_count);
       log_debug("[MCTS-EXPANSION] With region at index %3u      : %s (Queue Entry %s)",
-                region_index, u32_array_to_str(region.state_sequence, region.state_count), q->fname);
+                region_index, message, q->fname);
+      free(message);
+      message = NULL;
       if (path_index+1 <= region.state_count) {
 //        exact_match = (path_index+1 == region.state_count);
 //        matched_exactly = response_codes[path_index] == region.state_sequence[region.state_count-1];
@@ -845,19 +1015,31 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       if (matched_exactly)  {colour = White;}
       else  {colour = Black;}
       tree_node = append_child(parent_node, response_codes[path_index], colour, response_codes, path_index+1);
-      log_debug("[MCTS-EXPANSION] Add a new child %s of parent %s",
-               tree_node_repr(tree_node), tree_node_repr(parent_node));
+
+      message_node = tree_node_repr(tree_node);
+      message_parent = tree_node_repr(parent_node);
+      log_debug("[MCTS-EXPANSION] Add a new child %s of parent %s", message_node, message_parent);
+      free(message_node);
+      free(message_parent);
+      message_node = NULL;
+      message_parent = NULL;
     }
     if (matched_exactly) {
       TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
       if (tree_node_data->colour == Black && path_index + 1 != len_codes) {
         // NOTE: Flip a node if this is black and is not an termination point
         //  But still was considered as Black
-        log_debug("[MCTS-EXPANSION] Flipping node from Black to White: %s", tree_node_repr(tree_node));
+        message_node = tree_node_repr(tree_node);
+        log_debug("[MCTS-EXPANSION] Flipping node from Black to White: %s", message_node);
+        free(message_node);
+        message_node = NULL;
 //        tree_log(ROOT, tree_node, 0, 0);
         tree_node_data->colour = White;
         tree_node_data->simulation_child = append_child(tree_node, 999, Golden, response_codes, path_index+1);
-        log_debug("[MCTS-EXPANSION] Flipped node: %s", tree_node_repr(tree_node));
+        message_node = tree_node_repr(tree_node);
+        log_debug("[MCTS-EXPANSION] Flipped node: %s", message_node);
+        free(message_node);
+        message_node = NULL;
 
 //        tree_log(ROOT, tree_node, 0, 0);
       }
@@ -871,46 +1053,83 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 //        struct queue_entry* new_q = (struct queue_entry*) seed->q;
         region_t region = q->regions[matching_region_index];
         log_debug("[MCTS-EXPANSION] The following two paths should match");
+        message = u32_array_to_str(region.state_sequence, region.state_count);
         log_debug("[MCTS-EXPANSION] Region %d: %s",
-                 matching_region_index, u32_array_to_str(region.state_sequence, region.state_count));
+                 matching_region_index, message);
+        free(message);
+        message = NULL;
+        message = u32_array_to_str(tree_node_data->path, tree_node_data->path_len);
         log_debug("[MCTS-EXPANSION] Node %d: %s",
-                 tree_node_data->id, u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+                 tree_node_data->id, message);
+        free(message);
+        message = NULL;
         log_assert(region.state_count >= tree_node_data->path_len,
                    "[MCTS-EXPANSION] The number of states in region is smaller than "
                    "the number of states in the node path: %u < %u",
                    region.state_count, tree_node_data->path);
+        message = u32_array_to_str(region.state_sequence, tree_node_data->path_len);
+        message_node = u32_array_to_str(tree_node_data->path, tree_node_data->path_len);
         log_assert(!memcmp(region.state_sequence, tree_node_data->path, sizeof(u32)*tree_node_data->path_len),
                    "[MCTS-EXPANSION] The region states sequence is different to "
                    "the node states sequence:\nREGN: %s\nNODE: %s",
-                   u32_array_to_str(region.state_sequence, tree_node_data->path_len),
-                   u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+                   message, message_node);
+        free(message);
+        free(message_node);
+        message = NULL;
+        message_node = NULL;
+        message_node = tree_node_repr(tree_node);
         log_debug("[MCTS-EXPANSION] Seed appended at index %u of the simulation child of node %s , with region id %u",
-                 sim_data->seeds_count-1, tree_node_repr(tree_node),
+                 sim_data->seeds_count-1, message_node,
                  sim_data->region_indices[seed->parent_index]);
+        free(message_node);
+        message_node = NULL;
       }
     }
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-    log_debug("[MCTS-EXPANSION] Node %s path:%s",
-             tree_node_repr(tree_node), u32_array_to_str(tree_node_data->path, tree_node_data->path_len));
+    message_node = tree_node_repr(tree_node);
+    message = u32_array_to_str(tree_node_data->path, tree_node_data->path_len);
+    log_debug("[MCTS-EXPANSION] Node %s path:%s", message_node, message);
+    free(message_node);
+    free(message);
+    message_node = NULL;
+    message = NULL;
 
       /* NOTE: Assert the path of each node is saved correctly */
       log_assert(tree_node_data->path_len == path_index+1,
                  "[MCTS-EXPANSION] Node path len is different to the current index (of response codes seq) + 1: "
                  "%u != %u",
                  tree_node_data->path_len, path_index + 1);
+      message = u32_array_to_str(tree_node_data->path, tree_node_data->path_len);
+      message_node = u32_array_to_str(response_codes, tree_node_data->path_len);
       log_assert(!memcmp(tree_node_data->path, response_codes, sizeof(u32)*tree_node_data->path_len),
                  "[MCTS-EXPANSION] Node path is different to the the current prefix seq of response codes:\n"
                  "RESP: %s\nNODE: %s",
-                 u32_array_to_str(tree_node_data->path, tree_node_data->path_len),
-                 u32_array_to_str(response_codes, tree_node_data->path_len));
+                 message, message_node);
+      free(message);
+      free(message_node);
+      message = NULL;
+      message_node = NULL;
   }
   parent_node = tree_node;
-  log_debug("[MCTS-EXPANSION] Node: %s", tree_node_repr(tree_node));
-  log_debug("[MCTS-EXPANSION] Node's path:%s", u32_array_to_str(get_tree_node_data(tree_node)->path,
-                                                               get_tree_node_data(tree_node)->path_len));
-  log_debug("[MCTS-EXPANSION] Exec's path:%s", u32_array_to_str(response_codes, len_codes));
+  message_node = tree_node_repr(tree_node);
+  log_debug("[MCTS-EXPANSION] Node: %s", message_node);
+  free(message_node);
+  message_node = NULL;
+
+  message = u32_array_to_str(get_tree_node_data(tree_node)->path, get_tree_node_data(tree_node)->path_len);
+  log_debug("[MCTS-EXPANSION] Node's path:%s", message);
+  free(message);
+  message = NULL;
+  message = u32_array_to_str(response_codes, len_codes);
+  log_debug("[MCTS-EXPANSION] Exec's path:%s", message);
+  free(message);
+  message = NULL;
   get_tree_node_data(tree_node)->fully_explored = is_leaf(tree_node);
-  log_debug("[MCTS-EXPANSION] Node: %s", tree_node_repr(tree_node));
+
+  message_node = tree_node_repr(tree_node);
+  log_debug("[MCTS-EXPANSION] Node: %s", message_node);
+  free(message_node);
+  message_node = NULL;
   if (G_NODE_IS_ROOT(tree_node->parent)) {
     log_debug("[MCTS-EXPANSION] Reached ROOT;");
   }
@@ -929,8 +1148,14 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
 void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new)
 {
-  log_info("[PROPAGATION] Back-propagating from SimNode: %s", tree_node_repr(leaf_selected));
-  log_info("[PROPAGATION] The parent of the SimNode is : %s", tree_node_repr(leaf_selected->parent));
+  char* message = tree_node_repr(leaf_selected);
+  log_info("[PROPAGATION] Back-propagating from SimNode: %s", message);
+  free(message);
+  message = NULL;
+  message = tree_node_repr(leaf_selected->parent);
+  log_info("[PROPAGATION] The parent of the SimNode is : %s", message);
+  free(message);
+  message = NULL;
 
   if (ROUND <= 0) {
     /* NOTE: Temporarily only propagate stats to SimNote during normal run

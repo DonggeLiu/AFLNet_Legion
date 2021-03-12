@@ -433,6 +433,8 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
 {
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
   struct queue_entry* q = seed->q;
+  char* message = NULL;
+  char* message_arr = NULL;
 
   log_info("[find_M2_region] Queue Entry: %s", seed->q->fname);
   if (G_NODE_IS_ROOT(tree_node->parent)) {
@@ -442,9 +444,13 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
     return;
   }
   *M2_start_region_ID = tree_node_data->region_indices[seed->parent_index] + 1;
-  log_info("[find_M2_region] M1       : %s",
-           u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence,
-                            q->regions[*M2_start_region_ID-1].state_count));
+
+  message = u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence,
+                             q->regions[*M2_start_region_ID-1].state_count);
+  log_info("[find_M2_region] M1       : %s", message);
+  free(message);
+  message = NULL;
+
   if (FUZZ_M3) {
     *M2_region_count = q->region_count - *M2_start_region_ID;
   } else {
@@ -456,10 +462,14 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
       (*M2_region_count)++;
     }
     for(u32 i = 0; i < q->region_count; i++) {
-      char* message = NULL;
-      message_append(&message, "[find_M2_region] Region %2u: %s",
-                     i, u32_array_to_str(q->regions[i].state_sequence, q->regions[i].state_count));
+      message = NULL;
+      message_arr = u32_array_to_str(q->regions[i].state_sequence, q->regions[i].state_count);
+      message_append(&message, "[find_M2_region] Region %2u: %s", i, message_arr);
+      free(message_arr);
+      message_arr = NULL;
       log_info(message);
+      free(message);
+      message = NULL;
     }
   }
   log_info("[find_M2_region] M2 ID %d, M2 count %d", *M2_start_region_ID, *M2_region_count);
@@ -844,7 +854,10 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   }
 
   // During normal run: Collect the sequence of response code and expand the tree with it
-  log_info("[UPDATE-MCTS-TREE] RES Codes: %s", u32_array_to_str(node_sequence, node_count));
+  char* message = u32_array_to_str(node_sequence, node_count);
+  log_info("[UPDATE-MCTS-TREE] RES Codes: %s", message);
+  free(message);
+  message = NULL;
   /* NOTE: MCTS Expansion and check if the new input finds a new sequence */
   gboolean is_new = FALSE;
   Expansion(ROOT, q, node_sequence, node_count, &is_new);
@@ -9301,9 +9314,15 @@ int main(int argc, char** argv) {
         cur_discovered = 0;
         cur_tree_node = ROOT;
 //        tree_log(ROOT, cur_tree_node, 0, -1);
-        log_debug("[MAIN LOOP] Node selection starts from: %s", tree_node_repr(cur_tree_node));
+        char* message = tree_node_repr(cur_tree_node);
+        log_debug("[MAIN LOOP] Node selection starts from: %s", message);
+        free(message);
+        message = NULL;
         cur_seed = Selection(&cur_tree_node);
-        log_debug("[MAIN LOOP] Node selection ends at: %s", tree_node_repr(cur_tree_node));
+        message = tree_node_repr(cur_tree_node);
+        log_debug("[MAIN LOOP] Node selection ends at: %s", message);
+        free(message);
+        message = NULL;
 //        tree_node_print(cur_tree_node);
 
         selected_seed = (struct queue_entry*) cur_seed->q;
