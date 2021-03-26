@@ -16,7 +16,6 @@ enum score_function SCORE_FUNCTION = UCT;
 
 /* Statistics */
 uint ROUND = 0;
-khash_t(hms) *khms_nodes;
 
 /* ============================================== TreeNode Functions ============================================== */
 
@@ -34,9 +33,9 @@ TreeNodeData* new_tree_node_data (u32 response_code, enum node_colour colour, u3
     //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
 
-    int absent_in_khms_nodes = 0;
-    khint_t k = kh_put_hms(khms_nodes, response_code, &absent_in_khms_nodes);
-    kh_value(khms_nodes, response_code) = 0;
+    int absent_in_khmn_nodes = 0;
+    khint_t k = kh_put_hmn(khmn_nodes, response_code, &absent_in_khmn_nodes);
+    kh_value(khmn_nodes, response_code) = 0;
 
     if (colour == Golden) {
       log_assert(tree_node_data->id == 999,
@@ -578,7 +577,7 @@ void queue_state_log(struct queue_entry* queue)
 
 seed_info_t* construct_seed_with_queue_entry(struct queue_entry* q)
 {
-  seed_info_t* seed = (seed_info_t*) ck_alloc (sizeof(seed_info_t));
+  seed_info_t* seed = (seed_info_t*) malloc (sizeof(seed_info_t));
   seed->q = q;
   seed->selected = 0;
   seed->discovered = 0;
@@ -599,9 +598,9 @@ void add_seed_to_node(seed_info_t* seed, u32 matching_region_index, TreeNode * n
 
   // TOASK: Should we allocate more spaces to avoid repeated reallocation?
   TreeNodeData* node_data = get_tree_node_data(node);
-  node_data->seeds = (seed_info_t **) ck_realloc (node_data->seeds, (node_data->seeds_count + 1) * sizeof(void *));
+  node_data->seeds = (seed_info_t **) realloc (node_data->seeds, (node_data->seeds_count + 1) * sizeof(void *));
   node_data->seeds[node_data->seeds_count] = (seed_info_t *) seed;
-  node_data->region_indices = (u32*) ck_realloc (node_data->region_indices, (node_data->seeds_count + 1) * sizeof(u32));
+  node_data->region_indices = (u32*) realloc (node_data->region_indices, (node_data->seeds_count + 1) * sizeof(u32));
   node_data->region_indices[node_data->seeds_count] = matching_region_index;
   seed->parent_index = node_data->seeds_count;
   node_data->seeds_count++;
@@ -791,10 +790,12 @@ TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho)
     log_info("[INITIALISATION] Max tree log depth: %u", MAX_TREE_LOG_DEPTH);
     log_info("[INITIALISATION] Ignore assertions: %s", ign_ast?"True":"False");
     log_info("[INITIALISATION] Rho: %lf", RHO);
+
+    khmn_nodes = kh_init_hmn();
     u32 path[] = {0};
     TreeNode* root = new_tree_node(new_tree_node_data(0, White, path, 1));
     get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
-    khms_nodes = kh_init_hms();
+
     return root;
 }
 
@@ -842,8 +843,8 @@ seed_info_t* Selection(TreeNode** tree_node)
     seed_log(*tree_node, NULL, "[SELECTION] ");
 
     TreeNodeData* parent_node_data = get_tree_node_data((*tree_node)->parent);
-    assert(kh_exist(khms_nodes, parent_node_data->id));
-    kh_val(khms_nodes, parent_node_data->id) += 1;
+    assert(kh_exist(khmn_nodes, parent_node_data->id));
+    kh_val(khmn_nodes, parent_node_data->id) += 1;
 
 
     seed_info_t* seed_selected = select_seed(*tree_node);

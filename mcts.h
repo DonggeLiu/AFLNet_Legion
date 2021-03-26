@@ -32,6 +32,10 @@
 
 //#define MAX_TREE_LOG_DEPTH 5
 
+KHASH_INIT(hmn, khint32_t, int, 1, kh_int_hash_func, kh_int_hash_equal)
+
+khash_t(hmn) *khmn_nodes;
+
 enum node_colour{White, Red, Golden, Purple, Black};
 enum score_function{Random, UCT};
 

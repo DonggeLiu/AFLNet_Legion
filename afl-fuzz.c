@@ -9448,6 +9448,7 @@ int main(int argc, char** argv) {
     assert(kh_exist(khms_states, k));
     log_fatal("State %u selected %u times", kh_get_hms(khms_states, k));
   }
+  kh_destroy_hmn(khmn_nodes);
 
   if (queue_cur) show_stats();
 
