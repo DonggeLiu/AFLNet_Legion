@@ -16,7 +16,7 @@ enum score_function SCORE_FUNCTION = UCT;
 
 /* Statistics */
 uint ROUND = 0;
-khash_t(hms) *khms_nodes = kh_init_hms();
+khash_t(hms) *khms_nodes;
 
 /* ============================================== TreeNode Functions ============================================== */
 
@@ -794,6 +794,7 @@ TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho)
     u32 path[] = {0};
     TreeNode* root = new_tree_node(new_tree_node_data(0, White, path, 1));
     get_tree_node_data(root)->simulation_child = append_child(root, 999, Golden, path, 1);
+    khms_nodes = kh_init_hms();
     return root;
 }
 
