@@ -9443,6 +9443,12 @@ int main(int argc, char** argv) {
     }
   }
 
+  // Log the statistics of nodes
+  for (khiter_t k = kh_begin(khms_states); k != kh_end(khms_states) ; ++k) {
+    assert(kh_exist(khms_states, k));
+    log_fatal("State %u selected %u times", kh_get_hms(khms_states, k));
+  }
+
   if (queue_cur) show_stats();
 
   /* If we stopped programmatically, we kill the forkserver and the current runner.

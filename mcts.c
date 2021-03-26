@@ -16,7 +16,7 @@ enum score_function SCORE_FUNCTION = UCT;
 
 /* Statistics */
 uint ROUND = 0;
-
+khash_t(hms) *khms_nodes = kh_init_hms();
 
 /* ============================================== TreeNode Functions ============================================== */
 
@@ -33,6 +33,10 @@ TreeNodeData* new_tree_node_data (u32 response_code, enum node_colour colour, u3
     tree_node_data->path_len = path_len;
     //NOTE: This is probably not needed, left it here in case it comes in handy later.
     tree_node_data->colour = colour;
+
+    int absent_in_khms_nodes = 0;
+    khint_t k = kh_put_hms(khms_nodes, response_code, &absent_in_khms_nodes);
+    kh_get_hms(khms_nodes, response_code) = 0;
 
     if (colour == Golden) {
       log_assert(tree_node_data->id == 999,
@@ -835,6 +839,11 @@ seed_info_t* Selection(TreeNode** tree_node)
     free(message);
     message = NULL;
     seed_log(*tree_node, NULL, "[SELECTION] ");
+
+    TreeNodeData* parent_node_data = get_tree_node_data((*tree_node)->parent);
+    assert(kh_exist(khms_nodes, parent_node_data->id));
+    kh_val(khms_nodes, parent_node_data->id) += 1;
+
 
     seed_info_t* seed_selected = select_seed(*tree_node);
     seed_selected_log(*tree_node, seed_selected, "[SELECTION] ");
