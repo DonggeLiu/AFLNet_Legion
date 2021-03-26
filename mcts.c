@@ -36,7 +36,7 @@ TreeNodeData* new_tree_node_data (u32 response_code, enum node_colour colour, u3
 
     int absent_in_khms_nodes = 0;
     khint_t k = kh_put_hms(khms_nodes, response_code, &absent_in_khms_nodes);
-    kh_get_hms(khms_nodes, response_code) = 0;
+    kh_value(khms_nodes, response_code) = 0;
 
     if (colour == Golden) {
       log_assert(tree_node_data->id == 999,
