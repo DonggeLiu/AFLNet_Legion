@@ -9444,9 +9444,9 @@ int main(int argc, char** argv) {
   }
 
   // Log the statistics of nodes
-  for (khiter_t k = kh_begin(khms_states); k != kh_end(khms_states) ; ++k) {
-    assert(kh_exist(khms_states, k));
-    log_fatal("State %u selected %u times", kh_get_hms(khms_states, k));
+  for (khiter_t k = kh_begin(khmn_nodes); k != kh_end(khmn_nodes) ; ++k) {
+    assert(kh_exist(khmn_nodes, k));
+    log_fatal("State %u selected %u times", kh_get_hmn(khmn_nodes, k));
   }
   kh_destroy_hmn(khmn_nodes);
 
