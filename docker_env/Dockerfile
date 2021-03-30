@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 # Install dependencies
 RUN apt-get -y update \
-    && apt-get -y install apt-utils build-essential clang graphviz-dev git libgnutls-dev libglib2.0-dev cmake vim tzdata gdb libc6-dbg dpkg-dev libgnutls28-dev \
+    && apt-get -y install apt-utils build-essential clang graphviz-dev git libgnutls-dev libglib2.0-dev cmake vim tzdata gdb libc6-dbg dpkg-dev libgnutls28-dev valgrind\
     && sed -ri '/^# deb-src .* xenial(-updates){0,1} main restricted$/s/^# //g' /etc/apt/sources.list \
     && apt update \
     && mkdir -p /opt/src \
