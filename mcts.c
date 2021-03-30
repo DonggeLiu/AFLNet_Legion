@@ -851,7 +851,8 @@ seed_info_t* Selection(TreeNode** tree_node)
     TreeNodeData* parent_node_data = get_tree_node_data((*tree_node)->parent);
     khiter_t k = kh_get_hmn(khmn_nodes, parent_node_data->id);
     assert(kh_exist(khmn_nodes, k));
-    kh_value(khmn_nodes, k) += 1;
+    int count = kh_value(khmn_nodes, k);
+    kh_value(khmn_nodes, k) = 1 + count;
 
     seed_info_t* seed_selected = select_seed(*tree_node);
     seed_selected_log(*tree_node, seed_selected, "[SELECTION] ");
