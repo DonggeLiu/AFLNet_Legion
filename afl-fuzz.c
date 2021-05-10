@@ -9444,11 +9444,21 @@ int main(int argc, char** argv) {
   }
 
   // Log the statistics of nodes
-  for (khiter_t k = kh_begin(khms_states); k != kh_end(khms_states) ; ++k) {
-    assert(kh_exist(khms_states, k));
-    log_fatal("State %u selected %u times", kh_get_hms(khms_states, k));
+  if (state_selection_algo == MCTS) {
+    for (khiter_t k = kh_begin(khmn_nodes); k != kh_end(khmn_nodes) ; ++k) {
+      if(kh_exist(khmn_nodes, k)) log_fatal("State %u selected %u times", kh_key(khmn_nodes, k), kh_value(khmn_nodes, k));
+    }
+    kh_destroy_hmn(khmn_nodes);
+  } else {
+    char log_file[100];
+    snprintf(log_file, sizeof(log_file), "%s", getenv("AFLNET_LEGION_LOG"));
+    log_add_fp(fopen(log_file, "w+"), 0);
+    for (khiter_t k = kh_begin(khms_states); k != kh_end(khms_states) ; ++k) {
+      if(kh_exist(khms_states, k)) log_fatal("State %u selected %u times", kh_key(khms_states, k), kh_value(khms_states, k)->selected_times);
+    }
+//    kh_destroy_hms(khms_states);
   }
-  kh_destroy_hmn(khmn_nodes);
+
 
   if (queue_cur) show_stats();
 

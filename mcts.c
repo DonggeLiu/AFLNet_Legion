@@ -35,7 +35,13 @@ TreeNodeData* new_tree_node_data (u32 response_code, enum node_colour colour, u3
 
     int absent_in_khmn_nodes = 0;
     khint_t k = kh_put_hmn(khmn_nodes, response_code, &absent_in_khmn_nodes);
-    kh_value(khmn_nodes, response_code) = 0;
+
+    if (absent_in_khmn_nodes) {
+      log_info("RES_CODE %u does not exist yet", response_code);
+      kh_value(khmn_nodes, k) = 0;
+    } else {
+      log_info("RES_CODE %u exists", response_code);
+    }
 
     if (colour == Golden) {
       log_assert(tree_node_data->id == 999,
@@ -850,9 +856,10 @@ seed_info_t* Selection(TreeNode** tree_node)
     seed_log(*tree_node, NULL, "[SELECTION] ");
 
     TreeNodeData* parent_node_data = get_tree_node_data((*tree_node)->parent);
-    assert(kh_exist(khmn_nodes, parent_node_data->id));
-    kh_val(khmn_nodes, parent_node_data->id) += 1;
-
+    khiter_t k = kh_get_hmn(khmn_nodes, parent_node_data->id);
+    assert(kh_exist(khmn_nodes, k));
+    int count = kh_value(khmn_nodes, k);
+    kh_value(khmn_nodes, k) = 1 + count;
 
     seed_info_t* seed_selected = select_seed(*tree_node);
     seed_selected_log(*tree_node, seed_selected, "[SELECTION] ");

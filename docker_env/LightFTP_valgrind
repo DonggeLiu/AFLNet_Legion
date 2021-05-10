@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+valgrind --leak-check=full --show-leak-kinds=all afl-fuzz -l 0 -p 7 -a -z -r 0.0025 -d -i $AFLNET/tutorials/lightftp/in-ftp -o out-lightftp -N tcp://127.0.0.1/2200 -x $AFLNET/tutorials/lightftp/ftp.dict -P FTP -D 10000 -q 4 -s 4 -E -R -c ./ftpclean.sh ./fftp fftp.conf 2200
