@@ -167,7 +167,7 @@ double tree_node_score(TreeNode* tree_node)
      */
     if (SCORE_FUNCTION == Random) return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
-    TreeNodeData tree_node_data = get_tree_node_data(tree_node);
+    TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
 
     if (tree_node_data->fully_explored) return -INFINITY;
 
