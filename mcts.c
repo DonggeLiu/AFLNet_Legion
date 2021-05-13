@@ -135,10 +135,10 @@ double tree_node_exploration_score(TreeNode* tree_node)
     TreeNodeData* node_data = get_tree_node_data(tree_node);
     if (!node_data->selected) { return INFINITY; }
     TreeNodeData* parent_data = get_tree_node_data(tree_node->parent);
-    log_trace("[TREE_NODE_EXPLORATION_SCORE] Node %03u explore score: %lf = %lf * sqrt(2 * log(%lf) / %lf)",
-              node_data->id,
-              RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected),
-              RHO, (double) parent_data->selected, (double) node_data->selected);
+//    log_trace("[TREE_NODE_EXPLORATION_SCORE] Node %03u explore score: %lf = %lf * sqrt(2 * log(%lf) / %lf)",
+//              node_data->id,
+//              RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected),
+//              RHO, (double) parent_data->selected, (double) node_data->selected);
 
     return  RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected);
 }
@@ -889,55 +889,85 @@ char* Simulation(TreeNode* target)
     return NULL;
 }
 
-void preprocess_queue_entry(struct queue_entry* q)
+void remove_null_regions(struct queue_entry* q)
 {
-  u32 null_region_count = 0;
-  char* message = NULL;
-  for (u32 region_index = 0; region_index < q->region_count; ++region_index) {
-    message = u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count);
-    log_assert((q->regions[region_index].state_count > 0) == (q->regions[region_index].state_sequence != NULL),
-               "The state count %u does not match with state sequence:\n%s",
-               q->regions[region_index].state_count, message);
-    free(message);
-    message = NULL;
-    if (!null_region_count && q->regions[region_index].state_sequence != NULL) {continue;}
-    while (region_index+null_region_count < q->region_count
-           && q->regions[region_index+null_region_count].state_sequence == NULL)
-    {
-      null_region_count++;
+    u32 null_region_count = 0;
+    char* message = NULL;
+    for (u32 region_index = 0; region_index < q->region_count; ++region_index) {
+        message = u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count);
+        log_assert((q->regions[region_index].state_count > 0) == (q->regions[region_index].state_sequence != NULL),
+                   "The state count %u does not match with state sequence:\n%s",
+                   q->regions[region_index].state_count, message);
+        free(message);
+        message = NULL;
+        if (!null_region_count && q->regions[region_index].state_sequence != NULL) {continue;}
+        while (region_index+null_region_count < q->region_count
+               && q->regions[region_index+null_region_count].state_sequence == NULL)
+        {
+            null_region_count++;
+        }
+        if (region_index+null_region_count >= q->region_count)
+        {
+            log_info("[PREPROCESS_QUEUE_ENTRY] Reached region count %u while searching for region at index %u",
+                     q->region_count, region_index+null_region_count);
+            q->region_count = region_index;
+            log_info("[PREPROCESS_QUEUE_ENTRY] Set region count to be %u accordingly", q->region_count);
+            break;
+        }
+        log_info("[PREPROCESS_QUEUE_ENTRY] Replacing region ID %u with %u", region_index, region_index+null_region_count);
+        message = u32_array_to_str(q->regions[region_index+null_region_count].state_sequence,
+                                   q->regions[region_index+null_region_count].state_count);
+        log_assert(q->regions[region_index+null_region_count].state_sequence != NULL,
+                   "State sequence at region index %u should not be NULL: %s",
+                   region_index+null_region_count, message);
+        free(message);
+        message = NULL;
+        q->regions[region_index] = q->regions[region_index+null_region_count];
     }
-    if (region_index+null_region_count >= q->region_count)
-    {
-      log_info("[PREPROCESS_QUEUE_ENTRY] Reached region count %u while searching for region at index %u",
-               q->region_count, region_index+null_region_count);
-      q->region_count = region_index;
-      log_info("[PREPROCESS_QUEUE_ENTRY] Set region count to be %u accordingly", q->region_count);
-      break;
-    }
-    log_info("[PREPROCESS_QUEUE_ENTRY] Replacing region ID %u with %u", region_index, region_index+null_region_count);
-    message = u32_array_to_str(q->regions[region_index+null_region_count].state_sequence,
-                               q->regions[region_index+null_region_count].state_count);
-    log_assert(q->regions[region_index+null_region_count].state_sequence != NULL,
-               "State sequence at region index %u should not be NULL: %s",
-               region_index+null_region_count, message);
-    free(message);
-    message = NULL;
-    q->regions[region_index] = q->regions[region_index+null_region_count];
-  }
 
-  for (u32 region_index = 0; region_index < q->region_count; ++region_index)
-  {
-    message = u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count);
-    log_assert(q->regions[region_index].state_sequence != NULL && q->regions[region_index].state_count,
-               "After preprocessing q, region %u has %u states: %s",
-               region_index,
-               q->regions[region_index].state_count,
-               message);
-    free(message);
-    message = NULL;
-  }
+    for (u32 region_index = 0; region_index < q->region_count; ++region_index)
+    {
+        message = u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count);
+        log_assert(q->regions[region_index].state_sequence != NULL && q->regions[region_index].state_count,
+                   "After preprocessing q, region %u has %u states: %s",
+                   region_index,
+                   q->regions[region_index].state_count,
+                   message);
+        free(message);
+        message = NULL;
+    }
 }
 
+void truncate_long_regions(struct queue_entry* q)
+{
+    uint truncated_state_count=100;
+    char* message = NULL;
+    for (u32 region_index = 0; region_index < q->region_count; ++region_index) {
+        message = u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count);
+        log_assert((q->regions[region_index].state_count > 0) == (q->regions[region_index].state_sequence != NULL),
+                   "The state count %u does not match with state sequence:\n%s",
+                   q->regions[region_index].state_count, message);
+        free(message);
+        message = NULL;
+        if (q->regions[region_index].state_count < truncated_state_count) {continue;}
+        log_info("[TRUNCATE_LONG_REGIONS] %d states in region %d (%s)",
+                 q->regions[region_index].state_count, region_index, q->fname);
+
+        unsigned int truncated_state_sequence[truncated_state_count];
+        for (uint j = 0; j < truncated_state_count; ++j) {
+            truncated_state_sequence[j] = q->regions[region_index].state_sequence[j];
+        }
+
+        q->regions[region_index].state_count = truncated_state_count;
+        q->regions[region_index].state_sequence = truncated_state_sequence;
+    }
+}
+
+void preprocess_queue_entry(struct queue_entry* q)
+{
+    remove_null_regions(q);
+    truncate_long_regions(q);
+}
 
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
