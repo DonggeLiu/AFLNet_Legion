@@ -889,12 +889,6 @@ char* Simulation(TreeNode* target)
     return NULL;
 }
 
-void preprocess_queue_entry(struct queue_entry* q)
-{
-    remove_null_regions(q);
-    truncate_long_regions(q);
-}
-
 void remove_null_regions(struct queue_entry* q)
 {
     u32 null_region_count = 0;
@@ -959,8 +953,8 @@ void truncate_long_regions(struct queue_entry* q)
         log_info("[TRUNCATE_LONG_REGIONS] %d states in region %d (%s)",
                  q->regions[region_index].state_count, region_index, q->fname);
 
-        unsigned int* truncated_state_sequence[truncated_state_count];
-        for (unit j = 0; j < truncated_state_count; ++j) {
+        unsigned int *truncated_state_sequence[truncated_state_count];
+        for (uint j = 0; j < truncated_state_count; ++j) {
             truncated_state_sequence[j] = q->regions[region_index].state_sequence[j];
         }
 
@@ -969,6 +963,11 @@ void truncate_long_regions(struct queue_entry* q)
     }
 }
 
+void preprocess_queue_entry(struct queue_entry* q)
+{
+    remove_null_regions(q);
+    truncate_long_regions(q);
+}
 
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
