@@ -953,7 +953,7 @@ void truncate_long_regions(struct queue_entry* q)
         log_info("[TRUNCATE_LONG_REGIONS] %d states in region %d (%s)",
                  q->regions[region_index].state_count, region_index, q->fname);
 
-        unsigned int *truncated_state_sequence[truncated_state_count];
+        unsigned int truncated_state_sequence[truncated_state_count];
         for (uint j = 0; j < truncated_state_count; ++j) {
             truncated_state_sequence[j] = q->regions[region_index].state_sequence[j];
         }
