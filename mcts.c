@@ -135,10 +135,10 @@ double tree_node_exploration_score(TreeNode* tree_node)
     TreeNodeData* node_data = get_tree_node_data(tree_node);
     if (!node_data->selected) { return INFINITY; }
     TreeNodeData* parent_data = get_tree_node_data(tree_node->parent);
-    log_trace("[TREE_NODE_EXPLORATION_SCORE] Node %03u explore score: %lf = %lf * sqrt(2 * log(%lf) / %lf)",
-              node_data->id,
-              RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected),
-              RHO, (double) parent_data->selected, (double) node_data->selected);
+//    log_trace("[TREE_NODE_EXPLORATION_SCORE] Node %03u explore score: %lf = %lf * sqrt(2 * log(%lf) / %lf)",
+//              node_data->id,
+//              RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected),
+//              RHO, (double) parent_data->selected, (double) node_data->selected);
 
     return  RHO * sqrt(2 * log((double) parent_data->selected) / (double) node_data->selected);
 }
