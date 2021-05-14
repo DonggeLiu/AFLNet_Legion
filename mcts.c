@@ -1016,6 +1016,23 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   // And add the new queue entry to each node along the paths
   assert(response_codes[0] == 0);
   log_assert(response_codes[0] == 0, "[MCTS-EXPANSION] Response codes sequence does not start with 0");
+
+
+  log_info("[MCTS-EXPANSION] 1st round: Check if the queue_entry finds a new paths");
+  for (u32 path_index = 1; path_index < len_codes; path_index++) {
+    parent_node = tree_node;
+    log_debug("[MCTS-EXPANSION] === Matching code %03u at index %u ===",
+              response_codes[path_index], path_index);
+
+    if (!exists_child(tree_node, response_codes[path_index])) {
+      log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
+                response_codes[path_index], path_index);
+      *is_new = TRUE;
+      break;
+    }
+  }
+
+  log_info("[MCTS-EXPANSION] 2st round: Dye nodes and add queue_entry");
   for (u32 path_index = 1; path_index < len_codes; path_index++) {
     parent_node = tree_node;
     log_debug("[MCTS-EXPANSION] === Matching code %03u at index %u ===", response_codes[path_index], path_index);
@@ -1030,7 +1047,8 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
     if (!(tree_node = exists_child(tree_node, response_codes[path_index]))){
       log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
                response_codes[path_index], path_index);
-      *is_new = TRUE;
+      log_assert(*is_new == TRUE, "New path was not captured in the 1st round");
+//      *is_new = TRUE;
     }
 
     for (u32 region_index = matching_region_index + matched_exactly;
