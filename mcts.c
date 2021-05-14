@@ -1033,6 +1033,12 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
     }
   }
 
+  /* NOTE: Add all queue entries to the corresponding exact match node*/
+  /* NOTE: Try adding *interesting* queue entries only*/
+  TreeNode* root_sim = get_simulation_child(tree_node);
+  seed = construct_seed_with_queue_entry(q);
+  add_seed_to_node(seed, 0, root_sim);
+
   log_info("[MCTS-EXPANSION] 2st round: Dye nodes and add queue_entry");
   for (u32 path_index = 1; path_index < len_codes; path_index++) {
     parent_node = tree_node;
@@ -1102,6 +1108,8 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       message_node = NULL;
       message_parent = NULL;
     }
+    /* NOTE: Add all queue entries to the corresponding exact match node*/
+    /* NOTE: Try adding *interesting* queue entries only*/
     if (matched_exactly) {
       TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
       if (tree_node_data->colour == Black && path_index + 1 != len_codes) {
