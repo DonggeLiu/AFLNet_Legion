@@ -973,10 +973,11 @@ void preprocess_queue_entry(struct queue_entry* q)
     truncate_long_regions(q);
 }
 
-TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
+TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* new_path)
 {
   TreeNode* parent_node;
-  *is_new = FALSE;
+  gboolean new_node = FALSE;
+  *new_path = FALSE;
   u32 matching_region_index = 0;
   gboolean matched_exactly = FALSE;
   char* message = NULL;
@@ -1027,7 +1028,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
     if (!exists_child(tree_node, response_codes[path_index])) {
       log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
                 response_codes[path_index], path_index);
-      *is_new = TRUE;
+      *new_path = TRUE;
       break;
     }
   }
@@ -1047,8 +1048,8 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
     if (!(tree_node = exists_child(tree_node, response_codes[path_index]))){
       log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
                response_codes[path_index], path_index);
-      log_assert(*is_new == TRUE, "New path was not captured in the 1st round");
-//      *is_new = TRUE;
+      log_assert(*new_path == TRUE, "New path was not captured in the 1st round");
+      new_node = TRUE;
     }
 
     for (u32 region_index = matching_region_index + matched_exactly;
@@ -1087,7 +1088,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       }
     }
 
-    if (*is_new)  {
+    if (new_node)  {
       enum node_colour colour;
       if (matched_exactly)  {colour = White;}
       else  {colour = Black;}
@@ -1213,7 +1214,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   /*NOTE: Stats propagation along the execution path is done here*/
   while (parent_node) {
-      get_tree_node_data(parent_node)->discovered += *is_new;
+      get_tree_node_data(parent_node)->discovered += *new_path;
       parent_node = parent_node->parent;
   }
 
