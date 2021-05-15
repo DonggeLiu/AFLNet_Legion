@@ -995,7 +995,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   message = NULL;
   message = u32_array_to_str(q->regions[q->region_count-1].state_sequence,
                              q->regions[q->region_count-1].state_count);
-  log_info("[MCTS-EXPANSION] Last reg  has %02u states: %s",
+  log_info("[MCTS-EXPANSION] Last  reg has %02u states: %s",
            q->regions[q->region_count-1].state_count, message);
   free(message);
   message = NULL;
