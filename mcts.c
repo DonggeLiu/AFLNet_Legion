@@ -476,7 +476,7 @@ char* tree_node_repr(TreeNode* tree_node)
   TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
   char* message = NULL;
 
-  message_append(&message, "\033[1;%dm %03u: %06.2lf "
+  message_append(&message, "\033[1;%dm%03u: %06.2lf "
                            "[%06.2lf + %06.2lf] "
                            "{%03u, %03u} "
                            "<%03u>\033[0m",
