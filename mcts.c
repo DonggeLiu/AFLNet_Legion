@@ -861,7 +861,9 @@ seed_info_t* Selection(TreeNode** tree_node)
 
     TreeNodeData* parent_node_data = get_tree_node_data((*tree_node)->parent);
     khiter_t k = kh_get_hmn(khmn_nodes, parent_node_data->id);
-    assert(kh_exist(khmn_nodes, k));
+    log_assert(kh_exist(khmn_nodes, k),
+               "[SELECTION] Parent node (%03u) does not exist in HashMap",
+               parent_node_data->id);
     int count = kh_value(khmn_nodes, k);
     kh_value(khmn_nodes, k) = 1 + count;
 
@@ -889,7 +891,7 @@ seed_info_t* Selection(TreeNode** tree_node)
 
 char* Simulation(TreeNode* target)
 {
-    assert(get_tree_node_data(target)->colour == Golden);
+//    assert(get_tree_node_data(target)->colour == Golden);
     return NULL;
 }
 
@@ -1015,7 +1017,6 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   // Check if the response code sequence is new
   // And add the new queue entry to each node along the paths
-  assert(response_codes[0] == 0);
   log_assert(response_codes[0] == 0, "[MCTS-EXPANSION] Response codes sequence does not start with 0");
 
 
