@@ -796,7 +796,7 @@ seed_info_t* select_seed(TreeNode* tree_node_selected)
 TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho)
 {
     char log_file[100];
-    snprintf(log_file, sizeof(log_file), "%s", getenv("AFLNET_LEGION_LOG"));
+    snprintf(log_file, sizeof(log_file), "%s", getenv("FUZZER_LOG"));
     log_add_fp(fopen(log_file, "w+"), log_lvl);
     log_set_quiet(TRUE);
     set_ignore_assertion(ign_ast);
