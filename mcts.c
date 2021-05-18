@@ -944,7 +944,7 @@ void remove_null_regions(struct queue_entry* q)
 
 void truncate_long_regions(struct queue_entry* q)
 {
-    uint truncated_state_count=100;
+    uint truncated_state_count=200;
     char* message = NULL;
     for (u32 region_index = 0; region_index < q->region_count; ++region_index) {
         message = u32_array_to_str(q->regions[region_index].state_sequence, q->regions[region_index].state_count);
@@ -957,13 +957,13 @@ void truncate_long_regions(struct queue_entry* q)
         log_info("[TRUNCATE_LONG_REGIONS] %d states in region %d (%s)",
                  q->regions[region_index].state_count, region_index, q->fname);
 
-        unsigned int truncated_state_sequence[truncated_state_count];
-        for (uint j = 0; j < truncated_state_count; ++j) {
-            truncated_state_sequence[j] = q->regions[region_index].state_sequence[j];
-        }
-
+//        unsigned int truncated_state_sequence[truncated_state_count];
+//        for (uint j = 0; j < truncated_state_count; ++j) {
+//            truncated_state_sequence[j] = q->regions[region_index].state_sequence[j];
+//        }
+//
         q->regions[region_index].state_count = truncated_state_count;
-        q->regions[region_index].state_sequence = truncated_state_sequence;
+//        q->regions[region_index].state_sequence = truncated_state_sequence;
     }
 }
 
