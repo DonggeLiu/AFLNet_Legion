@@ -474,12 +474,26 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
   }
   log_info("[find_M2_region] M2 ID %d, M2 count %d", *M2_start_region_ID, *M2_region_count);
 
+  // NOTE: Never run simulation from termination response codes
+  log_assert(*M2_region_count >= 1, "M2 has less than 1 region ");
   /*NOTE: Assert the path is preserved, if the node is not the Simulation child of the ROOT*/
-  assert(*M2_region_count >= 1); // NOTE: Never run simulation from termination response codes
-  assert(G_NODE_IS_ROOT(tree_node->parent) ||
-         tree_node_data->path_len == q->regions[*M2_start_region_ID-1].state_count);
-  assert(G_NODE_IS_ROOT(tree_node->parent) ||
-         !memcmp(tree_node_data->path, q->regions[*M2_start_region_ID-1].state_sequence, tree_node_data->path_len));
+  log_assert(
+          G_NODE_IS_ROOT(tree_node->parent) ||
+          tree_node_data->path_len == q->regions[*M2_start_region_ID-1].state_count,
+          "Path len of the tree node selected != State count in M1 (%u != %u)",
+          tree_node_data->path_len,
+          q->regions[*M2_start_region_ID-1].state_count
+          );
+  log_assert(
+          G_NODE_IS_ROOT(tree_node->parent) ||
+          !memcmp(tree_node_data->path, q->regions[*M2_start_region_ID-1].state_sequence, tree_node_data->path_len),
+          "Path of the tree node differs from the state sequence in M1(%d):\n"
+          "Path: %s\n"
+          "Seq : %s",
+          memcmp(tree_node_data->path, q->regions[*M2_start_region_ID-1].state_sequence, tree_node_data->path_len),
+          u32_array_to_str(tree_node_data->path, tree_node_data->path_len),
+          u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence, tree_node_data->path_len)
+          );
 }
 
 /* Initialize the implemented state machine as a graphviz graph */
