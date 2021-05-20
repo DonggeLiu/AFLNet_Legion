@@ -1036,12 +1036,12 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   log_assert(get_tree_node_data(tree_node)->id == 0, "[MCTS-EXPANSION] Expansion did not start from the ROOT");
 
   /* NOTE: Add a queue entry to the corresponding exact match node if it finds a new path*/
-  if (*new_path) {
+//  if (*new_path) {
     //TODO: Maybe only add queue entries to each node if they are interesting?
     TreeNode* root_sim = get_simulation_child(tree_node);
     seed = construct_seed_with_queue_entry(q);
     add_seed_to_node(seed, 0, root_sim);
-  }
+//  }
 
   log_info("[MCTS-EXPANSION] 2st round: Dye nodes and add queue_entry");
   for (u32 path_index = 1; path_index < len_codes; path_index++) {
