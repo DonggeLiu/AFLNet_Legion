@@ -172,7 +172,7 @@ double tree_node_score(TreeNode* tree_node)
     if (tree_node_data->fully_explored) return -INFINITY;
 
     // If a SimNode does not have a seed, do not select it.
-    if (tree_node_data->colour == Golden && !tree_node_data->seeds_count) return -INFINITY;
+//    if (tree_node_data->colour == Golden && !tree_node_data->seeds_count) return -INFINITY;
 
 //    if (G_NODE_IS_ROOT(tree_node))  return INFINITY;
 
@@ -311,7 +311,7 @@ seed_info_t* best_seed(TreeNode* tree_node)
     char* message = tree_node_repr(tree_node);
     log_debug("[BEST_SEED] Selecting the best seed of: %s", message);
     // There should be at least one seed to select
-    log_assert(number_of_seeds > 0, "Selecting seed from a SimNode without any seed: %s", message);
+//    log_assert(number_of_seeds > 0, "Selecting seed from a SimNode without any seed: %s", message);
     free(message);
     message = NULL;
 
