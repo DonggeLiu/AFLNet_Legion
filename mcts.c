@@ -1038,9 +1038,9 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   /* NOTE: Add a queue entry to the corresponding exact match node if it finds a new path*/
 //  if (*new_path) {
     //TODO: Maybe only add queue entries to each node if they are interesting?
-    TreeNode* root_sim = get_simulation_child(tree_node);
-    seed = construct_seed_with_queue_entry(q);
-    add_seed_to_node(seed, 0, root_sim);
+//    TreeNode* root_sim = get_simulation_child(tree_node);
+//    seed = construct_seed_with_queue_entry(q);
+//    add_seed_to_node(seed, 0, root_sim);
 //  }
 
   log_info("[MCTS-EXPANSION] 2st round: Dye nodes and add queue_entry");
