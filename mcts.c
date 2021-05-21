@@ -978,7 +978,7 @@ void preprocess_queue_entry(struct queue_entry* q)
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* new_path)
 {
   TreeNode* parent_node = tree_node;
-  gboolean new_node = FALSE;
+//  gboolean new_node = FALSE;
   *new_path = FALSE;
   u32 matching_region_index = 0;
   gboolean matched_exactly = FALSE;
@@ -1021,17 +1021,17 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
 
   log_info("[MCTS-EXPANSION] 1st round: Check if the queue_entry finds a new paths");
-  for (u32 path_index = 1; path_index < len_codes; path_index++) {
-    log_debug("[MCTS-EXPANSION] === Matching code %03u at index %u ===",
-              response_codes[path_index], path_index);
-
-    if (!(parent_node = exists_child(parent_node, response_codes[path_index]))){
-      log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
-                response_codes[path_index], path_index);
-      *new_path = TRUE;
-      break;
-    }
-  }
+//  for (u32 path_index = 1; path_index < len_codes; path_index++) {
+//    log_debug("[MCTS-EXPANSION] === Matching code %03u at index %u ===",
+//              response_codes[path_index], path_index);
+//
+//    if (!(parent_node = exists_child(parent_node, response_codes[path_index]))){
+//      log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
+//                response_codes[path_index], path_index);
+//      *new_path = TRUE;
+//      break;
+//    }
+//  }
 
   log_assert(get_tree_node_data(tree_node)->id == 0, "[MCTS-EXPANSION] Expansion did not start from the ROOT");
 
@@ -1058,8 +1058,9 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
     if (!(tree_node = exists_child(tree_node, response_codes[path_index]))){
       log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
                response_codes[path_index], path_index);
-      log_assert(*new_path == TRUE, "New path was not captured in the 1st round");
-      new_node = TRUE;
+//      log_assert(*new_path == TRUE, "New path was not captured in the 1st round");
+//      new_node = TRUE;
+      *new_path == TRUE
     }
 
     for (u32 region_index = matching_region_index + matched_exactly;
@@ -1098,7 +1099,8 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       }
     }
 
-    if (new_node)  {
+//    if (new_node)  {
+    if (*new_path)  {
       enum node_colour colour;
       if (matched_exactly)  {colour = White;}
       else  {colour = Black;}
