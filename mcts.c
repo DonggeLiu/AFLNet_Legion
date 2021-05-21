@@ -972,7 +972,7 @@ void truncate_long_regions(struct queue_entry* q)
 void preprocess_queue_entry(struct queue_entry* q)
 {
     remove_null_regions(q);
-    truncate_long_regions(q);
+//    truncate_long_regions(q);
 }
 
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* new_path)
