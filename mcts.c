@@ -1060,7 +1060,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
                response_codes[path_index], path_index);
 //      log_assert(*new_path == TRUE, "New path was not captured in the 1st round");
 //      new_node = TRUE;
-      *new_path == TRUE
+      *new_path = TRUE;
     }
 
     for (u32 region_index = matching_region_index + matched_exactly;
