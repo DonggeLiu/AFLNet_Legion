@@ -29,6 +29,7 @@ ENV WORKDIR='/home/ubuntu' \
     AFL_NET='/home/ubuntu/AFLNet_Legion' \
     AFL_PATH='/home/ubuntu/AFLNet_Legion' \
     AFLNET_LEGION_PATH='/home/ubuntu/AFLNet_Legion' \
+    AFLNET_LEGION_LOG='/home/ubuntu/AFLNet_Legion/log.ansi' \
     PATH="${PATH}:/home/ubuntu/AFLNet_Legion" \
     LLVM_CONFIG='llvm-config-3.8' \
     AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 \
