@@ -148,9 +148,9 @@ double seed_exploration_score(TreeNode* tree_node, int seed_index)
     seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
     TreeNodeData* node_data = get_tree_node_data(tree_node);
     if (!target_seed->selected) { return INFINITY; }
-//    log_trace("[SEED_EXPLORATION_SCORE] %lf = %lf * sqrt(2 * log(%lf) / %lf)",
-//              RHO * sqrt(2 * log((double)node_data->selected)/target_seed->selected),
-//              RHO, (double)node_data->selected, (double) target_seed->selected);
+    log_trace("[SEED_EXPLORATION_SCORE] %lf = %lf * sqrt(2 * log(%lf) / %lf)",
+              RHO * sqrt(2 * log((double)node_data->selected)/target_seed->selected),
+              RHO, (double)node_data->selected, (double) target_seed->selected);
     return RHO * sqrt(2 * log((double)node_data->selected)/ (double) target_seed->selected);
 }
 
