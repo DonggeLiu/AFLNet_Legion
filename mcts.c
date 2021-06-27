@@ -981,6 +981,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   *is_new = FALSE;
   u32 matching_region_index = 0;
   gboolean matched_exactly = FALSE;
+  gboolean just_flipped = FALSE;
   char* message = NULL;
   char* message_node = NULL;
   char* message_parent = NULL;
@@ -1086,6 +1087,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
     }
     if (matched_exactly) {
       TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+      just_flipped = FALSE;
       if (tree_node_data->colour == Black && path_index + 1 != len_codes) {
         // NOTE: Flip a node if this is black and is not an termination point
         //  But still was considered as Black
@@ -1096,6 +1098,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 //        tree_log(ROOT, tree_node, 0, 0);
         tree_node_data->colour = White;
         tree_node_data->simulation_child = append_child(tree_node, 999, Golden, response_codes, path_index+1);
+        just_flipped = TRUE;
         message_node = tree_node_repr(tree_node);
         log_debug("[MCTS-EXPANSION] Flipped node: %s", message_node);
         free(message_node);
@@ -1103,9 +1106,11 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
 //        tree_log(ROOT, tree_node, 0, 0);
       }
-      if (tree_node_data->colour == White && q->regions[matching_region_index].state_count < len_codes) {
-        //NOTE: Only add seed to node if node colour is White  (Otherwise there is no simulation child)
-        // and the matching region is not the last region in the q, (otherwise M2 count is 0)
+      if ((*is_new || just_flipped) && tree_node_data->colour == White && q->regions[matching_region_index].state_count < len_codes) {
+        //NOTE: Only add seed to node if
+        //  a) the node is new or just flipped to white,
+        //  b) the node colour is White  (Otherwise there is no simulation child), and
+        //  c) the matching region is not the last region in the q, (otherwise M2 count is 0).
         seed = construct_seed_with_queue_entry(q);
         add_seed_to_node(seed, matching_region_index, get_simulation_child(tree_node));
         TreeNodeData* sim_data = get_tree_node_data(get_simulation_child(tree_node));
