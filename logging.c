@@ -179,7 +179,8 @@ char* u32_array_to_str(u32* a, u32 a_len)
   for (u32 i = 0; i < a_len; i++) {
     if (a[i]) {
       // each number should be within the range
-      assert(0 < a[i] && a[i] <= UINT32_MAX);
+      //assert(0 < a[i] && a[i] <= UINT32_MAX);
+      log_assert(0 < a[i] && a[i] <= UINT32_MAX, "[u32_array_to_str] element %u in array is not within the range of UINT: %u", i, a[i]);
       str_len += (u32)(floor(log10(a[i]))) + 1;
     } else {
       str_len += 1;
