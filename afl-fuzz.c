@@ -494,6 +494,7 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
           u32_array_to_str(tree_node_data->path, tree_node_data->path_len),
           u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence, tree_node_data->path_len)
           );
+  log_info("[find_M2_region] Passed assertions");
 }
 
 /* Initialize the implemented state machine as a graphviz graph */
@@ -6021,6 +6022,11 @@ AFLNET_REGIONS_SELECTION:;
       //TOASK: Find the start region ID of M2 as usual
       //  and consider all regions after that as the rest of M2?
       find_M2_region(cur_seed, cur_tree_node, &M2_start_region_ID, &M2_region_count);
+      log_info("[fuzz_one] Found M2:");
+      log_info("[fuzz_one] Cur Tree Node %s", tree_node_repr(cur_tree_node));
+      log_info("[fuzz_one] Cur Seed %s", seed_repr(cur_tree_node, cur_seed->parent_index, cur_seed));
+      log_info("[fuzz_one] M2_start_region_ID: %u", M2_start_region_ID);
+      log_info("[fuzz_one] M2_region_count: %u", M2_region_count);
     } else {
       /* In state aware mode, select M2 based on the targeted state ID */
       u32 total_region = queue_cur->region_count;
@@ -6097,6 +6103,7 @@ AFLNET_REGIONS_SELECTION:;
 
   /* Construct the buffer to be mutated and update out_buf */
   if (M2_prev == NULL) {
+    log_debug("[fuzz_one] M2_prev is NULL");
     it = kl_begin(kl_messages);
   } else {
     it = kl_next(M2_prev);
@@ -6110,8 +6117,10 @@ AFLNET_REGIONS_SELECTION:;
     memcpy(&in_buf[in_buf_size], kl_val(it)->mdata, kl_val(it)->msize);
 
     in_buf_size += kl_val(it)->msize;
+    log_debug("[fuzz_one] in_buf_size: %u", in_buf_size);
     it = kl_next(it);
   }
+  log_debug("[fuzz_one] in_buf_size final: %u", in_buf_size);
 
   orig_in = in_buf;
 
@@ -6129,6 +6138,7 @@ AFLNET_REGIONS_SELECTION:;
    *********************/
 
   orig_perf = perf_score = calculate_score(queue_cur);
+  log_info("[fuzz_one] orig_perf: %u", orig_perf);
 
   /* Skip right away if -d is given, if we have done deterministic fuzzing on
      this entry ourselves (was_fuzzed), or if it has gone through deterministic
@@ -7733,6 +7743,8 @@ retry_splicing:
   ret_val = 0;
 
 abandon_entry:
+
+  log_info("At abandon_entry");
 
   splicing_with = -1;
 
@@ -9381,6 +9393,7 @@ int main(int argc, char** argv) {
       }
 
       skipped_fuzz = fuzz_one(use_argv);
+      log_info("[MAIN] skipped_fuzz: %u", skipped_fuzz);
       tree_log(ROOT, cur_tree_node, 0,  cur_discovered);
 
       if (!stop_soon && sync_id && !skipped_fuzz) {
