@@ -747,6 +747,9 @@ gboolean is_fully_explored(TreeNode* parent_tree_node)
    * 1. White parent + white children:
    *  By definition, the parent is not fully explored even if all children are.
    *  Because there might be missing children that can be found by simulating from parent's SimNode
+   * 1.1. If the white parent does not have any seed and all children are fully explored:
+   *    Then this parent is fully explored.
+   *    This could happen if the white parent was added as a leaf, but later became a partial match parent.
    * 2. White parent + Black children:
    *  Same above, as being a black child only means all existing inputs bound the black child with a grandchild
    *  (i.e. by making the server returns more than response code as the same time.)
@@ -768,10 +771,29 @@ gboolean is_fully_explored(TreeNode* parent_tree_node)
    *   b) The parent does not have any SimNode;
    *   c) The black parent should not be selected, otherwise we will fuzz a leaf, which is problematic and unnecessary.
    * In short:
-   *  a) If the parent is not black, it is not fully explored, return False;
+   *  a) If the parent is not black, it is not fully explored and not in 1.1., return False;
    *  b) If the parent is black, it is fully explored only if the score of its only child is -inf.
    */
   if (get_tree_node_data(parent_tree_node)->fully_explored) {return TRUE;}
+
+  if (get_tree_node_data(parent_tree_node)->colour == White
+    && get_tree_node_data(get_simulation_child(parent_tree_node))->seeds_count == 0) {
+
+    gboolean all_children_neg_inf = TRUE;
+    TreeNode* child_node = g_node_first_child(parent_tree_node);
+    while (child_node)
+    {
+      TreeNodeData* child_node_data = get_tree_node_data(child_node);
+      if (child_node_data->colour == Golden) {continue;}
+      if (tree_node_score(child_node) > -INFINITY && !child_node_data->fully_explored && !is_leaf(child_node)) {
+        all_children_neg_inf = FALSE;
+        break;
+      }
+      child_node = g_node_next_sibling(child_node);
+    }
+    if (all_children_neg_inf) return TRUE;
+  }
+
   if (get_tree_node_data(parent_tree_node)->colour != Black) {return FALSE;}
 
   char* message = tree_node_repr(parent_tree_node);
