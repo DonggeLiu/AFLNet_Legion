@@ -784,7 +784,7 @@ gboolean is_fully_explored(TreeNode* parent_tree_node)
     while (child_node)
     {
       TreeNodeData* child_node_data = get_tree_node_data(child_node);
-      if (child_node_data->colour == Golden) {continue;}
+      if (child_node_data->colour == Golden) {child_node = g_node_next_sibling(child_node); continue;}
       if (tree_node_score(child_node) > -INFINITY && !child_node_data->fully_explored && !is_leaf(child_node)) {
         all_children_neg_inf = FALSE;
         break;
