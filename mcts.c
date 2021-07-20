@@ -776,16 +776,25 @@ gboolean is_fully_explored(TreeNode* parent_tree_node)
    */
   if (get_tree_node_data(parent_tree_node)->fully_explored) {return TRUE;}
 
+  char* message = tree_node_repr(parent_tree_node);
+
   if (get_tree_node_data(parent_tree_node)->colour == White
     && get_tree_node_data(get_simulation_child(parent_tree_node))->seeds_count == 0) {
+    log_info("[IS_FULLY_EXPLORED] White parent of a Sim Child with no seed: %s", message);
 
     gboolean all_children_neg_inf = TRUE;
     TreeNode* child_node = g_node_first_child(parent_tree_node);
     while (child_node)
     {
+      char* child_message = tree_node_repr(child_node);
+      log_info("[IS_FULLY_EXPLORED] Checking the child: %s", child_message);
+
       TreeNodeData* child_node_data = get_tree_node_data(child_node);
       if (child_node_data->colour == Golden) {child_node = g_node_next_sibling(child_node); continue;}
-      if (tree_node_score(child_node) > -INFINITY && !child_node_data->fully_explored && !is_leaf(child_node)) {
+      if (tree_node_score(child_node) > -INFINITY && !is_leaf(child_node)) {
+        log_info("[IS_FULLY_EXPLORED] The child may have something to explore:\nScore: %lf;\nIs Leaf: %d",
+                 tree_node_score(child_node),
+                 is_leaf(child_node));
         all_children_neg_inf = FALSE;
         break;
       }
@@ -796,7 +805,6 @@ gboolean is_fully_explored(TreeNode* parent_tree_node)
 
   if (get_tree_node_data(parent_tree_node)->colour != Black) {return FALSE;}
 
-  char* message = tree_node_repr(parent_tree_node);
   log_assert(g_node_n_children(parent_tree_node) == 1,
              "[IS_FULLY_EXPLORED] More than one child exists under %s", message);
   log_assert(get_tree_node_data(g_node_nth_child(parent_tree_node, 0))->colour != Golden,
