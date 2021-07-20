@@ -447,7 +447,7 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
 
   message = u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence,
                              q->regions[*M2_start_region_ID-1].state_count);
-  log_info("[find_M2_region] M1       : %s", message);
+  log_info("[find_M2_region] M1     : %s", message);
   free(message);
   message = NULL;
 

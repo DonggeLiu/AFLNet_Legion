@@ -902,10 +902,10 @@ seed_info_t* Selection(TreeNode** tree_node)
       message = NULL;
     }
     TreeNodeData* tree_node_data = get_tree_node_data(*tree_node);
-    log_info("[SELECTION] Selection path    : %s", node_path_str(*tree_node));
+    log_info("[SELECTION] Selection path  : %s", node_path_str(*tree_node));
     message = u32_array_to_str(q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_sequence,
                                q->regions[tree_node_data->region_indices[seed_selected->parent_index]].state_count);
-    log_debug("[SELECTION] Selection region  : %s", message);
+    log_debug("[SELECTION] Selection region: %s", message);
     free(message);
     message = NULL;
     return seed_selected;
