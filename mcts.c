@@ -1005,13 +1005,71 @@ void preprocess_queue_entry(struct queue_entry* q)
     truncate_long_regions(q);
 }
 
-TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
+seed_info_t* find_matching_queue_entry(TreeNode* tree_node, seed_info_t* seed_selected){
+  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+  region_t last_region_of_seed_selected = seed_selected->q->regions[seed_selected->q->region_count-1];
+  u32* response_codes = last_region_of_seed_selected.state_sequence;
+  u32 len_codes = last_region_of_seed_selected.state_count;
+
+  // The node should be a SimNode
+  log_assert(tree_node_data->colour == Golden, "[find_matching_queue_entry] The target tree node is not a SimNode: %s", tree_node_repr(tree_node));
+  // The node should have a least one seed
+  log_assert(tree_node_data->seeds_count > 0, "[find_matching_queue_entry] The target tree node has no seed: %s\n%s", tree_node_repr(tree_node), node_path_str(tree_node));
+
+  seed_info_t* matching_seed = NULL;
+
+  log_info("[find_matching_queue_entry] Checking target sequence   : %s", u32_array_to_str(response_codes, len_codes));
+
+  for (int i = 0; i < tree_node_data->seeds_count; ++i) {
+    region_t last_region_of_seed = tree_node_data->seeds[i]->q->regions[tree_node_data->seeds[i]->q->region_count-1];
+
+    log_info("[find_matching_queue_entry] Checking seed with sequence: %s", u32_array_to_str(last_region_of_seed.state_sequence, last_region_of_seed.state_count));
+
+    if (len_codes != last_region_of_seed.state_count) {continue;}
+    if (memcmp(response_codes, last_region_of_seed.state_sequence, len_codes)) {continue;}
+
+    // The matching seed must be null, because there should not be any duplication
+    if (matching_seed != NULL && !G_NODE_IS_ROOT(tree_node)) {
+      //NOTE: Root may have multiple seeds sharing the same sequence of response codes,
+      // as those seed might be added during the dry run.
+      char* message_node = tree_node_repr(tree_node);
+      char* message_resp = u32_array_to_str(response_codes, len_codes);
+      region_t last_region_of_prev_matching_seed = matching_seed->q->regions[matching_seed->q->region_count-1];
+      char* message_prev = u32_array_to_str(last_region_of_prev_matching_seed.state_sequence, last_region_of_prev_matching_seed.state_count);
+      char* message_curr = u32_array_to_str(last_region_of_seed.state_sequence, last_region_of_seed.state_count);
+      log_assert(matching_seed == NULL,
+                 "[find_matching_queue_entry] Multiple seeds share the same response code sequence:\n%s\nRESP: %s\nPREV: %s\nCURR: %s",
+                 message_node, message_resp, message_prev, message_curr
+                 );
+    }
+    matching_seed = tree_node_data->seeds[i];
+  }
+
+  log_assert(matching_seed != NULL,
+             "[find_matching_queue_entry] No seed matches the response code sequence:%s\nNODE: %s\nRESP: %s",
+             tree_node_repr(tree_node),
+             node_path_str(tree_node),
+             u32_array_to_str(response_codes, len_codes)
+  );
+
+  // NOTE: For some reason, the node path was not preserved
+  //  Therefore there is no way to determine which seed contributed to this find
+  //  Hence a random seed is selected
+  matching_seed = tree_node_data->seeds[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, tree_node_data->seeds_count)];
+
+
+  return matching_seed;
+
+}
+
+TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new, seed_info_t* seed_selected)
 {
   TreeNode* parent_node;
   *is_new = FALSE;
   u32 matching_region_index = 0;
   gboolean matched_exactly = FALSE;
   gboolean just_flipped = FALSE;
+  gboolean first_new = FALSE;
   char* message = NULL;
   char* message_node = NULL;
   char* message_parent = NULL;
@@ -1063,6 +1121,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
                response_codes[path_index], path_index);
       *is_new = TRUE;
+      first_new = !first_new && *is_new;
     }
 
     for (u32 region_index = matching_region_index + matched_exactly;
@@ -1107,6 +1166,22 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       else  {colour = Black;}
       tree_node = append_child(parent_node, response_codes[path_index], colour, response_codes, path_index+1);
 
+      /* NOTE: Award a SimNode only when its parent has a new child, instead of when selecting it finds a new path
+           Select 1 in: 0->1->2->3->4->5
+           Find a path: 0->1->2->6->7->8
+           Award the SimNode of 6 and 7, instead of 1. */
+      if (get_tree_node_data(parent_node)->colour == White) {
+        /*NOTE: Add 1 to the parent->sim_child->discovered
+        NOTE: Stats propagation of the reward to the selected SimNode is done here */
+        get_tree_node_data(get_simulation_child(parent_node))->discovered += 1;
+        if (first_new) {
+          /*NOTE: Add 1 to the parent->sim_child->corresponding_seed->discovered
+            NOTE: Stats propagation of the reward to the selected seed is done here */
+          seed_info_t *matching_seed = find_matching_queue_entry(get_simulation_child(parent_node), seed_selected);
+          matching_seed->discovered += 1;
+        }
+      }
+
       message_node = tree_node_repr(tree_node);
       message_parent = tree_node_repr(parent_node);
       log_debug("[MCTS-EXPANSION] Add a new child %s of parent %s", message_node, message_parent);
@@ -1145,6 +1220,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
         add_seed_to_node(seed, matching_region_index, get_simulation_child(tree_node));
         TreeNodeData* sim_data = get_tree_node_data(get_simulation_child(tree_node));
         seed_info_t* seed = sim_data->seeds[sim_data->seeds_count-1];
+        seed->discovered += 1;
 //        struct queue_entry* new_q = (struct queue_entry*) seed->q;
         region_t region = q->regions[matching_region_index];
         log_debug("[MCTS-EXPANSION] The following two paths should match");
@@ -1263,12 +1339,12 @@ void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean i
     return;
   }
 
-  TreeNode* leaf_parent = leaf_selected;
-  TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);
-  tree_node_data->discovered += is_new;
+  //TreeNode* leaf_parent = leaf_selected;
+  //TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);
+  //tree_node_data->discovered += is_new;
 
   /* NOTE: Stats propagation of the seed is done here */
-  seed_selected->discovered += is_new;
+  //seed_selected->discovered += is_new;
 
 //  while (leaf_parent) {
 //    TreeNodeData* tree_node_data = get_tree_node_data(leaf_parent);

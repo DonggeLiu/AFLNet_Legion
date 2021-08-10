@@ -875,7 +875,7 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
   message = NULL;
   /* NOTE: MCTS Expansion and check if the new input finds a new sequence */
   gboolean is_new = FALSE;
-  Expansion(ROOT, q, node_sequence, node_count, &is_new);
+  Expansion(ROOT, q, node_sequence, node_count, &is_new, cur_seed);
 //  tree_log(ROOT, cur_tree_node, 0, is_new);
   //  TreeNode * execution_leaf = Expansion(ROOT, q, node_sequence, node_count, &is_new);
   //  print_path(execution_leaf);
