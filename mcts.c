@@ -1055,7 +1055,7 @@ seed_info_t* find_matching_queue_entry(TreeNode* tree_node, seed_info_t* seed_se
   // NOTE: For some reason, the node path was not preserved
   //  Therefore there is no way to determine which seed contributed to this find
   //  Hence a random seed is selected
-  matching_seed = tree_node_data->seeds[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, tree_node_data->seeds_count)];
+  //matching_seed = tree_node_data->seeds[g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, tree_node_data->seeds_count)];
 
 
   return matching_seed;
@@ -1065,11 +1065,13 @@ seed_info_t* find_matching_queue_entry(TreeNode* tree_node, seed_info_t* seed_se
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new, seed_info_t* seed_selected)
 {
   TreeNode* parent_node;
+  TreeNode* last_white_parent_matched_exactly = tree_node;
   *is_new = FALSE;
   u32 matching_region_index = 0;
+  u32 last_white_parent_matched_exactly_region_index = 0;
   gboolean matched_exactly = FALSE;
   gboolean just_flipped = FALSE;
-  gboolean first_new = FALSE;
+  gboolean passed_first_new = FALSE;
   char* message = NULL;
   char* message_node = NULL;
   char* message_parent = NULL;
@@ -1117,11 +1119,15 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
                response_codes[path_index], path_index);
     }
 
+    if (get_tree_node_data(parent_node)->colour == White && (matched_exactly || G_NODE_IS_ROOT(parent_node))) {
+      last_white_parent_matched_exactly = parent_node;
+      last_white_parent_matched_exactly_region_index = matching_region_index;
+    }
+
     if (!(tree_node = exists_child(tree_node, response_codes[path_index]))){
       log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ",
                response_codes[path_index], path_index);
       *is_new = TRUE;
-      first_new = !first_new && *is_new;
     }
 
     for (u32 region_index = matching_region_index + matched_exactly;
@@ -1170,17 +1176,24 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
            Select 1 in: 0->1->2->3->4->5
            Find a path: 0->1->2->6->7->8
            Award the SimNode of 6 and 7, instead of 1. */
-      if (get_tree_node_data(parent_node)->colour == White) {
         /*NOTE: Add 1 to the parent->sim_child->discovered
         NOTE: Stats propagation of the reward to the selected SimNode is done here */
-        get_tree_node_data(get_simulation_child(parent_node))->discovered += 1;
-        if (first_new) {
+        get_tree_node_data(get_simulation_child(last_white_parent_matched_exactly))->discovered += 1;
+        if (!passed_first_new) {
           /*NOTE: Add 1 to the parent->sim_child->corresponding_seed->discovered
             NOTE: Stats propagation of the reward to the selected seed is done here */
-          seed_info_t *matching_seed = find_matching_queue_entry(get_simulation_child(parent_node), seed_selected);
+          seed_info_t *matching_seed = find_matching_queue_entry(get_simulation_child(last_white_parent_matched_exactly), seed_selected);
+          if (matching_seed == NULL) {
+            matching_seed = construct_seed_with_queue_entry(q);
+            add_seed_to_node(matching_seed, last_white_parent_matched_exactly_region_index, get_simulation_child(last_white_parent_matched_exactly));
+            log_info("Adding new seed to Node: %s", tree_node_repr(last_white_parent_matched_exactly));
+            log_info("Node's prefix is: %s", node_path_str(last_white_parent_matched_exactly));
+            log_info("Seed's prefix is: %s", u32_array_to_str(matching_seed->q->regions[last_white_parent_matched_exactly_region_index].state_sequence, matching_seed->q->regions[last_white_parent_matched_exactly_region_index].state_count));
+            log_info("Seed's path is  : %s", u32_array_to_str(matching_seed->q->regions[matching_seed->q->region_count-1].state_sequence, matching_seed->q->regions[matching_seed->q->region_count-1].state_count));
+          }
           matching_seed->discovered += 1;
+          passed_first_new = TRUE;
         }
-      }
 
       message_node = tree_node_repr(tree_node);
       message_parent = tree_node_repr(parent_node);
