@@ -150,7 +150,7 @@ seed_info_t* select_seed(TreeNode* tree_node_selected);
 TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho);
 seed_info_t* Selection(TreeNode** parent_tree_node);
 char* Simulation(TreeNode* target);
-TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new);
+TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new, seed_info_t* seed_selected);
 void Propagation(TreeNode* leaf_selected, seed_info_t* seed_selected, gboolean is_new);
 
 
