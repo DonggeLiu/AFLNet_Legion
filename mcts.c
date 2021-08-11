@@ -1005,6 +1005,22 @@ void preprocess_queue_entry(struct queue_entry* q)
     truncate_long_regions(q);
 }
 
+gboolean is_new_path(TreeNode* tree_node, u32* response_codes, u32 len_codes) {
+  log_assert(len_codes > 0, "[MCTS-EXPANSION] The length of response codes sequence is 0");
+  log_assert(response_codes[0] == get_tree_node_data(tree_node)->id,
+             "[MCTS-EXPANSION] Response codes sequence does not start with the id of the first tree:%d != %d",
+             response_codes[0],
+             get_tree_node_data(tree_node)->id);
+
+  TreeNode* curr_node = tree_node;
+  for (int path_index = 1; path_index < len_codes; ++path_index) {
+    if ((curr_node = exists_child(curr_node, response_codes[path_index])))  {continue;}
+    log_debug("[MCTS-EXPANSION] Detected a new path at code %03u at index %u ", response_codes[path_index], path_index);
+    return TRUE;
+  }
+  return FALSE;
+}
+
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
   TreeNode* parent_node;
@@ -1046,6 +1062,8 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   message_node = NULL;
 
   // Check if the response code sequence is new
+  gboolean new_path = is_new_path(tree_node, response_codes, len_codes);
+
   // And add the new queue entry to each node along the paths
   log_assert(response_codes[0] == 0, "[MCTS-EXPANSION] Response codes sequence does not start with 0");
   for (u32 path_index = 1; path_index < len_codes; path_index++) {
@@ -1136,7 +1154,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
 //        tree_log(ROOT, tree_node, 0, 0);
       }
-      if ((*is_new || just_flipped || (tree_node_data->colour == White && get_tree_node_data(get_simulation_child(tree_node))->seeds_count == 0)) && tree_node_data->colour == White && q->regions[matching_region_index].state_count < len_codes) {
+      if ((new_path || just_flipped || (tree_node_data->colour == White && get_tree_node_data(get_simulation_child(tree_node))->seeds_count == 0)) && tree_node_data->colour == White && q->regions[matching_region_index].state_count < len_codes) {
         //NOTE: Only add seed to node if
         //  a) the node is 1) new, 2) just flipped to white, or 3) does not have any seed in its SimChild (because it was added as a leaf), and
         //  b) the node colour is White  (Otherwise there is no simulation child), and
@@ -1230,6 +1248,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   }
 
   /*NOTE: Stats propagation along the execution path is done here*/
+  log_assert(*is_new == new_path, "is_new is inconsistent with new_path: %d != %d", *is_new, new_path);
   while (parent_node) {
       get_tree_node_data(parent_node)->discovered += *is_new;
       parent_node = parent_node->parent;
