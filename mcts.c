@@ -1063,7 +1063,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   // Check if the response code sequence is new
   gboolean new_path = is_new_path(tree_node, response_codes, len_codes);
-
+  add_seed_to_node(construct_seed_with_queue_entry(q), 0, get_simulation_child(ROOT));
   // And add the new queue entry to each node along the paths
   log_assert(response_codes[0] == 0, "[MCTS-EXPANSION] Response codes sequence does not start with 0");
   for (u32 path_index = 1; path_index < len_codes; path_index++) {
