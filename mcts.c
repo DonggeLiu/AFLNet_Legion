@@ -1021,6 +1021,34 @@ gboolean is_new_path(TreeNode* tree_node, u32* response_codes, u32 len_codes) {
   return FALSE;
 }
 
+int find_match_region_index(struct queue_entry* q, TreeNode* tree_node) {
+  TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+  u32 tree_node_path_len = tree_node_data->path_len;
+  u32* tree_node_path = tree_node_data->path;
+
+  for (int i = 0; i < q->region_count; ++i) {
+    log_info("[FIND_MATCH_REGION_INDEX] Region index %2d:\nState count : %u\nNodePath len: %u",
+             i, q->regions[i].state_count, tree_node_path_len);
+    if (q->regions[i].state_count < tree_node_path_len) {continue;}
+    if (q->regions[i].state_count > tree_node_path_len) {return -1;}
+    log_assert(!memcmp(q->regions[i].state_sequence, tree_node_path, tree_node_path_len),
+               "[FIND_MATCH_REGION_INDEX] q len (%u) == (%u) tree_node path len, "
+               "but their arrays do not match:\nq   : %s\npath: %s",
+               q->regions[i].state_count, tree_node_path_len,
+               u32_array_to_str(q->regions[i].state_sequence, q->regions[i].state_count),
+               u32_array_to_str(tree_node_path, tree_node_path_len));
+    if (!memcmp(q->regions[i].state_sequence, tree_node_path, tree_node_path_len)) {return i;}
+  }
+  log_assert(FALSE,
+             "[FIND_MATCH_REGION_INDEX] The last q len (%u) < (%u) tree_node path len, "
+             "their arrays are:\nq   : %s\npath: %s",
+             q->regions[q->region_count-1].state_count, tree_node_path_len,
+             u32_array_to_str(q->regions[q->region_count-1].state_sequence, q->regions[q->region_count-1].state_count),
+             u32_array_to_str(tree_node_path, tree_node_path_len));
+  return -1;
+}
+
+
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new)
 {
   TreeNode* parent_node;
@@ -1031,6 +1059,8 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
   char* message = NULL;
   char* message_node = NULL;
   char* message_parent = NULL;
+  TreeNode* last_white_parent_matched_exactly = tree_node;
+  gboolean passed_first_new = FALSE;
 
   // Construct seed with queue_entry q
   seed_info_t* seed = NULL;
@@ -1063,7 +1093,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
   // Check if the response code sequence is new
   gboolean new_path = is_new_path(tree_node, response_codes, len_codes);
-  if (new_path) { add_seed_to_node(construct_seed_with_queue_entry(q), 0, get_simulation_child(ROOT));}
+//  if (new_path) { add_seed_to_node(construct_seed_with_queue_entry(q), 0, get_simulation_child(ROOT));}
   // And add the new queue entry to each node along the paths
   log_assert(response_codes[0] == 0, "[MCTS-EXPANSION] Response codes sequence does not start with 0");
   for (u32 path_index = 1; path_index < len_codes; path_index++) {
@@ -1075,6 +1105,10 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       get_tree_node_data(tree_node)->fully_explored = FALSE;
       log_debug("[MCTS-EXPANSION] code %03u at index %u is not fully explored anymore",
                response_codes[path_index], path_index);
+    }
+
+    if (get_tree_node_data(parent_node)->colour == White && (matched_exactly || G_NODE_IS_ROOT(parent_node))) {
+      last_white_parent_matched_exactly = parent_node;
     }
 
     if (!(tree_node = exists_child(tree_node, response_codes[path_index]))){
@@ -1124,6 +1158,18 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       if (matched_exactly)  {colour = White;}
       else  {colour = Black;}
       tree_node = append_child(parent_node, response_codes[path_index], colour, response_codes, path_index+1);
+
+      /* NOTE: Add the new seed to the parent of the new child */
+      if (!passed_first_new) {
+        seed_info_t* new_seed = construct_seed_with_queue_entry(q);
+        new_seed->discovered += 1;
+        int matching_region_index = G_NODE_IS_ROOT(last_white_parent_matched_exactly)?
+                0:find_match_region_index(q, last_white_parent_matched_exactly);
+        if (matching_region_index >= 0) {
+          add_seed_to_node(new_seed, matching_region_index, get_simulation_child(last_white_parent_matched_exactly));
+        }
+        passed_first_new = TRUE;
+      }
 
       message_node = tree_node_repr(tree_node);
       message_parent = tree_node_repr(parent_node);
