@@ -443,6 +443,8 @@ void find_M2_region(seed_info_t* seed, TreeNode* tree_node, u32* M2_start_region
     *M2_region_count = q->region_count;
     return;
   }
+  /* TODO: Should not +1 when the tree_node is the ROOT?
+   *  Otherwise we can never fuzz the whole input sequence*/
   *M2_start_region_ID = tree_node_data->region_indices[seed->parent_index] + 1;
 
   message = u32_array_to_str(q->regions[*M2_start_region_ID-1].state_sequence,
