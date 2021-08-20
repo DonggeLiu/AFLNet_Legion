@@ -1200,7 +1200,7 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
 
 //        tree_log(ROOT, tree_node, 0, 0);
       }
-      if ((new_path || just_flipped || (tree_node_data->colour == White && get_tree_node_data(get_simulation_child(tree_node))->seeds_count == 0)) && tree_node_data->colour == White && q->regions[matching_region_index].state_count < len_codes) {
+      if ((*is_new || just_flipped || (tree_node_data->colour == White && get_tree_node_data(get_simulation_child(tree_node))->seeds_count == 0)) && tree_node_data->colour == White && q->regions[matching_region_index].state_count < len_codes) {
         //NOTE: Only add seed to node if
         //  a) the node is 1) new, 2) just flipped to white, or 3) does not have any seed in its SimChild (because it was added as a leaf), and
         //  b) the node colour is White  (Otherwise there is no simulation child), and
