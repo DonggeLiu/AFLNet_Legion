@@ -1171,10 +1171,12 @@ TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_co
       if (!passed_first_new) {
         seed_info_t* new_seed = construct_seed_with_queue_entry(q);
         new_seed->discovered += 1;
-        int matching_region_index = G_NODE_IS_ROOT(last_white_parent_matched_exactly)?
+        u32 matching_parent_region_index = G_NODE_IS_ROOT(last_white_parent_matched_exactly)?
                 0:find_match_region_index(q, last_white_parent_matched_exactly);
-        if (matching_region_index >= 0) {
-          add_seed_to_node(new_seed, matching_region_index, get_simulation_child(last_white_parent_matched_exactly));
+        if (matching_parent_region_index >= 0) {
+          add_seed_to_node(new_seed,
+                           matching_parent_region_index,
+                           get_simulation_child(last_white_parent_matched_exactly));
         }
         passed_first_new = TRUE;
       }
