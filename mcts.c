@@ -393,8 +393,16 @@ TreeNode* exists_child(TreeNode* tree_node, u32 target_response_code)
 
 TreeNode* append_child(TreeNode* tree_node, u32 child_response_code, enum node_colour colour, u32* path, u32 path_len)
 {
-    TreeNode* child = g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour, path, path_len));
-    if (colour == White) get_tree_node_data(child)->simulation_child = append_child(child, 999, Golden, path, path_len);
+    TreeNode* child;
+    if (colour == Golden) {
+        child = g_node_insert_data(tree_node, 0, new_tree_node_data(child_response_code, colour, path, path_len));
+    } else {
+        child = g_node_append_data(tree_node, new_tree_node_data(child_response_code, colour, path, path_len));
+    }
+
+    if (colour == White) {
+      get_tree_node_data(child)->simulation_child = append_child(child, 999, Golden, path, path_len);
+    }
 
     return child;
 }
