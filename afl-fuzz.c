@@ -865,9 +865,9 @@ void update_MCTS_tree(struct queue_entry *q, u8 dry_run)
 
   // During dry run: Save the given queue entry to the sim child of ROOT only
   if (dry_run) {
-//    cur_seed = construct_seed_with_queue_entry(q);
+    cur_seed = construct_seed_with_queue_entry(q);
     cur_tree_node = get_simulation_child(ROOT);
-//    add_seed_to_node(cur_seed, 0, cur_tree_node);
+    add_seed_to_node(cur_seed, 0, cur_tree_node);
   }
 
   // During normal run: Collect the sequence of response code and expand the tree with it
