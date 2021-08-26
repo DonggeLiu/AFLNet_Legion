@@ -11,7 +11,7 @@ u32 MAX_SAMPLES = 100;
 u32 CONEX_TIMEOUT = 0;
 gboolean PERSISTENT = FALSE;
 gboolean COVERAGE_ONLY = TRUE;
-enum score_function SCORE_FUNCTION = UCT;
+enum score_function SCORE_FUNCTION = Random;
 
 
 /* Statistics */
