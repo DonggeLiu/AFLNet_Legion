@@ -37,7 +37,7 @@ KHASH_INIT(hmn, khint32_t, u32, 1, kh_int_hash_func, kh_int_hash_equal)
 khash_t(hmn) *khmn_nodes;
 
 enum node_colour{White, Red, Golden, Purple, Black};
-enum score_function{Random, UCT};
+enum score_function{RANDOM, UCT, UNDEFINED};
 
 struct queue_entry {
 
@@ -147,7 +147,7 @@ char* seed_repr(TreeNode* tree_node, uint seed_index, seed_info_t* seed);
 /* ================================================ MCTS Functions ================================================ */
 TreeNode* select_tree_node(TreeNode* parent_tree_node);
 seed_info_t* select_seed(TreeNode* tree_node_selected);
-TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho);
+TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho, uint node_selection_algorithm, uint seed_selection_algorithm);
 seed_info_t* Selection(TreeNode** parent_tree_node);
 char* Simulation(TreeNode* target);
 TreeNode* Expansion(TreeNode* tree_node, struct queue_entry* q, u32* response_codes, u32 len_codes, gboolean* is_new);

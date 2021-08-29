@@ -11,8 +11,8 @@ u32 MAX_SAMPLES = 100;
 u32 CONEX_TIMEOUT = 0;
 gboolean PERSISTENT = FALSE;
 gboolean COVERAGE_ONLY = TRUE;
-enum score_function NODE_SCORE_FUNCTION = UCT;
-enum score_function SEED_SCORE_FUNCTION = Random;
+enum score_function NODE_SCORE_FUNCTION;
+enum score_function SEED_SCORE_FUNCTION;
 
 
 /* Statistics */
@@ -166,7 +166,11 @@ double tree_node_score(TreeNode* tree_node)
      *  4. If the node has not been selected before, return INFINITY
      *  5. If the node has been selected before, apply the UCT function
      */
-    if (NODE_SCORE_FUNCTION == UCT) return g_rand_int(RANDOM_NUMBER_GENERATOR);
+    log_assert(NODE_SCORE_FUNCTION != UNDEFINED,
+               "[INITIALISATION] Undefined node score function: %u",
+               NODE_SCORE_FUNCTION);
+
+    if (NODE_SCORE_FUNCTION == RANDOM) return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
 
@@ -191,7 +195,11 @@ double seed_score(TreeNode* tree_node, u32 seed_index)
 {
     // return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
-    if (SEED_SCORE_FUNCTION == Random) return g_rand_int(RANDOM_NUMBER_GENERATOR);
+    log_assert(SEED_SCORE_FUNCTION != UNDEFINED,
+               "[INITIALISATION] Undefined seed score function: %u",
+               SEED_SCORE_FUNCTION);
+
+    if (SEED_SCORE_FUNCTION == RANDOM) return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
 //    seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
 //    if (!target_seed->selected)  return INFINITY;
@@ -832,7 +840,7 @@ seed_info_t* select_seed(TreeNode* tree_node_selected)
 }
 
 
-TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho)
+TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho, uint node_selection_algorithm, uint seed_selection_algorithm)
 {
     char log_file[100];
     snprintf(log_file, sizeof(log_file), "%s", getenv("FUZZER_LOG"));
@@ -842,10 +850,41 @@ TreeNode* Initialisation(uint log_lvl, uint tree_dp, uint ign_ast, double rho)
     log_info("[INITIALISATION] LOG PATH: %s", log_file);
     MAX_TREE_LOG_DEPTH = tree_dp;
     RHO = rho;
+    char node_score_function_name[10], seed_score_function_name[10];
+
+    if (node_selection_algorithm == 0) {
+        NODE_SCORE_FUNCTION = RANDOM;
+        strcpy(node_score_function_name, "RANDOM");
+    } else if (node_selection_algorithm == 1) {
+        NODE_SCORE_FUNCTION = UCT;
+        strcpy(node_score_function_name, "UCT");
+    } else {
+        NODE_SCORE_FUNCTION = UNDEFINED;
+        strcpy(node_score_function_name, "UNDEFINED");
+    }
+    if (seed_selection_algorithm == 0) {
+        SEED_SCORE_FUNCTION = RANDOM;
+        strcpy(seed_score_function_name, "RANDOM");
+    } else if (seed_selection_algorithm == 1) {
+        SEED_SCORE_FUNCTION = UCT;
+        strcpy(seed_score_function_name, "UCT");
+    } else {
+        SEED_SCORE_FUNCTION = UNDEFINED;
+        strcpy(seed_score_function_name, "UNDEFINED");
+    }
+
     log_info("[INITIALISATION] Log level: %u", log_lvl);
     log_info("[INITIALISATION] Max tree log depth: %u", MAX_TREE_LOG_DEPTH);
     log_info("[INITIALISATION] Ignore assertions: %s", ign_ast?"True":"False");
     log_info("[INITIALISATION] Rho: %lf", RHO);
+    log_info("[INITIALISATION] Node score function: %s", node_score_function_name);
+    log_info("[INITIALISATION] Seed score function: %s", seed_score_function_name);
+    log_assert(NODE_SCORE_FUNCTION != UNDEFINED,
+               "[INITIALISATION] Undefined node score function: %u, %u, %s",
+               node_selection_algorithm, NODE_SCORE_FUNCTION, node_score_function_name);
+    log_assert(SEED_SCORE_FUNCTION != UNDEFINED,
+               "[INITIALISATION] Undefined seed score function: %u, %u, %s",
+               seed_selection_algorithm, SEED_SCORE_FUNCTION, seed_score_function_name);
 
     khmn_nodes = kh_init_hmn();
     u32 path[] = {0};

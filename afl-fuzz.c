@@ -416,6 +416,8 @@ uint TREE_DP = 5;
 uint IGN_AST = 0;
 uint FUZZ_M3 = 0;
 double RHO_V = 1.414;
+uint NODE_SELECTION_ALGORITHM = 0;
+uint SEED_SELECTION_ALGORITHM = 0;
 
 
 // MCTS global variables
@@ -8918,7 +8920,7 @@ int main(int argc, char** argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:QN:D:W:w:P:KEq:s:RFc:l:p:azr:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:QN:D:W:w:P:KEq:s:RFc:l:p:azr:O:e:")) > 0)
 
     switch (opt) {
 
@@ -9208,6 +9210,16 @@ int main(int argc, char** argv) {
         if (sscanf(optarg, "%lf", &RHO_V) < 1 || optarg[0] == '-') FATAL("Bad syntax used for -r");
         break;
 
+      case 'O': /* Node Selection Algorithm */
+        if (NODE_SELECTION_ALGORITHM) FATAL("Multiple -O options not supported");
+        if (sscanf(optarg, "%u", &NODE_SELECTION_ALGORITHM) < 1 || optarg[0] == '-') FATAL("Bad syntax used for -O (Node Selection Algorithm)");
+        break;
+
+      case 'e': /* Seed Selection Algorithm */
+        if (SEED_SELECTION_ALGORITHM) FATAL("Multiple -e options not supported");
+        if (sscanf(optarg, "%u", &SEED_SELECTION_ALGORITHM) < 1 || optarg[0] == '-') FATAL("Bad syntax used for -e (Seed Selection Algorithm)");
+        break;
+
       default:
 
         usage(argv[0]);
@@ -9283,7 +9295,7 @@ int main(int argc, char** argv) {
   /* Thuan's comments:
      - we should do intialisation here so that the tree is ready to perform dry run with given seed inputs/message sequences
   */  
-  ROOT = Initialisation(LOG_LVL, TREE_DP, IGN_AST, RHO_V);
+  ROOT = Initialisation(LOG_LVL, TREE_DP, IGN_AST, RHO_V, NODE_SELECTION_ALGORITHM, SEED_SELECTION_ALGORITHM);
   log_info("[MAIN] FUZZ M3: %s", FUZZ_M3?"True":"False");
 
   setup_dirs_fds();
