@@ -181,6 +181,7 @@ double tree_node_score(TreeNode* tree_node)
                "[INITIALISATION] Undefined node score function: %u",
                NODE_SCORE_FUNCTION);
 
+    if ((NODE_SCORE_FUNCTION == RANDOM) && leaf_no_seed(tree_node)) return -INFINITY;
     if (NODE_SCORE_FUNCTION == RANDOM) return g_rand_int(RANDOM_NUMBER_GENERATOR);
 
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
@@ -189,7 +190,6 @@ double tree_node_score(TreeNode* tree_node)
 
     // If a SimNode or its leaf parent does not have a seed, do not select it.
 //    if (tree_node_data->colour == Golden && !tree_node_data->seeds_count) return -INFINITY;
-    if (leaf_no_seed(tree_node)) return -INFINITY;
 
 //    if (G_NODE_IS_ROOT(tree_node))  return INFINITY;
 
