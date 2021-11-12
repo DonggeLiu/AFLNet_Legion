@@ -176,6 +176,8 @@ double tree_node_score(TreeNode* tree_node)
 
     if (tree_node_data->fully_explored) return -INFINITY;
 
+    if (is_leaf(tree_node)) return -INFINITY;
+
     // If a SimNode does not have a seed, do not select it.
     if (tree_node_data->colour == Golden && !tree_node_data->seeds_count) return -INFINITY;
 
