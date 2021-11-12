@@ -155,6 +155,17 @@ double seed_exploration_score(TreeNode* tree_node, int seed_index)
     return RHO * sqrt(2 * log((double)node_data->selected)/ (double) target_seed->selected);
 }
 
+gboolean leaf_no_seed(TreeNode* tree_node)
+{
+  if (!is_leaf(tree_node)) return FALSE;
+
+  if ((g_node_n_children(tree_node) == 1) && get_tree_node_data(g_node_first_child(tree_node))->colour == Golden)
+  {
+    tree_node = g_node_first_child(tree_node);
+  }
+  return !get_tree_node_data(tree_node)->seeds_count;
+}
+
 double tree_node_score(TreeNode* tree_node)
 {
     /*
@@ -176,10 +187,9 @@ double tree_node_score(TreeNode* tree_node)
 
     if (tree_node_data->fully_explored) return -INFINITY;
 
-    if (is_leaf(tree_node)) return -INFINITY;
-
-    // If a SimNode does not have a seed, do not select it.
-    if (tree_node_data->colour == Golden && !tree_node_data->seeds_count) return -INFINITY;
+    // If a SimNode or its leaf parent does not have a seed, do not select it.
+//    if (tree_node_data->colour == Golden && !tree_node_data->seeds_count) return -INFINITY;
+    if (leaf_no_seed(tree_node)) return -INFINITY;
 
 //    if (G_NODE_IS_ROOT(tree_node))  return INFINITY;
 
