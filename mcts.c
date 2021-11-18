@@ -183,9 +183,8 @@ double tree_node_score(TreeNode* tree_node)
 
     if ((NODE_SCORE_FUNCTION == RANDOM) && leaf_no_seed(tree_node)) return -INFINITY;
 //    if (NODE_SCORE_FUNCTION == RANDOM) return g_rand_int(RANDOM_NUMBER_GENERATOR);
-    if (NODE_SCORE_FUNCTION == RANDOM && !tree_node_data->fully_explored) return g_rand_int(g_rand_new_with_seed(time(NULL)));
-
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
+    if (NODE_SCORE_FUNCTION == RANDOM && !tree_node_data->fully_explored) return g_rand_int(g_rand_new_with_seed(time(NULL)));
 
     if (tree_node_data->fully_explored) return -INFINITY;
 
