@@ -184,7 +184,9 @@ double tree_node_score(TreeNode* tree_node)
     if ((NODE_SCORE_FUNCTION == RANDOM) && leaf_no_seed(tree_node)) return -INFINITY;
 //    if (NODE_SCORE_FUNCTION == RANDOM) return g_rand_int(RANDOM_NUMBER_GENERATOR);
     TreeNodeData* tree_node_data = get_tree_node_data(tree_node);
-    if (NODE_SCORE_FUNCTION == RANDOM && !tree_node_data->fully_explored) return g_rand_int(g_rand_new_with_seed(time(NULL)));
+    struct timespec t;
+    clock_gettime(CLOCK_REALTIME, &t);
+    if (NODE_SCORE_FUNCTION == RANDOM && !tree_node_data->fully_explored) return g_rand_int(g_rand_new_with_seed(t.tv_nsec));
 
     if (tree_node_data->fully_explored) return -INFINITY;
 
@@ -212,7 +214,10 @@ double seed_score(TreeNode* tree_node, u32 seed_index)
                SEED_SCORE_FUNCTION);
 
 //    if (SEED_SCORE_FUNCTION == RANDOM) return g_rand_int(RANDOM_NUMBER_GENERATOR);
-    if (SEED_SCORE_FUNCTION == RANDOM) return g_rand_int(g_rand_new_with_seed(time(NULL)));
+    struct timespec t;
+    clock_gettime(CLOCK_REALTIME, &t);
+    
+    if (SEED_SCORE_FUNCTION == RANDOM) return g_rand_int(g_rand_new_with_seed(t.tv_nsec));
 
 //    seed_info_t* target_seed = get_tree_node_data(tree_node)->seeds[seed_index];
 //    if (!target_seed->selected)  return INFINITY;
@@ -313,7 +318,9 @@ TreeNode* best_child(TreeNode* tree_node)
         message = NULL;
     }
 //    u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
-    u32 winner_index = g_rand_int_range(g_rand_new_with_seed(time(NULL)), 0, number_of_ties);
+    struct timespec t;
+    clock_gettime(CLOCK_REALTIME, &t);
+    u32 winner_index = g_rand_int_range(g_rand_new_with_seed(t.tv_nsec), 0, number_of_ties);
     u32 winner = ties[winner_index];
     log_info("[BEST_CHILD] Winner index in ties is: %u", winner_index);
     message = tree_node_repr(g_node_nth_child(tree_node, winner));
@@ -391,7 +398,9 @@ seed_info_t* best_seed(TreeNode* tree_node)
     }
 
 //    u32 winner_index = g_rand_int_range(RANDOM_NUMBER_GENERATOR, 0, number_of_ties);
-    u32 winner_index = g_rand_int_range(g_rand_new_with_seed(time(NULL)), 0, number_of_ties);
+    struct timespec t;
+    clock_gettime(CLOCK_REALTIME, &t);
+    u32 winner_index = g_rand_int_range(g_rand_new_with_seed(t.tv_nsec), 0, number_of_ties);
     u32 winner = ties[winner_index];
     log_debug("[BEST_SEED] Winner index in ties is: %u", winner_index);
     message = seed_repr(tree_node, winner, NULL);
