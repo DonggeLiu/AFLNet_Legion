@@ -1,7 +1,7 @@
 # Guide to use dockerfile
 
 ## LightFTP
-Build with
+In `docker_env`, build with
 ```shell
 docker build -t aflnet_legion:LightFTP --no-cache --rm .
 ```
