@@ -15,7 +15,7 @@ We recommend building & running with `Docker` via [these steps](https://github.c
 
 
 ## Run AFLNetLegion with benchmarking
-You can easily test the performance of `AFLNetLegion` with `ProFuzzBench`, with [these instructions](https://github.com/Alan32Liu/ProFuzzBench/tree/SANER2022)
+You can easily test the performance of `AFLNetLegion` with `ProFuzzBench`, with [these instructions](https://github.com/Alan32Liu/ProFuzzBench/tree/temp)
 
 
 <!---------------------------------------------------------------------------------------------------------------------------------------------------------->
