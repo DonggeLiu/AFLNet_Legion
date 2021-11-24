@@ -1,7 +1,8 @@
-# AFLNet: A Greybox Fuzzer for Network Protocols
-AFLNet is a greybox fuzzer for protocol implementations. Unlike existing protocol fuzzers, it takes a mutational approach and uses state-feedback, in addition to code-coverage feedback, to guide the fuzzing process. AFLNet is seeded with a corpus of recorded message exchanges between the server and an actual client. No protocol specification or message grammars are required. It acts as a client and replays variations of the original sequence of messages sent to the server and retains those variations that were effective at increasing the coverage of the code or state space. To identify the server states that are exercised by a message sequence, AFLNet uses the server’s response codes. From this feedback, AFLNet identifies progressive regions in the state space, and systematically steers towards such regions.
+# AFLNetLegion: A Greybox Fuzzer for Network Protocols
+AFLNetLegion is greybox fuzzer for protocol implementations based on `AFLNet`, a state-of-the-art fuzzer for network servers. 
+It extends `Legion`'s algorithms to selecting server states and request sequence.
 
-# Licences
+## Licences
 
 AFLNet is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
@@ -9,7 +10,16 @@ AFLNet is an extension of [American Fuzzy Lop](http://lcamtuf.coredump.cx/afl/) 
 
 * **AFL**: [Copyright](https://github.com/aflsmart/aflsmart/blob/master/docs/README) 2013, 2014, 2015, 2016 Google Inc. All rights reserved. Released under terms and conditions of [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
-# Citing AFLNet
+## Run AFLNetLegion alone
+We recommend building & running with `Docker` via [these steps](https://github.com/Alan32Liu/AFLNet_Legion/blob/MCTS/docker_env/README.md)
+
+
+## Run AFLNetLegion with benchmarking
+You can easily test the performance of `AFLNetLegion` with `ProFuzzBench`, with [these instructions](https://github.com/Alan32Liu/ProFuzzBench/tree/temp)
+
+
+<!---------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-- # Citing AFLNet
 AFLNet has been accepted for publication as a Testing Tool paper at the IEEE International Conference on Software Testing, Verification and Validation (ICST) 2020. 
 
 ```
@@ -19,8 +29,9 @@ title={AFLNet: A Greybox Fuzzer for Network Protocols},
 booktitle={Proceedings of the 13rd IEEE International Conference on Software Testing, Verification and Validation : Testing Tools Track},
 year={2020},}
 ```
-
-# Installation (Tested on Ubuntu 18.04 & 16.04 64-bit)
+ -->
+ 
+<!-- # Installation (Tested on Ubuntu 18.04 & 16.04 64-bit)
 
 ## Prerequisites
 
@@ -248,3 +259,4 @@ You may need to provide this option to keep network fuzzing more deterministic. 
 Unlike stateless programs (e.g., image processing libraries like LibPNG), several stateful servers (e.g., the RTSP server in the above tutorial) do not terminate themselves after consuming all requests from the client, which is AFLNet in this fuzzing setup. So AFLNet needs to gracefully terminate the server by sending the SIGTERM signal (when -K is specified). Otherwise, AFLNet will detect normal server executions as hangs. However, the issue is that if AFLNet sends SIGTERM signal too early, say right after all request messages have been sent to the server, the server may be forced to terminate when it is still doing some tasks which may lead to server crashes (i.e., false negatives -- the server crashes are missed). The false-negative reduction mode is designed to handle such situations. However, it could slow down the fuzzing process leading to slower execution speed.
 
 
+ -->
